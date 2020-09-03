@@ -79,14 +79,14 @@
 
 
 
-<meta name="description" content="Mycatmycat服务配置$ cat mycat&#x2F;conf&#x2F;server.xml 12345678910111213141516171819202122232425&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;&lt;!-- - - Licensed under the Apache Licen">
+<meta name="description" content="项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。 docker run -it -v  $PWD&#x2F;pipeline&#x2F;:&#x2F;usr&#x2F;share">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Youj&#39;s blog">
-<meta property="og:url" content="http://blog.yjll.art/unpost/Mycat%E9%85%8D%E7%BD%AE.html">
+<meta property="og:url" content="http://blog.yjll.art/unpost/Logstash.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
-<meta property="og:description" content="Mycatmycat服务配置$ cat mycat&#x2F;conf&#x2F;server.xml 12345678910111213141516171819202122232425&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;&lt;!-- - - Licensed under the Apache Licen">
-<meta property="article:published_time" content="2020-08-25T08:32:30.631Z">
-<meta property="article:modified_time" content="2020-08-25T08:32:30.631Z">
+<meta property="og:description" content="项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。 docker run -it -v  $PWD&#x2F;pipeline&#x2F;:&#x2F;usr&#x2F;share">
+<meta property="article:published_time" content="2020-09-02T09:58:59.786Z">
+<meta property="article:modified_time" content="2020-09-02T09:58:59.786Z">
 <meta property="article:author" content="Youj">
 <meta name="twitter:card" content="summary">
 
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://blog.yjll.art/unpost/Mycat配置.html"/>
+  <link rel="canonical" href="http://blog.yjll.art/unpost/Logstash.html"/>
 
 
 
@@ -290,17 +290,24 @@
       <div class="post-body">
         
         
-          <h3 id="Mycat"><a href="#Mycat" class="headerlink" title="Mycat"></a>Mycat</h3><h4 id="mycat服务配置"><a href="#mycat服务配置" class="headerlink" title="mycat服务配置"></a>mycat服务配置</h4><p>$ cat mycat/conf/server.xml</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!-- - - Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); </span><br><span class="line">	- you may not use this file except in compliance with the License. - You </span><br><span class="line">	may obtain a copy of the License at - - http:&#x2F;&#x2F;www.apache.org&#x2F;licenses&#x2F;LICENSE-2.0 </span><br><span class="line">	- - Unless required by applicable law or agreed to in writing, software - </span><br><span class="line">	distributed under the License is distributed on an &quot;AS IS&quot; BASIS, - WITHOUT </span><br><span class="line">	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the </span><br><span class="line">	License for the specific language governing permissions and - limitations </span><br><span class="line">	under the License. --&gt;</span><br><span class="line">&lt;!DOCTYPE mycat:server SYSTEM &quot;server.dtd&quot;&gt;</span><br><span class="line">&lt;mycat:server xmlns:mycat&#x3D;&quot;http:&#x2F;&#x2F;io.mycat&#x2F;&quot;&gt;</span><br><span class="line">	&lt;system&gt;</span><br><span class="line">	&lt;!-- 这里配置的都是一些系统属性，可以自己查看mycat文档 --&gt;</span><br><span class="line">	&lt;property name&#x3D;&quot;defaultSqlParser&quot;&gt;druidparser&lt;&#x2F;property&gt;</span><br><span class="line">	&lt;property name&#x3D;&quot;charset&quot;&gt;utf8mb4&lt;&#x2F;property&gt;</span><br><span class="line">	&lt;&#x2F;system&gt;</span><br><span class="line"></span><br><span class="line">	&lt;user name&#x3D;&quot;root&quot; defaultAccount&#x3D;&quot;true&quot;&gt;</span><br><span class="line">		&lt;property name&#x3D;&quot;password&quot;&gt;123456&lt;&#x2F;property&gt;</span><br><span class="line">		&lt;property name&#x3D;&quot;schemas&quot;&gt;prod&lt;&#x2F;property&gt;</span><br><span class="line">		</span><br><span class="line">	&lt;&#x2F;user&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;&#x2F;mycat:server&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><code>schemas</code>表示<code>schema.xml</code>中的<code>schema</code>节点，多个库用逗号分隔</p>
-</blockquote>
-<h4 id="表配置"><a href="#表配置" class="headerlink" title="表配置"></a>表配置</h4><p>$ cat mycat/conf/schema.xml </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE mycat:schema SYSTEM &quot;schema.dtd&quot;&gt;</span><br><span class="line">&lt;mycat:schema xmlns:mycat&#x3D;&quot;http:&#x2F;&#x2F;io.mycat&#x2F;&quot;&gt;</span><br><span class="line"></span><br><span class="line">	&lt;schema name&#x3D;&quot;prod&quot; checkSQLschema&#x3D;&quot;false&quot; sqlMaxLimit&#x3D;&quot;100&quot; dataNode&#x3D;&quot;pcxNode&quot;&gt;&lt;&#x2F;schema&gt;</span><br><span class="line"></span><br><span class="line">	&lt;dataNode name&#x3D;&quot;pcxNode&quot; dataHost&#x3D;&quot;dtHost&quot; database&#x3D;&quot;test&quot; &#x2F;&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	&lt;dataHost name&#x3D;&quot;dtHost&quot; maxCon&#x3D;&quot;1000&quot; minCon&#x3D;&quot;10&quot; balance&#x3D;&quot;3&quot;</span><br><span class="line">			  writeType&#x3D;&quot;0&quot; dbType&#x3D;&quot;mysql&quot; dbDriver&#x3D;&quot;native&quot; switchType&#x3D;&quot;1&quot;  slaveThreshold&#x3D;&quot;100&quot;&gt;</span><br><span class="line">		&lt;heartbeat&gt;select user()&lt;&#x2F;heartbeat&gt;</span><br><span class="line">		&lt;!-- can have multi write hosts --&gt;</span><br><span class="line">		&lt;writeHost host&#x3D;&quot;hostM1&quot; url&#x3D;&quot;localhost:3308&quot; user&#x3D;&quot;root&quot;</span><br><span class="line">				   password&#x3D;&quot;123456&quot;&gt;</span><br><span class="line">			&lt;!-- can have multi read hosts --&gt;</span><br><span class="line">			&lt;readHost host&#x3D;&quot;hostS1&quot; url&#x3D;&quot;localhost:3307&quot; user&#x3D;&quot;root&quot; password&#x3D;&quot;123456&quot; &#x2F;&gt;</span><br><span class="line">		&lt;&#x2F;writeHost&gt;</span><br><span class="line">	&lt;&#x2F;dataHost&gt;</span><br><span class="line">&lt;&#x2F;mycat:schema&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>增加数据库时要添加<code>dataNode</code>及<code>schema</code></p>
-</blockquote>
-<h4 id="Mycat-启动"><a href="#Mycat-启动" class="headerlink" title="Mycat 启动"></a>Mycat 启动</h4><p><code>./mycat start</code></p>
+          <p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
+<p>docker run -it -v  $PWD/pipeline/:/usr/share/logstash/pipeline logstash:6.4.3 bash</p>
+<p>先安装jdbc和es的插件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">bash-4.2$ ~&#x2F;bin&#x2F;logstash-plugin install logstash-input-jdbc</span><br><span class="line">Validating logstash-input-jdbc</span><br><span class="line">Installing logstash-input-jdbc</span><br><span class="line">Installation successful</span><br><span class="line"></span><br><span class="line">bash-4.2$ ~&#x2F;bin&#x2F;logstash-plugin install logstash-output-elasticsearch</span><br><span class="line">Validating logstash-output-elasticsearch</span><br><span class="line">Installing logstash-output-elasticsearch</span><br><span class="line">Installation successful</span><br></pre></td></tr></table></figure>
+
+<p>由于是在容器内部连接服务，所以ES的连接不要使用localhost和127.0.0.1，更改为实际IP地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bash-4.2$ cat ~&#x2F;config&#x2F;logstash.yml </span><br><span class="line">http.host: &quot;0.0.0.0&quot;</span><br><span class="line">xpack.monitoring.elasticsearch.url: http:&#x2F;&#x2F;192.168.1.200:9200</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h3><p>运行同步脚本可手动执行也可以配置调度执行</p>
+<h4 id="手动执行"><a href="#手动执行" class="headerlink" title="手动执行"></a>手动执行</h4><p><code>~/bin/logstash -f ***.config</code></p>
+<h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash-4.2$ cat ~&#x2F;config&#x2F;pipelines.yml </span><br><span class="line"></span><br><span class="line">- pipeline.id: main</span><br><span class="line">  path.config: &quot;&#x2F;usr&#x2F;share&#x2F;logstash&#x2F;pipeline&quot;</span><br></pre></td></tr></table></figure>
+<p>退出容器并重启，<code>docker logs -f CONTAINER</code> 查看运行日志</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
+<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
+<p>重点在于 use_column_value 和 tracking_column 这两个参数，当use_column_value为true时，可以用 :sql_last_value 这个变量来获取tracking_column对应的字段的最新值，默认即第一次启动时为 0 。我的示例中tracking_column对应id，即Logstash都会记录每次查询结果id的最大值，供下一次查询使用。</p>
+<p>Logstash将tracking_column的最新值记录到 last_run_metadata_path 参数下的 .logstash_jdbc_last_run 文件，默认是/home/${user}/.logstash_jdbc_last_run，所以重启后也不会从最初加载，还是从上次记录的最新值开始查。当然，也可以设置 clean_run 参数为true，重启后删除上次的运行状态，就可以从最初的数据开始读取了。</p>
 
         
       </div>
@@ -423,7 +430,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mycat"><span class="nav-number">1.</span> <span class="nav-text">Mycat</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mycat服务配置"><span class="nav-number">1.1.</span> <span class="nav-text">mycat服务配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表配置"><span class="nav-number">1.2.</span> <span class="nav-text">表配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mycat-启动"><span class="nav-number">1.3.</span> <span class="nav-text">Mycat 启动</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#执行脚本"><span class="nav-number">1.</span> <span class="nav-text">执行脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#手动执行"><span class="nav-number">1.1.</span> <span class="nav-text">手动执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调度执行"><span class="nav-number">1.2.</span> <span class="nav-text">调度执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文档"><span class="nav-number">3.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
             
 
           </div>
