@@ -73,11 +73,15 @@
       </tags>
   </entry>
   <entry>
-    <title>Logstash</title>
+    <title>使用Logstash同步Mysql数据到Elasticsearch</title>
     <url>/post/undefined.html</url>
-    <content><![CDATA[<p><a href="https://img.yjll.art/img/Logstash.png" target="_blank" rel="noopener">Logstash</a><br>Logstash是一个开源数据收集引擎，具有实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
+    <content><![CDATA[<!-- ![Logstash](https://img.yjll.art/img/Logstash.png) -->
+<p>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
 <p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
-<p>首先要编写同步数据的配置文件，使用jdbc里连接数据库作为input，ouput为ES。</p>
+<a id="more"></a>
+
+
+<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p>首先要编写同步数据的配置文件，从Mysql同步数据到ElasticSearch中，使用jdbc里连接数据库作为input，ouput为ES。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">input &#123;</span><br><span class="line"> stdin &#123; &#125;</span><br><span class="line">    jdbc &#123;</span><br><span class="line">        #注意mysql连接地址一定要用ip，不能使用localhost等</span><br><span class="line">        jdbc_connection_string &#x3D;&gt; &quot;jdbc:mysql:&#x2F;&#x2F;192.168.1.200:3308&#x2F;test&quot;</span><br><span class="line">        jdbc_user &#x3D;&gt; &quot;test&quot;</span><br><span class="line">        jdbc_password &#x3D;&gt; &quot;test&quot;</span><br><span class="line">        #这个jar包的地址是容器内的地址</span><br><span class="line">        jdbc_driver_library &#x3D;&gt; &quot;&#x2F;usr&#x2F;share&#x2F;logstash&#x2F;pipeline&#x2F;mysql-connector-java-8.0.11.jar&quot;</span><br><span class="line">        jdbc_driver_class &#x3D;&gt; &quot;com.mysql.jdbc.Driver&quot;</span><br><span class="line">        jdbc_paging_enabled &#x3D;&gt; &quot;true&quot;</span><br><span class="line">        jdbc_page_size &#x3D;&gt; &quot;5000&quot;</span><br><span class="line">        statement &#x3D;&gt; &quot;SELECT * FROM base_areas where id &gt; :sql_last_value&quot;</span><br><span class="line">        tracking_column &#x3D;&gt; id</span><br><span class="line">        use_column_value &#x3D;&gt; true</span><br><span class="line">        last_run_metadata_path &#x3D;&gt; &quot;&#x2F;usr&#x2F;share&#x2F;logstash&#x2F;pipeline&#x2F;area&quot;</span><br><span class="line">        schedule &#x3D;&gt; &quot;* * * * *&quot;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br><span class="line">  </span><br><span class="line"> output &#123;</span><br><span class="line">     stdout &#123;</span><br><span class="line">        codec &#x3D;&gt; json_lines</span><br><span class="line">    &#125;</span><br><span class="line">    elasticsearch &#123;</span><br><span class="line">        hosts &#x3D;&gt; &quot;192.168.1.200:9200&quot;</span><br><span class="line">        index &#x3D;&gt; &quot;area&quot;</span><br><span class="line">        document_type &#x3D;&gt; &quot;_doc&quot;</span><br><span class="line">        document_id &#x3D;&gt; &quot;%&#123;id&#125;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
@@ -96,11 +100,19 @@
 <h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bash-4.2$ cat ~&#x2F;config&#x2F;pipelines.yml </span><br><span class="line"></span><br><span class="line">- pipeline.id: main</span><br><span class="line">  path.config: &quot;&#x2F;usr&#x2F;share&#x2F;logstash&#x2F;pipeline&quot;</span><br></pre></td></tr></table></figure>
 
-<p>退出容器并重启，<code>docker logs -f CONTAINER</code> 查看运行日志</p>
+<p>好，配置已完成，运行<code>/usr/local/bin/docker-entrypoint</code>启动调度任务</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
 <h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
 <p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
 ]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Mysql</tag>
+        <tag>Logstash</tag>
+        <tag>Elasticsearch</tag>
+      </tags>
   </entry>
   <entry>
     <title>Manjaro安装与配置</title>
@@ -426,8 +438,8 @@ secure-file-priv=/home/mysql/data</code></pre><figure class="highlight plain"><t
       </categories>
       <tags>
         <tag>Docker</tag>
-        <tag>Aliyun</tag>
         <tag>Mysql</tag>
+        <tag>Aliyun</tag>
       </tags>
   </entry>
   <entry>
