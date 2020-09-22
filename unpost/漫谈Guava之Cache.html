@@ -1,603 +1,389 @@
+
+
 <!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
 
 
 
-  
-
-
-<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="test">
+  <meta name="author" content="Youj">
+  <meta name="keywords" content="">
+  <title>漫谈Guava之Cache（二） - Youj&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
 
-
-
-
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
   
+    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
-
-
-
-
-
-  <meta name="keywords" content=",,," />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="之前的文章介绍了Guava Cache的使用，本文将剖析Cache的源码，对Guava Cache的不太了解的可以移步这里： 漫谈Guava之Cache（一） 创建创建Cache需通过CacheBuilder，该处使用了建造者模式，我们来看CacheBuilder的build方法。 12345public &lt;K1 extends K, V1 extends V&gt; Cache&lt;K1">
-<meta property="og:type" content="website">
-<meta property="og:title" content="漫谈Guava之Cache（二）">
-<meta property="og:url" content="http://blog.yjll.art/unpost/%E6%BC%AB%E8%B0%88Guava%E4%B9%8BCache.html">
-<meta property="og:site_name" content="Youj&#39;s blog">
-<meta property="og:description" content="之前的文章介绍了Guava Cache的使用，本文将剖析Cache的源码，对Guava Cache的不太了解的可以移步这里： 漫谈Guava之Cache（一） 创建创建Cache需通过CacheBuilder，该处使用了建造者模式，我们来看CacheBuilder的build方法。 12345public &lt;K1 extends K, V1 extends V&gt; Cache&lt;K1">
-<meta property="article:published_time" content="2020-03-27T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-04-30T09:32:46.828Z">
-<meta property="article:author" content="Youj">
-<meta property="article:tag" content="Guava">
-<meta property="article:tag" content="Cache">
-<meta property="article:tag" content="缓存">
-<meta name="twitter:card" content="summary">
-
-
-
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '5.1.4',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-
-  <link rel="canonical" href="http://blog.yjll.art/unpost/漫谈Guava之Cache.html"/>
-
-
-
-
-
-  <title>漫谈Guava之Cache（二） | Youj's blog</title>
   
 
 
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
 
 
 
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
 
 
+<link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
 <meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  
-  
-    
-  
+<body>
+  <header style="height: 60vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Youj's blog</strong>&nbsp;</a>
 
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Youj's blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-      
-        <p class="site-subtitle">无他，唯手熟尔</p>
-      
-  </div>
-
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
-  </div>
-</div>
 
-<nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
         
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-        <li class="menu-item menu-item-search">
           
-            <a href="javascript:;" class="popup-trigger">
           
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
     </div>
   </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
 </nav>
 
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
+              
+            </span>
 
-
- </div>
-    </header>
-
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
             
+          </div>
 
-  <div id="posts" class="posts-expand">
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
     
-    
-    
-    <div class="post-block page">
-      <header class="post-header">
+      <div class="container nopadding-md">
+        <div class="py-5" id="board"
+          >
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
 
-	<h1 class="post-title" itemprop="name headline">漫谈Guava之Cache（二）</h1>
-
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
-        
-        
-          <p>之前的文章介绍了Guava Cache的使用，本文将剖析Cache的源码，对Guava Cache的不太了解的可以移步这里：</p>
+<div class="page-content">
+  <p>之前的文章介绍了Guava Cache的使用，本文将剖析Cache的源码，对Guava Cache的不太了解的可以移步这里：</p>
 <p><a href="https://blog.yjll.art/2020/03/27/%E6%BC%AB%E8%B0%88Guava%E4%B9%8BCache%EF%BC%88%E4%B8%80%EF%BC%89">漫谈Guava之Cache（一）</a></p>
 <h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>创建Cache需通过CacheBuilder，该处使用了建造者模式，我们来看CacheBuilder的build方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;K1 extends K, V1 extends V&gt; <span class="function">Cache&lt;K1, V1&gt; <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  checkWeightWithWeigher();</span><br><span class="line">  checkNonLoadingCache();</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> LocalCache.LocalManualCache&lt;&gt;(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-keyword">public</span> &lt;K1 extends K, V1 extends V&gt; <span class="hljs-function">Cache&lt;K1, V1&gt; <span class="hljs-title">build</span><span class="hljs-params">()</span> </span>&#123;
+  checkWeightWithWeigher();
+  checkNonLoadingCache();
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> LocalCache.LocalManualCache&lt;&gt;(<span class="hljs-keyword">this</span>);
+&#125;</code></pre></div>
 
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LocalManualCache(CacheBuilder&lt;? <span class="keyword">super</span> K, ? <span class="keyword">super</span> V&gt; builder) &#123;</span><br><span class="line">  <span class="keyword">this</span>(<span class="keyword">new</span> LocalCache&lt;K, V&gt;(builder, <span class="keyword">null</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">LocalManualCache(CacheBuilder&lt;? <span class="hljs-keyword">super</span> K, ? <span class="hljs-keyword">super</span> V&gt; builder) &#123;
+  <span class="hljs-keyword">this</span>(<span class="hljs-keyword">new</span> LocalCache&lt;K, V&gt;(builder, <span class="hljs-keyword">null</span>));
+&#125;</code></pre></div>
 
 <p>LocalManualCache 相当于LocalCache的包装类，大部分方法直接使用LocalCache的实现，部分方法自己实现了一下。我们直接看LocalCache的逻辑，LocalCache的实现参考了<code>ConcurrentHashMap</code>，采用分段锁技术，当一个线程访问一个 <code>Segment</code> 时，不会影响其他的 <code>Segment</code>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function">Segment&lt;K, V&gt; <span class="title">segmentFor</span><span class="params">(<span class="keyword">int</span> hash)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> segments[(hash &gt;&gt;&gt; segmentShift) &amp; segmentMask];</span><br><span class="line">  &#125;</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Segment中维护了<span class="number">5</span>个队列</span><br><span class="line"></span><br><span class="line">* keyReferenceQueue </span><br><span class="line">* valueReferenceQueue </span><br><span class="line">* recencyQueue </span><br><span class="line">* writeQueue </span><br><span class="line">* accessQueue </span><br><span class="line"></span><br><span class="line">### 存放元素</span><br><span class="line"></span><br><span class="line">加锁，判断加入的元素在缓存中是否存在</span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line"><span class="function">V <span class="title">put</span><span class="params">(K key, <span class="keyword">int</span> hash, V value, <span class="keyword">boolean</span> onlyIfAbsent)</span> </span>&#123;</span><br><span class="line">  lock();</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">long</span> now = map.ticker.read();</span><br><span class="line">    <span class="comment">// 清理过期数据和被GC回收的数据</span></span><br><span class="line">    preWriteCleanup(now);</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">int</span> newCount = <span class="keyword">this</span>.count + <span class="number">1</span>;</span><br><span class="line">    <span class="comment">// 扩容</span></span><br><span class="line">    <span class="keyword">if</span> (newCount &gt; <span class="keyword">this</span>.threshold) &#123; <span class="comment">// ensure capacity</span></span><br><span class="line">      expand();</span><br><span class="line">      newCount = <span class="keyword">this</span>.count + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    AtomicReferenceArray&lt;ReferenceEntry&lt;K, V&gt;&gt; table = <span class="keyword">this</span>.table;</span><br><span class="line">    <span class="keyword">int</span> index = hash &amp; (table.length() - <span class="number">1</span>);</span><br><span class="line">    ReferenceEntry&lt;K, V&gt; first = table.get(index);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Look for an existing entry.</span></span><br><span class="line">    <span class="keyword">for</span> (ReferenceEntry&lt;K, V&gt; e = first; e != <span class="keyword">null</span>; e = e.getNext()) &#123;</span><br><span class="line">      K entryKey = e.getKey();</span><br><span class="line">      <span class="keyword">if</span> (e.getHash() == hash</span><br><span class="line">          &amp;&amp; entryKey != <span class="keyword">null</span></span><br><span class="line">          &amp;&amp; map.keyEquivalence.equivalent(key, entryKey)) &#123;</span><br><span class="line">        <span class="comment">// We found an existing entry.</span></span><br><span class="line"></span><br><span class="line">        ValueReference&lt;K, V&gt; valueReference = e.getValueReference();</span><br><span class="line">        V entryValue = valueReference.get();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 表示触发GC，值被回收了</span></span><br><span class="line">        <span class="keyword">if</span> (entryValue == <span class="keyword">null</span>) &#123;</span><br><span class="line">          ++modCount;</span><br><span class="line">          <span class="comment">// 排除CacheLoad加载的数据</span></span><br><span class="line">          <span class="keyword">if</span> (valueReference.isActive()) &#123;</span><br><span class="line">            <span class="comment">// 移入删除队列中</span></span><br><span class="line">            enqueueNotification(</span><br><span class="line">                key, hash, entryValue, valueReference.getWeight(), RemovalCause.COLLECTED);</span><br><span class="line">            setValue(e, key, value, now);</span><br><span class="line">            newCount = <span class="keyword">this</span>.count; <span class="comment">// count remains unchanged</span></span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            setValue(e, key, value, now);</span><br><span class="line">            newCount = <span class="keyword">this</span>.count + <span class="number">1</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">this</span>.count = newCount; <span class="comment">// write-volatile</span></span><br><span class="line">          <span class="comment">// 移除原来元素</span></span><br><span class="line">          evictEntries(e);</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (onlyIfAbsent) &#123;</span><br><span class="line">          <span class="comment">// Mimic</span></span><br><span class="line">          <span class="comment">// "if (!map.containsKey(key)) ...</span></span><br><span class="line">          <span class="comment">// else return map.get(key);</span></span><br><span class="line">          recordLockedRead(e, now);</span><br><span class="line">          <span class="keyword">return</span> entryValue;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">// clobber existing entry, count remains unchanged</span></span><br><span class="line">          ++modCount;</span><br><span class="line">          enqueueNotification(</span><br><span class="line">              key, hash, entryValue, valueReference.getWeight(), RemovalCause.REPLACED);</span><br><span class="line">          setValue(e, key, value, now);</span><br><span class="line">          evictEntries(e);</span><br><span class="line">          <span class="keyword">return</span> entryValue;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Create a new entry.</span></span><br><span class="line">    <span class="comment">// 缓存中没有，创建一个</span></span><br><span class="line">    ++modCount;</span><br><span class="line">    ReferenceEntry&lt;K, V&gt; newEntry = newEntry(key, hash, first);</span><br><span class="line">    <span class="comment">// 包装key，value放到newEntry中，并调用recordWrite()方法，更新权重,将entry存入accessQueue，writeQueue队列中</span></span><br><span class="line">    setValue(newEntry, key, value, now);</span><br><span class="line">    table.set(index, newEntry);</span><br><span class="line">    newCount = <span class="keyword">this</span>.count + <span class="number">1</span>;</span><br><span class="line">    count用<span class="keyword">volatile</span>修饰，保证内存可见性</span><br><span class="line">    <span class="keyword">this</span>.count = newCount; <span class="comment">// write-volatile</span></span><br><span class="line">    <span class="comment">// TODO</span></span><br><span class="line">    evictEntries(newEntry);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    unlock();</span><br><span class="line">    postWriteCleanup();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">  <span class="hljs-function">Segment&lt;K, V&gt; <span class="hljs-title">segmentFor</span><span class="hljs-params">(<span class="hljs-keyword">int</span> hash)</span> </span>&#123;
+    <span class="hljs-keyword">return</span> segments[(hash &gt;&gt;&gt; segmentShift) &amp; segmentMask];
+  &#125;
+``` 
+
+
+Segment中维护了<span class="hljs-number">5</span>个队列
+
+* keyReferenceQueue 
+* valueReferenceQueue 
+* recencyQueue 
+* writeQueue 
+* accessQueue 
+
+### 存放元素
+
+加锁，判断加入的元素在缓存中是否存在
+
+```java
+<span class="hljs-function">V <span class="hljs-title">put</span><span class="hljs-params">(K key, <span class="hljs-keyword">int</span> hash, V value, <span class="hljs-keyword">boolean</span> onlyIfAbsent)</span> </span>&#123;
+  lock();
+  <span class="hljs-keyword">try</span> &#123;
+    <span class="hljs-keyword">long</span> now = map.ticker.read();
+    <span class="hljs-comment">// 清理过期数据和被GC回收的数据</span>
+    preWriteCleanup(now);
+	
+    <span class="hljs-keyword">int</span> newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    <span class="hljs-comment">// 扩容</span>
+    <span class="hljs-keyword">if</span> (newCount &gt; <span class="hljs-keyword">this</span>.threshold) &#123; <span class="hljs-comment">// ensure capacity</span>
+      expand();
+      newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    &#125;
+
+    AtomicReferenceArray&lt;ReferenceEntry&lt;K, V&gt;&gt; table = <span class="hljs-keyword">this</span>.table;
+    <span class="hljs-keyword">int</span> index = hash &amp; (table.length() - <span class="hljs-number">1</span>);
+    ReferenceEntry&lt;K, V&gt; first = table.get(index);
+
+    <span class="hljs-comment">// Look for an existing entry.</span>
+    <span class="hljs-keyword">for</span> (ReferenceEntry&lt;K, V&gt; e = first; e != <span class="hljs-keyword">null</span>; e = e.getNext()) &#123;
+      K entryKey = e.getKey();
+      <span class="hljs-keyword">if</span> (e.getHash() == hash
+          &amp;&amp; entryKey != <span class="hljs-keyword">null</span>
+          &amp;&amp; map.keyEquivalence.equivalent(key, entryKey)) &#123;
+        <span class="hljs-comment">// We found an existing entry.</span>
+
+        ValueReference&lt;K, V&gt; valueReference = e.getValueReference();
+        V entryValue = valueReference.get();
+
+        <span class="hljs-comment">// 表示触发GC，值被回收了</span>
+        <span class="hljs-keyword">if</span> (entryValue == <span class="hljs-keyword">null</span>) &#123;
+          ++modCount;
+          <span class="hljs-comment">// 排除CacheLoad加载的数据</span>
+          <span class="hljs-keyword">if</span> (valueReference.isActive()) &#123;
+            <span class="hljs-comment">// 移入删除队列中</span>
+            enqueueNotification(
+                key, hash, entryValue, valueReference.getWeight(), RemovalCause.COLLECTED);
+            setValue(e, key, value, now);
+            newCount = <span class="hljs-keyword">this</span>.count; <span class="hljs-comment">// count remains unchanged</span>
+          &#125; <span class="hljs-keyword">else</span> &#123;
+            setValue(e, key, value, now);
+            newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+          &#125;
+          <span class="hljs-keyword">this</span>.count = newCount; <span class="hljs-comment">// write-volatile</span>
+          <span class="hljs-comment">// 移除原来元素</span>
+          evictEntries(e);
+          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (onlyIfAbsent) &#123;
+          <span class="hljs-comment">// Mimic</span>
+          <span class="hljs-comment">// "if (!map.containsKey(key)) ...</span>
+          <span class="hljs-comment">// else return map.get(key);</span>
+          recordLockedRead(e, now);
+          <span class="hljs-keyword">return</span> entryValue;
+        &#125; <span class="hljs-keyword">else</span> &#123;
+          <span class="hljs-comment">// clobber existing entry, count remains unchanged</span>
+          ++modCount;
+          enqueueNotification(
+              key, hash, entryValue, valueReference.getWeight(), RemovalCause.REPLACED);
+          setValue(e, key, value, now);
+          evictEntries(e);
+          <span class="hljs-keyword">return</span> entryValue;
+        &#125;
+      &#125;
+    &#125;
+
+    <span class="hljs-comment">// Create a new entry.</span>
+    <span class="hljs-comment">// 缓存中没有，创建一个</span>
+    ++modCount;
+    ReferenceEntry&lt;K, V&gt; newEntry = newEntry(key, hash, first);
+    <span class="hljs-comment">// 包装key，value放到newEntry中，并调用recordWrite()方法，更新权重,将entry存入accessQueue，writeQueue队列中</span>
+    setValue(newEntry, key, value, now);
+    table.set(index, newEntry);
+    newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    count用<span class="hljs-keyword">volatile</span>修饰，保证内存可见性
+    <span class="hljs-keyword">this</span>.count = newCount; <span class="hljs-comment">// write-volatile</span>
+    <span class="hljs-comment">// TODO</span>
+    evictEntries(newEntry);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+  &#125; <span class="hljs-keyword">finally</span> &#123;
+    unlock();
+    postWriteCleanup();
+  &#125;
+&#125;</code></pre></div>
 
 
 
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">recordWrite</span><span class="params">(ReferenceEntry&lt;K, V&gt; entry, <span class="keyword">int</span> weight, <span class="keyword">long</span> now)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// we are already under lock, so drain the recency queue immediately</span></span><br><span class="line">  drainRecencyQueue();</span><br><span class="line">  totalWeight += weight;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (map.recordsAccess()) &#123;</span><br><span class="line">    entry.setAccessTime(now);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (map.recordsWrite()) &#123;</span><br><span class="line">    entry.setWriteTime(now);</span><br><span class="line">  &#125;</span><br><span class="line">  accessQueue.add(entry);</span><br><span class="line">  writeQueue.add(entry);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">recordWrite</span><span class="hljs-params">(ReferenceEntry&lt;K, V&gt; entry, <span class="hljs-keyword">int</span> weight, <span class="hljs-keyword">long</span> now)</span> </span>&#123;
+  <span class="hljs-comment">// we are already under lock, so drain the recency queue immediately</span>
+  drainRecencyQueue();
+  totalWeight += weight;
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">keyStrength</span><br><span class="line"></span><br><span class="line">STRONG_ACCESS_WRITE</span><br><span class="line"></span><br><span class="line">StrongAccessWriteEntry</span><br></pre></td></tr></table></figure>
+  <span class="hljs-keyword">if</span> (map.recordsAccess()) &#123;
+    entry.setAccessTime(now);
+  &#125;
+  <span class="hljs-keyword">if</span> (map.recordsWrite()) &#123;
+    entry.setWriteTime(now);
+  &#125;
+  accessQueue.add(entry);
+  writeQueue.add(entry);
+&#125;</code></pre></div>
+
+<div class="hljs"><pre><code class="hljs armasm"><span class="hljs-symbol">keyStrength</span>
+
+<span class="hljs-keyword">STRONG_ACCESS_WRITE</span>
+<span class="hljs-keyword"></span>
+<span class="hljs-keyword">StrongAccessWriteEntry</span></code></pre></div>
 
 <p>com.google.common.cache.RemovalCause 删除原因</p>
 
-        
-      </div>
-      
-      
-      
-    </div>
-    
-    
-    
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
-
-
-
-        </div>
-        
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
-
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
-
-      
-
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
-
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <p class="site-author-name" itemprop="name">Youj</p>
-              <p class="site-description motion-element" itemprop="description">test</p>
-          </div>
-
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/%7C%7C%20archive">
-              
-                  <span class="site-state-item-count">15</span>
-                  <span class="site-state-item-name">日志</span>
-                </a>
-              </div>
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-categories">
-                <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
-                  <span class="site-state-item-name">分类</span>
-                </a>
-              </div>
-            
-
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">22</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
-
-          </nav>
-
-          
-
-          
-
-          
-          
-
-          
-          
-
-          
-
-        </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建"><span class="nav-number">1.</span> <span class="nav-text">创建</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Youj</span>
-
-  
 </div>
 
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     
+  </main>
 
-    
+  
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
+  
 
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
   </div>
-
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+</div>
   
 
   
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
 
   
 
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+    
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+    
+  </div>
+</footer>
 
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
 
 
   
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
-
-
-
-  
-
-
+    <script  src="/js/lazyload.js" ></script>
   
 
 
 
-
-	
-
-
-
-
-
-  
-
-
-
-
-
-  
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
 
 
 
@@ -607,346 +393,73 @@
 
 
 
-
-
-
-  
-
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url);
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
-      });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "漫谈Guava之Cache（二）&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
     });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
 
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
   </script>
 
 
 
 
 
-  
 
-  
 
-  
 
-  
-  
 
-  
 
-  
 
-  
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>

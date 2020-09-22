@@ -1,383 +1,208 @@
+
+
 <!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
 
 
 
-  
-
-
-<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="test">
+  <meta name="author" content="Youj">
+  <meta name="keywords" content="">
+  <title>漫谈Guava之Cache（一） - Youj&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
 
-
-
-
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
   
+    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
-
-
-
-
-
-  <meta name="keywords" content="Guava,Cache,缓存," />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，CPU Cache是用于减少处理器访问内存所需平均时间的部件。在金字塔式存储体系中它位于自顶向下的第二层，仅次于CPU寄存器。其容量远小于内存，但速度却可以接近处理器的频率。 当处理器发出内存访问请求时，会先查看缓存内是否有请求数据。如果存在（命中），则不经访问内存直接返回该数据；如果不存在（失效），则要先把内存中的相应数据载入缓存，再将其返">
-<meta property="og:type" content="article">
-<meta property="og:title" content="漫谈Guava之Cache（一）">
-<meta property="og:url" content="http://blog.yjll.art/post/96f462f9.html">
-<meta property="og:site_name" content="Youj&#39;s blog">
-<meta property="og:description" content="计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，CPU Cache是用于减少处理器访问内存所需平均时间的部件。在金字塔式存储体系中它位于自顶向下的第二层，仅次于CPU寄存器。其容量远小于内存，但速度却可以接近处理器的频率。 当处理器发出内存访问请求时，会先查看缓存内是否有请求数据。如果存在（命中），则不经访问内存直接返回该数据；如果不存在（失效），则要先把内存中的相应数据载入缓存，再将其返">
-<meta property="article:published_time" content="2020-03-27T07:40:24.000Z">
-<meta property="article:modified_time" content="2020-08-25T07:40:41.849Z">
-<meta property="article:author" content="Youj">
-<meta property="article:tag" content="Guava">
-<meta property="article:tag" content="Cache">
-<meta property="article:tag" content="缓存">
-<meta name="twitter:card" content="summary">
-
-
-
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '5.1.4',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-
-  <link rel="canonical" href="http://blog.yjll.art/post/96f462f9.html"/>
-
-
-
-
-
-  <title>漫谈Guava之Cache（一） | Youj's blog</title>
   
 
 
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
 
 
 
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
 
 
+<link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
 <meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  
-  
-    
-  
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Youj's blog</strong>&nbsp;</a>
 
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Youj's blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-      
-        <p class="site-subtitle">无他，唯手熟尔</p>
-      
-  </div>
-
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
-  </div>
-</div>
 
-<nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
         
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-        <li class="menu-item menu-item-search">
           
-            <a href="javascript:;" class="popup-trigger">
           
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
     </div>
   </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
 </nav>
 
-
-
- </div>
-    </header>
-
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            
-
-  <div id="posts" class="posts-expand">
-    
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.yjll.art/post/96f462f9.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Youj">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Youj's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">漫谈Guava之Cache（一）</h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-27T15:40:24+08:00">
-                2020-03-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
               
             </span>
-          
 
-          
             
-          
+              
+  <div class="mt-3 post-meta">
+    <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+    <time datetime="2020-03-27 15:40" pubdate>
+      2020年3月27日 下午
+    </time>
+  </div>
+
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.1k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      14
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
 
           
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      </div>
+    </div>
+  </header>
 
+  <main>
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
-      
-        <p>计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，<code>CPU Cache</code>是用于减少<a href="https://zh.wikipedia.org/wiki/中央处理器" target="_blank" rel="noopener">处理器</a>访问内存所需平均时间的部件。在金字塔式<a href="https://zh.wikipedia.org/w/index.php?title=存储体系&action=edit&redlink=1" target="_blank" rel="noopener">存储体系</a>中它位于自顶向下的第二层，仅次于<a href="https://zh.wikipedia.org/wiki/寄存器" target="_blank" rel="noopener">CPU寄存器</a>。其容量远小于<a href="https://zh.wikipedia.org/wiki/内存" target="_blank" rel="noopener">内存</a>，但速度却可以接近处理器的频率。</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto" id="post">
+            <!-- SEO header -->
+            <h1 style="display: none">漫谈Guava之Cache（一）</h1>
+            
+            <div class="markdown-body" id="post-body">
+              <p>计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，<code>CPU Cache</code>是用于减少<a href="https://zh.wikipedia.org/wiki/中央处理器" target="_blank" rel="noopener">处理器</a>访问内存所需平均时间的部件。在金字塔式<a href="https://zh.wikipedia.org/w/index.php?title=存储体系&action=edit&redlink=1" target="_blank" rel="noopener">存储体系</a>中它位于自顶向下的第二层，仅次于<a href="https://zh.wikipedia.org/wiki/寄存器" target="_blank" rel="noopener">CPU寄存器</a>。其容量远小于<a href="https://zh.wikipedia.org/wiki/内存" target="_blank" rel="noopener">内存</a>，但速度却可以接近处理器的频率。</p>
 <p>当处理器发出内存访问请求时，会先查看缓存内是否有请求数据。如果存在（命中），则不经访问内存直接返回该数据；如果不存在（失效），则要先把内存中的相应数据载入缓存，再将其返回处理器。</p>
 <p>这和我们日常开发中的很多场景相似，例如调用第三方接口取数据，微服务间取数据，甚至从数据库中取数据。这些IO操作所消耗的时间对于CPU来说是很久的。如果这些数据是读多写少，也就是说数据不会轻易改变，那我们可以把这部分数据进行缓存，取数据前先访问缓存，在缓存中查不到时再走原来的逻辑。</p>
 <a id="more"></a>
@@ -385,10 +210,27 @@
 <p>日常开发中我们可能会使用<code>ConcurrentHashMap</code>存数据，替代缓存使用，简单场景这样使用没什么问题，只是<code>ConcurrentHashMap</code>设计的目的不是做缓存，所以很多Cache应该有的很多功能，<code>ConcurrentHashMap</code>并不直接支持，类如设置key的过期时间，内存不足时释放缓存等。</p>
 <p>本文介绍Guava的Cache使用，为该系列的第一部分。</p>
 <p>我先写一个简单的例子，创建一个缓存，该缓存最多存100个元素，超时时间为10分钟</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Cache&lt;String, String&gt; cache = CacheBuilder.newBuilder()</span><br><span class="line">            .maximumSize(<span class="number">100</span>)</span><br><span class="line">            .expireAfterWrite(<span class="number">10</span>, TimeUnit.MINUTES)</span><br><span class="line">            .build();</span><br><span class="line"></span><br><span class="line">cache.getIfPresent(key)</span><br><span class="line"></span><br><span class="line">cache.get(key, () -&gt; defaultValue)</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">Cache&lt;String, String&gt; cache = CacheBuilder.newBuilder()
+            .maximumSize(<span class="hljs-number">100</span>)
+            .expireAfterWrite(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
+            .build();
+
+cache.getIfPresent(key)
+
+cache.get(key, () -&gt; defaultValue)</code></pre></div>
 
 <h3 id="CacheLoader"><a href="#CacheLoader" class="headerlink" title="CacheLoader"></a>CacheLoader</h3><p>上文中的<code>cache.get(key, () -&gt; defaultValue)</code>会在<code>cache</code>中没这条数据的情况下，根据我们写的策略重新计算，并将数据保存在缓存中一份。对于这种情况可以使用<code>CacheLoader</code>来统一处理。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()</span><br><span class="line">      .expireAfterAccess(<span class="number">10</span>, TimeUnit.MINUTES)</span><br><span class="line">      .maximumSize(<span class="number">1000</span>)</span><br><span class="line">      .build(</span><br><span class="line">          <span class="keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> Graph <span class="title">load</span><span class="params">(Key key)</span> </span>&#123; <span class="comment">// no checked exception</span></span><br><span class="line">              <span class="keyword">return</span> createExpensiveGraph(key);</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;);</span><br><span class="line">...</span><br><span class="line"><span class="keyword">return</span> graphs.getUnchecked(key);</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+      .expireAfterAccess(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
+      .maximumSize(<span class="hljs-number">1000</span>)
+      .build(
+          <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+            <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+              <span class="hljs-keyword">return</span> createExpensiveGraph(key);
+            &#125;
+          &#125;);
+...
+<span class="hljs-keyword">return</span> graphs.getUnchecked(key);</code></pre></div>
 
 
 
@@ -396,7 +238,19 @@
 <p>Guava provides three basic types of eviction: size-based eviction, time-based eviction, and reference-based eviction.</p>
 </blockquote>
 <h3 id="容量大小"><a href="#容量大小" class="headerlink" title="容量大小"></a>容量大小</h3><p>前文使用的<code>CacheBuilder.maximumSize(long)</code> 便可限制最大缓存数量。<br>如缓冲的每条数据有不同的权重的话可自己写<code>Weigher</code>策略，并设置最大<code>重量</code>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()</span><br><span class="line">       .maximumWeight(<span class="number">100000</span>)</span><br><span class="line">       .weigher(<span class="keyword">new</span> Weigher&lt;Key, Graph&gt;() &#123;</span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">weigh</span><span class="params">(Key k, Graph g)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> g.vertices().size();</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">       .build(</span><br><span class="line">           <span class="keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;</span><br><span class="line">             <span class="function"><span class="keyword">public</span> Graph <span class="title">load</span><span class="params">(Key key)</span> </span>&#123; <span class="comment">// no checked exception</span></span><br><span class="line">               <span class="keyword">return</span> createExpensiveGraph(key);</span><br><span class="line">             &#125;</span><br><span class="line">           &#125;);</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+       .maximumWeight(<span class="hljs-number">100000</span>)
+       .weigher(<span class="hljs-keyword">new</span> Weigher&lt;Key, Graph&gt;() &#123;
+          <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">weigh</span><span class="hljs-params">(Key k, Graph g)</span> </span>&#123;
+            <span class="hljs-keyword">return</span> g.vertices().size();
+          &#125;
+        &#125;)
+       .build(
+           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+               <span class="hljs-keyword">return</span> createExpensiveGraph(key);
+             &#125;
+           &#125;);</code></pre></div>
 
 <h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><p><code>CacheBuilder</code> provides two approaches to timed eviction:</p>
 <ul>
@@ -410,354 +264,194 @@
 <li><code>CacheBuilder.softValues()</code> 对soft使用软引用包装</li>
 </ul>
 <h2 id="Removal-Listeners"><a href="#Removal-Listeners" class="headerlink" title="Removal Listeners"></a>Removal Listeners</h2><p>如果我们想对淘汰的元素进行处理，我们可以写一个<code>RemovalListener</code>对Cache进行监听。例如我们将DB连接存入cache中，当缓存失效时，我们需要关闭数据库连接，这部分逻辑就可以通过<code>RemovalListener</code>来完成</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">CacheLoader&lt;Key, DatabaseConnection&gt; loader = <span class="keyword">new</span> CacheLoader&lt;Key, DatabaseConnection&gt; () &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> DatabaseConnection <span class="title">load</span><span class="params">(Key key)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> openConnection(key);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">RemovalListener&lt;Key, DatabaseConnection&gt; removalListener = <span class="keyword">new</span> RemovalListener&lt;Key, DatabaseConnection&gt;() &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRemoval</span><span class="params">(RemovalNotification&lt;Key, DatabaseConnection&gt; removal)</span> </span>&#123;</span><br><span class="line">    DatabaseConnection conn = removal.getValue();</span><br><span class="line">    conn.close(); <span class="comment">// tear down properly</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">CacheBuilder.newBuilder()</span><br><span class="line">  .expireAfterWrite(<span class="number">2</span>, TimeUnit.MINUTES)</span><br><span class="line">  .removalListener(removalListener)</span><br><span class="line">  .build(loader);</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java">CacheLoader&lt;Key, DatabaseConnection&gt; loader = <span class="hljs-keyword">new</span> CacheLoader&lt;Key, DatabaseConnection&gt; () &#123;
+  <span class="hljs-function"><span class="hljs-keyword">public</span> DatabaseConnection <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;
+    <span class="hljs-keyword">return</span> openConnection(key);
+  &#125;
+&#125;;
+RemovalListener&lt;Key, DatabaseConnection&gt; removalListener = <span class="hljs-keyword">new</span> RemovalListener&lt;Key, DatabaseConnection&gt;() &#123;
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onRemoval</span><span class="hljs-params">(RemovalNotification&lt;Key, DatabaseConnection&gt; removal)</span> </span>&#123;
+    DatabaseConnection conn = removal.getValue();
+    conn.close(); <span class="hljs-comment">// tear down properly</span>
+  &#125;
+&#125;;
+
+CacheBuilder.newBuilder()
+  .expireAfterWrite(<span class="hljs-number">2</span>, TimeUnit.MINUTES)
+  .removalListener(removalListener)
+  .build(loader);</code></pre></div>
 
 <h2 id="Refresh"><a href="#Refresh" class="headerlink" title="Refresh"></a>Refresh</h2><p>对于失效性比较强的元素，我们可以配置刷新的策略。刷新和淘汰不同，刷新元素是异步操作，刷新未完成时返回还是原数据，刷新成功则返回新数据。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Some keys don't need refreshing, and we want refreshes to be done asynchronously.</span></span><br><span class="line">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()</span><br><span class="line">       .maximumSize(<span class="number">1000</span>)</span><br><span class="line">       .refreshAfterWrite(<span class="number">1</span>, TimeUnit.MINUTES)</span><br><span class="line">       .build(</span><br><span class="line">           <span class="keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;</span><br><span class="line">             <span class="function"><span class="keyword">public</span> Graph <span class="title">load</span><span class="params">(Key key)</span> </span>&#123; <span class="comment">// no checked exception</span></span><br><span class="line">               <span class="keyword">return</span> getGraphFromDatabase(key);</span><br><span class="line">             &#125;</span><br><span class="line"></span><br><span class="line">             <span class="function"><span class="keyword">public</span> ListenableFuture&lt;Graph&gt; <span class="title">reload</span><span class="params">(<span class="keyword">final</span> Key key, Graph prevGraph)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">if</span> (neverNeedsRefresh(key)) &#123;</span><br><span class="line">                 <span class="keyword">return</span> Futures.immediateFuture(prevGraph);</span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                 <span class="comment">// asynchronous!</span></span><br><span class="line">                 ListenableFutureTask&lt;Graph&gt; task = ListenableFutureTask.create(<span class="keyword">new</span> Callable&lt;Graph&gt;() &#123;</span><br><span class="line">                   <span class="function"><span class="keyword">public</span> Graph <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                     <span class="keyword">return</span> getGraphFromDatabase(key);</span><br><span class="line">                   &#125;</span><br><span class="line">                 &#125;);</span><br><span class="line">                 executor.execute(task);</span><br><span class="line">                 <span class="keyword">return</span> task;</span><br><span class="line">               &#125;</span><br><span class="line">             &#125;</span><br><span class="line">           &#125;);</span><br></pre></td></tr></table></figure>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// Some keys don't need refreshing, and we want refreshes to be done asynchronously.</span>
+LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+       .maximumSize(<span class="hljs-number">1000</span>)
+       .refreshAfterWrite(<span class="hljs-number">1</span>, TimeUnit.MINUTES)
+       .build(
+           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+               <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
+             &#125;
 
-      
-    </div>
-    
-    
-    
+             <span class="hljs-function"><span class="hljs-keyword">public</span> ListenableFuture&lt;Graph&gt; <span class="hljs-title">reload</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Key key, Graph prevGraph)</span> </span>&#123;
+               <span class="hljs-keyword">if</span> (neverNeedsRefresh(key)) &#123;
+                 <span class="hljs-keyword">return</span> Futures.immediateFuture(prevGraph);
+               &#125; <span class="hljs-keyword">else</span> &#123;
+                 <span class="hljs-comment">// asynchronous!</span>
+                 ListenableFutureTask&lt;Graph&gt; task = ListenableFutureTask.create(<span class="hljs-keyword">new</span> Callable&lt;Graph&gt;() &#123;
+                   <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">call</span><span class="hljs-params">()</span> </span>&#123;
+                     <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
+                   &#125;
+                 &#125;);
+                 executor.execute(task);
+                 <span class="hljs-keyword">return</span> task;
+               &#125;
+             &#125;
+           &#125;);</code></pre></div>
 
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Guava/" rel="tag"># Guava</a>
-          
-            <a href="/tags/Cache/" rel="tag"># Cache</a>
-          
-            <a href="/tags/%E7%BC%93%E5%AD%98/" rel="tag"># 缓存</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/post/c7e397c2.html" rel="next" title="Spring Cloud Gateway 分布式限流">
-                <i class="fa fa-chevron-left"></i> Spring Cloud Gateway 分布式限流
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/post/77a89a46.html" rel="prev" title="Nginx使用Certbot配置HTTPS证书">
-                Nginx使用Certbot配置HTTPS证书 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-
-    <div class="post-spread">
-      
-    </div>
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
-
-
-
-        </div>
-        
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
-
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
-
-      
-
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
-
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <p class="site-author-name" itemprop="name">Youj</p>
-              <p class="site-description motion-element" itemprop="description">test</p>
-          </div>
-
-          <nav class="site-state motion-element">
-
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/%7C%7C%20archive">
-              
-                  <span class="site-state-item-count">15</span>
-                  <span class="site-state-item-name">日志</span>
-                </a>
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Java/">Java</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Guava/">Guava</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Cache/">Cache</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+                    
+                  </div>
+                
               </div>
-            
-
-            
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" target="_blank" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
               
               
-              <div class="site-state-item site-state-categories">
-                <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
-                  <span class="site-state-item-name">分类</span>
-                </a>
-              </div>
-            
-
-            
+                <div class="post-prevnext row">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/post/77a89a46.html">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Nginx使用Certbot配置HTTPS证书</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/c7e397c2.html">
+                        <span class="hidden-mobile">Spring Cloud Gateway 分布式限流</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
               
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">22</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
+            </div>
+
             
-
-          </nav>
-
-          
-
-          
-
-          
-          
-
-          
-          
-
-          
-
+          </article>
         </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#CacheLoader"><span class="nav-number">1.</span> <span class="nav-text">CacheLoader</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三种淘汰策略"><span class="nav-number"></span> <span class="nav-text">三种淘汰策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#容量大小"><span class="nav-number">1.</span> <span class="nav-text">容量大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间"><span class="nav-number">2.</span> <span class="nav-text">时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引用"><span class="nav-number">3.</span> <span class="nav-text">引用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Removal-Listeners"><span class="nav-number"></span> <span class="nav-text">Removal Listeners</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Refresh"><span class="nav-number"></span> <span class="nav-text">Refresh</span></a></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
       </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Youj</span>
-
-  
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div id="tocbot"></div>
 </div>
 
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
       </div>
     
-
-    
-
   </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
 
   
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
   
 
   
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
-
-
-
-  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+    
 
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
 
 
   
-
-
+    <script  src="/js/lazyload.js" ></script>
   
 
 
 
-
-	
-
-
-
-
-
-  
-
-
-
-
-
-  
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
 
 
 
@@ -765,348 +459,114 @@
 
 
 
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
 
-
-
-
-
-  
-
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url);
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '#post-body',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
       });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
-    });
-
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
       }
     });
   </script>
 
 
 
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "漫谈Guava之Cache（一）&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
 
 
-  
 
-  
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
 
-  
 
-  
-  
 
-  
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
 
-  
 
-  
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>

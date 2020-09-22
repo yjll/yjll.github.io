@@ -1,618 +1,316 @@
+
+
 <!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
 
 
 
-  
-
-
-<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<meta name="theme-color" content="#222">
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="test">
+  <meta name="author" content="Youj">
+  <meta name="keywords" content="">
+  <title>page.title - Youj&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
 
-
-
-
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
   
+    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
-
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
-
-
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
-
-
-  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
-
-
-
-
-
-  <meta name="keywords" content="Hexo, NexT" />
-
-
-
-
-
-
-
-
-
-
-<meta name="description" content="安装1234curl -fsSL get.docker.com | sh curl -fsSL get.docker.com -o get-docker.shsudo sh get-docker.sh --mirror Aliyun   配置国内源123456$ cat &#x2F;etc&#x2F;docker&#x2F;daemon.json&amp;#123;  &quot;registry-mir">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Youj&#39;s blog">
-<meta property="og:url" content="http://blog.yjll.art/unpost/Docker.html">
-<meta property="og:site_name" content="Youj&#39;s blog">
-<meta property="og:description" content="安装1234curl -fsSL get.docker.com | sh curl -fsSL get.docker.com -o get-docker.shsudo sh get-docker.sh --mirror Aliyun   配置国内源123456$ cat &#x2F;etc&#x2F;docker&#x2F;daemon.json&amp;#123;  &quot;registry-mir">
-<meta property="article:published_time" content="2020-09-04T10:00:50.444Z">
-<meta property="article:modified_time" content="2020-09-04T10:00:50.444Z">
-<meta property="article:author" content="Youj">
-<meta name="twitter:card" content="summary">
-
-
-
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Muse',
-    version: '5.1.4',
-    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
-    fancybox: true,
-    tabs: true,
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-
-  <link rel="canonical" href="http://blog.yjll.art/unpost/Docker.html"/>
-
-
-
-
-
-  <title> | Youj's blog</title>
   
 
 
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
 
 
 
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
 
 
+<link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
 <meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  
-  
-    
-  
+<body>
+  <header style="height: 60vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Youj's blog</strong>&nbsp;</a>
 
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Youj's blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-      
-        <p class="site-subtitle">无他，唯手熟尔</p>
-      
-  </div>
-
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
     </button>
-  </div>
-</div>
 
-<nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
         
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-
-      
-        <li class="menu-item menu-item-search">
           
-            <a href="javascript:;" class="popup-trigger">
           
-            
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
-            
-            搜索
-          </a>
-        </li>
-      
-    </ul>
-  
-
-  
-    <div class="site-search">
-      
-  <div class="popup search-popup local-search-popup">
-  <div class="local-search-header clearfix">
-    <span class="search-icon">
-      <i class="fa fa-search"></i>
-    </span>
-    <span class="popup-btn-close">
-      <i class="fa fa-times-circle"></i>
-    </span>
-    <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
     </div>
   </div>
-  <div id="local-search-result"></div>
-</div>
-
-
-
-    </div>
-  
 </nav>
 
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
+              
+            </span>
 
-
- </div>
-    </header>
-
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
             
+          </div>
 
-  <div id="posts" class="posts-expand">
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
     
-    
-    
-    <div class="post-block page">
-      <header class="post-header">
+      <div class="container nopadding-md">
+        <div class="py-5" id="board"
+          >
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
 
-	<h1 class="post-title" itemprop="name headline"></h1>
+<div class="page-content">
+  <h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><div class="hljs"><pre><code class="hljs dsconfig"><span class="hljs-string">curl </span>-<span class="hljs-string">fsSL </span><span class="hljs-string">get.</span><span class="hljs-string">docker.</span><span class="hljs-string">com </span>| <span class="hljs-string">sh </span>
 
-
-
-</header>
-
-      
-      
-      
-      <div class="post-body">
-        
-        
-          <h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL get.docker.com | sh </span><br><span class="line"></span><br><span class="line">curl -fsSL get.docker.com -o get-docker.sh</span><br><span class="line">sudo sh get-docker.sh --mirror Aliyun</span><br></pre></td></tr></table></figure>
+<span class="hljs-string">curl </span>-<span class="hljs-string">fsSL </span><span class="hljs-string">get.</span><span class="hljs-string">docker.</span><span class="hljs-string">com </span>-o <span class="hljs-built_in">get-docker.sh</span>
+<span class="hljs-built_in">sudo</span> <span class="hljs-string">sh </span><span class="hljs-built_in">get-docker.sh</span> <span class="hljs-built_in">--mirror</span> <span class="hljs-string">Aliyun</span></code></pre></div>
 
 
-<h3 id="配置国内源"><a href="#配置国内源" class="headerlink" title="配置国内源"></a>配置国内源</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ cat &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;https:&#x2F;&#x2F;docker.mirrors.ustc.edu.cn&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="配置国内源"><a href="#配置国内源" class="headerlink" title="配置国内源"></a>配置国内源</h3><div class="hljs"><pre><code class="hljs dts">$ cat <span class="hljs-meta-keyword">/etc/</span>docker/daemon.json
+&#123;
+  <span class="hljs-string">"registry-mirrors"</span>: [
+    <span class="hljs-string">"https://docker.mirrors.ustc.edu.cn"</span>
+  ]
+&#125;</code></pre></div>
 
-<h3 id="配置dockerd-走代理"><a href="#配置dockerd-走代理" class="headerlink" title="配置dockerd 走代理"></a>配置dockerd 走代理</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;docker.service.d</span><br><span class="line"></span><br><span class="line">vim &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;docker.service.d&#x2F;http-proxy.conf</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Environment&#x3D;&quot;HTTPS_PROXY&#x3D;http:&#x2F;&#x2F;localhost:1081&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="配置dockerd-走代理"><a href="#配置dockerd-走代理" class="headerlink" title="配置dockerd 走代理"></a>配置dockerd 走代理</h3><div class="hljs"><pre><code class="hljs stylus">sudo mkdir -<span class="hljs-selector-tag">p</span> /etc/systemd/system/docker<span class="hljs-selector-class">.service</span>.d
+
+vim /etc/systemd/system/docker<span class="hljs-selector-class">.service</span>.d/http-proxy.conf
+
+[Service]
+Environment=<span class="hljs-string">"HTTPS_PROXY=http://localhost:1081"</span></code></pre></div>
 
 
 <p>$ sudo service docker restart</p>
 <h3 id="离线安装镜像"><a href="#离线安装镜像" class="headerlink" title="离线安装镜像"></a>离线安装镜像</h3><p>先从一个有网络的电脑下载docker镜像<br>docker pull centos<br>保存镜像到本地文件<br>docker save -o centos_image.docker centos<br>把镜像拷贝到无网络的电脑，然后通过docker加载镜像即可。<br>docker load -i centos_image.docker</p>
-<h3 id="导出-导入"><a href="#导出-导入" class="headerlink" title="导出/导入"></a>导出/导入</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker save gitlab-bak &gt; &#x2F;root&#x2F;gitlab-bak.tar</span><br><span class="line">docker load &lt; &#x2F;root&#x2F;gitlab-bak.tar</span><br><span class="line"></span><br><span class="line">docker export cb69c3765fba &gt; &#x2F;root&#x2F;gitlab_bak.tar</span><br><span class="line">docker import --change &#39;CMD [&quot;&#x2F;assets&#x2F;wrapper&quot;]&#39; &#x2F;root&#x2F;gitlab.tar gitlab:1.0.0</span><br></pre></td></tr></table></figure>
+<h3 id="导出-导入"><a href="#导出-导入" class="headerlink" title="导出/导入"></a>导出/导入</h3><div class="hljs"><pre><code class="hljs groovy">docker save gitlab-bak &gt; <span class="hljs-regexp">/root/</span>gitlab-bak.tar
+docker load &lt; <span class="hljs-regexp">/root/</span>gitlab-bak.tar
 
-<h3 id="删除操作"><a href="#删除操作" class="headerlink" title="删除操作"></a>删除操作</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 删除已停止实例</span><br><span class="line">docker container prune</span><br><span class="line"></span><br><span class="line"># 删除无用镜像</span><br><span class="line">docker image prune -f -a</span><br></pre></td></tr></table></figure>
+docker export cb69c3765fba &gt; <span class="hljs-regexp">/root/</span>gitlab_bak.tar
+docker <span class="hljs-keyword">import</span> --change <span class="hljs-string">'CMD ["/assets/wrapper"]'</span> <span class="hljs-regexp">/root/</span>gitlab.tar <span class="hljs-string">gitlab:</span><span class="hljs-number">1.0</span><span class="hljs-number">.0</span></code></pre></div>
 
+<h3 id="删除操作"><a href="#删除操作" class="headerlink" title="删除操作"></a>删除操作</h3><div class="hljs"><pre><code class="hljs properties"><span class="hljs-comment"># 删除已停止实例</span>
+<span class="hljs-attr">docker</span> <span class="hljs-string">container prune</span>
 
-<h3 id="查看容器IP"><a href="#查看容器IP" class="headerlink" title="查看容器IP"></a>查看容器IP</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect --format&#x3D;&#39;&#123;&#123;.NetworkSettings.IPAddress&#125;&#125;&#39; mysql-master</span><br></pre></td></tr></table></figure>
-
-<h3 id="设置容器开机自起"><a href="#设置容器开机自起" class="headerlink" title="设置容器开机自起"></a>设置容器开机自起</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker container update --restart=always  b6e4b684e251</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="ftp"><a href="#ftp" class="headerlink" title="ftp"></a>ftp</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">sudo docker run -v &#x2F;share:&#x2F;home&#x2F;vsftpd --network&#x3D;host --restart&#x3D;always -e FTP_USER&#x3D;yjll -e FTP_PASS&#x3D;admin0   fauria&#x2F;vsftpd </span><br><span class="line"></span><br><span class="line">vim &#x2F;etc&#x2F;vsftpd&#x2F;vsftpd.conf</span><br><span class="line">local_root&#x3D;&#x2F;home&#x2F;vsftpd</span><br></pre></td></tr></table></figure>
-
-<h3 id="samba"><a href="#samba" class="headerlink" title="samba"></a>samba</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -it --network&#x3D;host --restart&#x3D;always -v &#x2F;share:&#x2F;mount  -d dperson&#x2F;samba -u &quot;yjll;admin0&quot; -s &quot;yjll;&#x2F;mount&#x2F;;yes;no;no;all;none&quot;</span><br></pre></td></tr></table></figure>
+<span class="hljs-comment"># 删除无用镜像</span>
+<span class="hljs-attr">docker</span> <span class="hljs-string">image prune -f -a</span></code></pre></div>
 
 
+<h3 id="查看容器IP"><a href="#查看容器IP" class="headerlink" title="查看容器IP"></a>查看容器IP</h3><div class="hljs"><pre><code class="hljs ebnf"><span class="hljs-attribute">docker inspect --format</span>=<span class="hljs-string">'&#123;&#123;.NetworkSettings.IPAddress&#125;&#125;'</span> mysql-master</code></pre></div>
+
+<h3 id="设置容器开机自起"><a href="#设置容器开机自起" class="headerlink" title="设置容器开机自起"></a>设置容器开机自起</h3><div class="hljs"><pre><code class="hljs bash">sudo docker container update --restart=always  b6e4b684e251</code></pre></div>
 
 
-<h3 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker run -p 3307:3306 --name mysql-slave -v $PWD&#x2F;var&#x2F;lib&#x2F;mysql:&#x2F;var&#x2F;lib&#x2F;mysql -v $PWD&#x2F;etc&#x2F;my.cnf:&#x2F;etc&#x2F;my.cnf -v $PWD&#x2F;var&#x2F;log:&#x2F;var&#x2F;log  -e MYSQL_ROOT_PASSWORD&#x3D;Krkj@123456 -d mysql:5.7</span><br><span class="line"></span><br><span class="line">docker run -p 3308:3306 --name mysql-master -v $PWD&#x2F;var&#x2F;lib&#x2F;mysql:&#x2F;var&#x2F;lib&#x2F;mysql -v $PWD&#x2F;etc&#x2F;my.cnf:&#x2F;etc&#x2F;my.cnf -v $PWD&#x2F;var&#x2F;log:&#x2F;var&#x2F;log  -e MYSQL_ROOT_PASSWORD&#x3D;Krkj@123456 -d mysql:5.7</span><br></pre></td></tr></table></figure>
+<h3 id="ftp"><a href="#ftp" class="headerlink" title="ftp"></a>ftp</h3><div class="hljs"><pre><code class="hljs routeros">
+sudo docker <span class="hljs-builtin-name">run</span> -v /share:/home/vsftpd <span class="hljs-attribute">--network</span>=host <span class="hljs-attribute">--restart</span>=always -e <span class="hljs-attribute">FTP_USER</span>=yjll -e <span class="hljs-attribute">FTP_PASS</span>=admin0   fauria/vsftpd 
 
-<h3 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name redis  -p 6379:6379 -v $PWD&#x2F;data:&#x2F;data -d  redis:4.0  redis-server   --appendonly yes --requirepass krkj_123456</span><br></pre></td></tr></table></figure>
+vim /etc/vsftpd/vsftpd.conf
+<span class="hljs-attribute">local_root</span>=/home/vsftpd</code></pre></div>
 
-<h3 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name rabbitmq -d -p 15672:15672 -p 5672:5672 rabbitmq:3.8.2-management</span><br></pre></td></tr></table></figure>
-
-<h3 id="Clickhouse"><a href="#Clickhouse" class="headerlink" title="Clickhouse"></a>Clickhouse</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d  --ulimit nofile&#x3D;262144:262144 --network&#x3D;host --volume&#x3D;clickhouse_database:&#x2F;var&#x2F;lib&#x2F;clickhouse yandex&#x2F;clickhouse-server</span><br></pre></td></tr></table></figure>
-
-<h3 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker network create esnetwork</span><br><span class="line"></span><br><span class="line">docker run -d --name kibana --net esnetwork -p 5601:5601 kibana:6.4.3</span><br><span class="line"></span><br><span class="line">docker run -d --name elasticsearch --net esnetwork  -p 9200:9200 -p 9300:9300 -e &quot;discovery.type&#x3D;single-node&quot; elasticsearch:6.4.3</span><br><span class="line"></span><br><span class="line">docker run -it -d -v  $PWD&#x2F;pipeline&#x2F;:&#x2F;etc&#x2F;logstash&#x2F;pipeline&#x2F; logstash:6.4.3 bash</span><br></pre></td></tr></table></figure>
-        
-      </div>
-      
-      
-      
-    </div>
-    
-    
-    
-  </div>
-
-
-          </div>
-          
-
-
-          
-
-  
+<h3 id="samba"><a href="#samba" class="headerlink" title="samba"></a>samba</h3><div class="hljs"><pre><code class="hljs routeros">sudo docker <span class="hljs-builtin-name">run</span> -it <span class="hljs-attribute">--network</span>=host <span class="hljs-attribute">--restart</span>=always -v /share:/mount  -d dperson/samba -u <span class="hljs-string">"yjll;admin0"</span> -s <span class="hljs-string">"yjll;/mount/;yes;no;no;all;none"</span></code></pre></div>
 
 
 
-        </div>
-        
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
 
-  <aside id="sidebar" class="sidebar">
-    
-    <div class="sidebar-inner">
+<h3 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h3><div class="hljs"><pre><code class="hljs awk">docker run -p <span class="hljs-number">3307</span>:<span class="hljs-number">3306</span> --name mysql-slave -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/mysql:/</span>var<span class="hljs-regexp">/lib/my</span>sql -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/etc/my</span>.cnf:<span class="hljs-regexp">/etc/my</span>.cnf -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/var/</span>log:<span class="hljs-regexp">/var/</span>log  -e MYSQL_ROOT_PASSWORD=Krkj@<span class="hljs-number">123456</span> -d mysql:<span class="hljs-number">5.7</span>
 
-      
+docker run -p <span class="hljs-number">3308</span>:<span class="hljs-number">3306</span> --name mysql-master -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/var/</span>lib<span class="hljs-regexp">/mysql:/</span>var<span class="hljs-regexp">/lib/my</span>sql -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/etc/my</span>.cnf:<span class="hljs-regexp">/etc/my</span>.cnf -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/var/</span>log:<span class="hljs-regexp">/var/</span>log  -e MYSQL_ROOT_PASSWORD=Krkj@<span class="hljs-number">123456</span> -d mysql:<span class="hljs-number">5.7</span></code></pre></div>
 
-      
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
+<h3 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h3><div class="hljs"><pre><code class="hljs jboss-cli">docker run <span class="hljs-params">--name</span> redis  -p 6379<span class="hljs-function">:6379</span> -v $PWD/data:<span class="hljs-string">/data</span> -d  redis<span class="hljs-function">:4.0</span>  redis-server   <span class="hljs-params">--appendonly</span> yes <span class="hljs-params">--requirepass</span> krkj_123456</code></pre></div>
 
-      <section class="site-overview-wrap sidebar-panel">
-        <div class="site-overview">
-          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-            
-              <p class="site-author-name" itemprop="name">Youj</p>
-              <p class="site-description motion-element" itemprop="description">test</p>
-          </div>
+<h3 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h3><div class="hljs"><pre><code class="hljs angelscript">docker run --name rabbitmq -d -p <span class="hljs-number">15672</span>:<span class="hljs-number">15672</span> -p <span class="hljs-number">5672</span>:<span class="hljs-number">5672</span> rabbitmq:<span class="hljs-number">3.8</span><span class="hljs-number">.2</span>-management</code></pre></div>
 
-          <nav class="site-state motion-element">
+<h3 id="Clickhouse"><a href="#Clickhouse" class="headerlink" title="Clickhouse"></a>Clickhouse</h3><div class="hljs"><pre><code class="hljs crystal">docker run -d  --ulimit nofile=<span class="hljs-number">262144</span>:<span class="hljs-number">262144</span> --network=host --volume=<span class="hljs-symbol">clickhouse_database:</span>/var/<span class="hljs-class"><span class="hljs-keyword">lib</span>/<span class="hljs-title">clickhouse</span> <span class="hljs-title">yandex</span>/<span class="hljs-title">clickhouse</span>-<span class="hljs-title">server</span></span></code></pre></div>
 
-            
-              <div class="site-state-item site-state-posts">
-              
-                <a href="/archives/%7C%7C%20archive">
-              
-                  <span class="site-state-item-count">15</span>
-                  <span class="site-state-item-name">日志</span>
-                </a>
-              </div>
-            
+<h3 id="ElasticSearch"><a href="#ElasticSearch" class="headerlink" title="ElasticSearch"></a>ElasticSearch</h3><div class="hljs"><pre><code class="hljs routeros">docker<span class="hljs-built_in"> network </span>create esnetwork
 
-            
-              
-              
-              <div class="site-state-item site-state-categories">
-                <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
-                  <span class="site-state-item-name">分类</span>
-                </a>
-              </div>
-            
+docker <span class="hljs-builtin-name">run</span> -d --name kibana --net esnetwork -p 5601:5601 kibana:6.4.3
 
-            
-              
-              
-              <div class="site-state-item site-state-tags">
-                <a href="/tags/index.html">
-                  <span class="site-state-item-count">22</span>
-                  <span class="site-state-item-name">标签</span>
-                </a>
-              </div>
-            
+docker <span class="hljs-builtin-name">run</span> -d --name elasticsearch --net esnetwork  -p 9200:9200 -p 9300:9300 -e <span class="hljs-string">"discovery.type=single-node"</span> elasticsearch:6.4.3
 
-          </nav>
-
-          
-
-          
-
-          
-          
-
-          
-          
-
-          
-
-        </div>
-      </section>
-
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置国内源"><span class="nav-number">2.</span> <span class="nav-text">配置国内源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置dockerd-走代理"><span class="nav-number">3.</span> <span class="nav-text">配置dockerd 走代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#离线安装镜像"><span class="nav-number">4.</span> <span class="nav-text">离线安装镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#导出-导入"><span class="nav-number">5.</span> <span class="nav-text">导出&#x2F;导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除操作"><span class="nav-number">6.</span> <span class="nav-text">删除操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看容器IP"><span class="nav-number">7.</span> <span class="nav-text">查看容器IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置容器开机自起"><span class="nav-number">8.</span> <span class="nav-text">设置容器开机自起</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ftp"><span class="nav-number">9.</span> <span class="nav-text">ftp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#samba"><span class="nav-number">10.</span> <span class="nav-text">samba</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql"><span class="nav-number">11.</span> <span class="nav-text">mysql</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis"><span class="nav-number">12.</span> <span class="nav-text">Redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RabbitMQ"><span class="nav-number">13.</span> <span class="nav-text">RabbitMQ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Clickhouse"><span class="nav-number">14.</span> <span class="nav-text">Clickhouse</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ElasticSearch"><span class="nav-number">15.</span> <span class="nav-text">ElasticSearch</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Youj</span>
-
-  
+docker <span class="hljs-builtin-name">run</span> -it -d -v  <span class="hljs-variable">$PWD</span>/pipeline/:/etc/logstash/pipeline/ logstash:6.4.3 bash</code></pre></div>
 </div>
 
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     
+  </main>
 
-    
+  
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
+  
 
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
   </div>
-
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+</div>
   
 
   
-  
-    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
 
   
 
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
 
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+    
 
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+    
+  </div>
+</footer>
 
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
 
 
   
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
-
-
-
-  
-
-
+    <script  src="/js/lazyload.js" ></script>
   
 
 
 
-
-	
-
-
-
-
-
-  
-
-
-
-
-
-  
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
 
 
 
@@ -622,346 +320,73 @@
 
 
 
-
-
-
-  
-
-  <script type="text/javascript">
-    // Popup Window;
-    var isfetched = false;
-    var isXml = true;
-    // Search DB path;
-    var search_path = "search.xml";
-    if (search_path.length === 0) {
-      search_path = "search.xml";
-    } else if (/json$/i.test(search_path)) {
-      isXml = false;
-    }
-    var path = "/" + search_path;
-    // monitor main search box;
-
-    var onPopupClose = function (e) {
-      $('.popup').hide();
-      $('#local-search-input').val('');
-      $('.search-result-list').remove();
-      $('#no-result').remove();
-      $(".local-search-pop-overlay").remove();
-      $('body').css('overflow', '');
-    }
-
-    function proceedsearch() {
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
-        .css('overflow', 'hidden');
-      $('.search-popup-overlay').click(onPopupClose);
-      $('.popup').toggle();
-      var $localSearchInput = $('#local-search-input');
-      $localSearchInput.attr("autocapitalize", "none");
-      $localSearchInput.attr("autocorrect", "off");
-      $localSearchInput.focus();
-    }
-
-    // search function;
-    var searchFunc = function(path, search_id, content_id) {
-      'use strict';
-
-      // start loading animation
-      $("body")
-        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
-          '<div id="search-loading-icon">' +
-          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
-          '</div>' +
-          '</div>')
-        .css('overflow', 'hidden');
-      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
-
-      $.ajax({
-        url: path,
-        dataType: isXml ? "xml" : "json",
-        async: true,
-        success: function(res) {
-          // get the contents from search data
-          isfetched = true;
-          $('.popup').detach().appendTo('.header-inner');
-          var datas = isXml ? $("entry", res).map(function() {
-            return {
-              title: $("title", this).text(),
-              content: $("content",this).text(),
-              url: $("url" , this).text()
-            };
-          }).get() : res;
-          var input = document.getElementById(search_id);
-          var resultContent = document.getElementById(content_id);
-          var inputEventFunction = function() {
-            var searchText = input.value.trim().toLowerCase();
-            var keywords = searchText.split(/[\s\-]+/);
-            if (keywords.length > 1) {
-              keywords.push(searchText);
-            }
-            var resultItems = [];
-            if (searchText.length > 0) {
-              // perform local searching
-              datas.forEach(function(data) {
-                var isMatch = false;
-                var hitCount = 0;
-                var searchTextCount = 0;
-                var title = data.title.trim();
-                var titleInLowerCase = title.toLowerCase();
-                var content = data.content.trim().replace(/<[^>]+>/g,"");
-                var contentInLowerCase = content.toLowerCase();
-                var articleUrl = decodeURIComponent(data.url);
-                var indexOfTitle = [];
-                var indexOfContent = [];
-                // only match articles with not empty titles
-                if(title != '') {
-                  keywords.forEach(function(keyword) {
-                    function getIndexByWord(word, text, caseSensitive) {
-                      var wordLen = word.length;
-                      if (wordLen === 0) {
-                        return [];
-                      }
-                      var startPosition = 0, position = [], index = [];
-                      if (!caseSensitive) {
-                        text = text.toLowerCase();
-                        word = word.toLowerCase();
-                      }
-                      while ((position = text.indexOf(word, startPosition)) > -1) {
-                        index.push({position: position, word: word});
-                        startPosition = position + wordLen;
-                      }
-                      return index;
-                    }
-
-                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
-                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
-                  });
-                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
-                    isMatch = true;
-                    hitCount = indexOfTitle.length + indexOfContent.length;
-                  }
-                }
-
-                // show search results
-
-                if (isMatch) {
-                  // sort index by position of keyword
-
-                  [indexOfTitle, indexOfContent].forEach(function (index) {
-                    index.sort(function (itemLeft, itemRight) {
-                      if (itemRight.position !== itemLeft.position) {
-                        return itemRight.position - itemLeft.position;
-                      } else {
-                        return itemLeft.word.length - itemRight.word.length;
-                      }
-                    });
-                  });
-
-                  // merge hits into slices
-
-                  function mergeIntoSlice(text, start, end, index) {
-                    var item = index[index.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    var hits = [];
-                    var searchTextCountInSlice = 0;
-                    while (position + word.length <= end && index.length != 0) {
-                      if (word === searchText) {
-                        searchTextCountInSlice++;
-                      }
-                      hits.push({position: position, length: word.length});
-                      var wordEnd = position + word.length;
-
-                      // move to next position of hit
-
-                      index.pop();
-                      while (index.length != 0) {
-                        item = index[index.length - 1];
-                        position = item.position;
-                        word = item.word;
-                        if (wordEnd > position) {
-                          index.pop();
-                        } else {
-                          break;
-                        }
-                      }
-                    }
-                    searchTextCount += searchTextCountInSlice;
-                    return {
-                      hits: hits,
-                      start: start,
-                      end: end,
-                      searchTextCount: searchTextCountInSlice
-                    };
-                  }
-
-                  var slicesOfTitle = [];
-                  if (indexOfTitle.length != 0) {
-                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
-                  }
-
-                  var slicesOfContent = [];
-                  while (indexOfContent.length != 0) {
-                    var item = indexOfContent[indexOfContent.length - 1];
-                    var position = item.position;
-                    var word = item.word;
-                    // cut out 100 characters
-                    var start = position - 20;
-                    var end = position + 80;
-                    if(start < 0){
-                      start = 0;
-                    }
-                    if (end < position + word.length) {
-                      end = position + word.length;
-                    }
-                    if(end > content.length){
-                      end = content.length;
-                    }
-                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
-                  }
-
-                  // sort slices in content by search text's count and hits' count
-
-                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
-                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
-                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
-                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
-                      return sliceRight.hits.length - sliceLeft.hits.length;
-                    } else {
-                      return sliceLeft.start - sliceRight.start;
-                    }
-                  });
-
-                  // select top N slices in content
-
-                  var upperBound = parseInt('1');
-                  if (upperBound >= 0) {
-                    slicesOfContent = slicesOfContent.slice(0, upperBound);
-                  }
-
-                  // highlight title and content
-
-                  function highlightKeyword(text, slice) {
-                    var result = '';
-                    var prevEnd = slice.start;
-                    slice.hits.forEach(function (hit) {
-                      result += text.substring(prevEnd, hit.position);
-                      var end = hit.position + hit.length;
-                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
-                      prevEnd = end;
-                    });
-                    result += text.substring(prevEnd, slice.end);
-                    return result;
-                  }
-
-                  var resultItem = '';
-
-                  if (slicesOfTitle.length != 0) {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
-                  } else {
-                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
-                  }
-
-                  slicesOfContent.forEach(function (slice) {
-                    resultItem += "<a href='" + articleUrl + "'>" +
-                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
-                      "...</p>" + "</a>";
-                  });
-
-                  resultItem += "</li>";
-                  resultItems.push({
-                    item: resultItem,
-                    searchTextCount: searchTextCount,
-                    hitCount: hitCount,
-                    id: resultItems.length
-                  });
-                }
-              })
-            };
-            if (keywords.length === 1 && keywords[0] === "") {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
-            } else if (resultItems.length === 0) {
-              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
-            } else {
-              resultItems.sort(function (resultLeft, resultRight) {
-                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
-                  return resultRight.searchTextCount - resultLeft.searchTextCount;
-                } else if (resultLeft.hitCount !== resultRight.hitCount) {
-                  return resultRight.hitCount - resultLeft.hitCount;
-                } else {
-                  return resultRight.id - resultLeft.id;
-                }
-              });
-              var searchResultList = '<ul class=\"search-result-list\">';
-              resultItems.forEach(function (result) {
-                searchResultList += result.item;
-              })
-              searchResultList += "</ul>";
-              resultContent.innerHTML = searchResultList;
-            }
-          }
-
-          if ('auto' === 'auto') {
-            input.addEventListener('input', inputEventFunction);
-          } else {
-            $('.search-icon').click(inputEventFunction);
-            input.addEventListener('keypress', function (event) {
-              if (event.keyCode === 13) {
-                inputEventFunction();
-              }
-            });
-          }
-
-          // remove loading animation
-          $(".local-search-pop-overlay").remove();
-          $('body').css('overflow', '');
-
-          proceedsearch();
-        }
-      });
-    }
-
-    // handle and trigger popup window;
-    $('.popup-trigger').click(function(e) {
-      e.stopPropagation();
-      if (isfetched === false) {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      } else {
-        proceedsearch();
-      };
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "page.title&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
     });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
 
-    $('.popup-btn-close').click(onPopupClose);
-    $('.popup').click(function(e){
-      e.stopPropagation();
-    });
-    $(document).on('keyup', function (event) {
-      var shouldDismissSearchPopup = event.which === 27 &&
-        $('.search-popup').is(':visible');
-      if (shouldDismissSearchPopup) {
-        onPopupClose();
-      }
-    });
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
   </script>
 
 
 
 
 
-  
 
-  
 
-  
 
-  
-  
 
-  
 
-  
 
-  
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>
