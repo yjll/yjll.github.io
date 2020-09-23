@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      214 字
+      348 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      3
+      5
        分钟
     </span>
   
@@ -203,9 +203,9 @@
             
             <div class="markdown-body" id="post-body">
               <p><img src="https://img.yjll.art/img/20200428102310.png" srcset="/img/loading.gif" alt="20200428102310"></p>
+<p>在docker中安装软件，下载地址在外国，下载速度奇慢，这个时候可以通过宿主的代理访问。</p>
 <a id="more"></a>
 
-<p>在docker中安装软件，下载地址在外国，下载速度奇慢，这个时候想通过宿主的代理访问。</p>
 <p>Docker启动容器，默认使用bridge模式分配网络，会在宿主机安装一个虚拟网卡docker0。我们通过<code>ifconfig</code>命令查看一下</p>
 <div class="hljs"><pre><code class="hljs angelscript">docker0: flags=<span class="hljs-number">4163</span>&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu <span class="hljs-number">1500</span>
         inet <span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>  netmask <span class="hljs-number">255.255</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>  broadcast <span class="hljs-number">172.17</span><span class="hljs-number">.255</span><span class="hljs-number">.255</span>
@@ -216,9 +216,27 @@
         TX packets <span class="hljs-number">8654991</span>  bytes <span class="hljs-number">11073643780</span> (<span class="hljs-number">11.0</span> GB)
         TX errors <span class="hljs-number">0</span>  dropped <span class="hljs-number">0</span> overruns <span class="hljs-number">0</span>  carrier <span class="hljs-number">0</span>  collisions <span class="hljs-number">0</span></code></pre></div>
 
-<p>对于容器来说，宿主的IP地址为<code>172.17.0.1</code>，我们进入容器进行代理配置</p>
+
+<p>对于容器来说，宿主的IP地址为<code>172.17.0.1</code></p>
+<h3 id="在已有的容器中使用代理"><a href="#在已有的容器中使用代理" class="headerlink" title="在已有的容器中使用代理"></a>在已有的容器中使用代理</h3><p>我们进入容器进行代理配置</p>
 <div class="hljs"><pre><code class="hljs angelscript">export http_proxy=http:<span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">1081</span>
 export https_proxy=http:<span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">1081</span></code></pre></div>
+
+<h3 id="bulid-Dockerfile-使用代理"><a href="#bulid-Dockerfile-使用代理" class="headerlink" title="bulid Dockerfile 使用代理"></a>bulid Dockerfile 使用代理</h3><p>编辑Dokkerfile添加以下环境</p>
+<div class="hljs"><pre><code class="hljs dockerfile"><span class="hljs-keyword">ENV</span> http_proxy <span class="hljs-string">"http://172.17.0.1:1081"</span>
+<span class="hljs-keyword">ENV</span> https_proxy <span class="hljs-string">"http://172.17.0.1:1081"</span></code></pre></div>
+
+<h3 id="下载镜像时使用代理"><a href="#下载镜像时使用代理" class="headerlink" title="下载镜像时使用代理"></a>下载镜像时使用代理</h3><p>官方的镜像源在国外，我们可以使用国内的镜像，但有时还是需要通过官方的源拉取镜像</p>
+<div class="hljs"><pre><code class="hljs routeros">sudo mkdir -p /etc/systemd/system/docker.service.d
+<span class="hljs-comment"># 创建proxy文件</span>
+vim /etc/systemd/system/docker.service.d/http-proxy.conf
+
+<span class="hljs-comment"># 配置代理地址</span>
+[Service]
+<span class="hljs-attribute">Environment</span>=<span class="hljs-string">"HTTPS_PROXY=http://localhost:1081"</span>
+
+<span class="hljs-comment"># 需要重启Docker</span>
+sudo<span class="hljs-built_in"> service </span>docker restart</code></pre></div>
 
 <p>好了，可以愉快的乱搞了。</p>
 

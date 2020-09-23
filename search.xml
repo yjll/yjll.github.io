@@ -909,9 +909,9 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
     <title>Docker使用宿主代理</title>
     <url>/post/21f939f5.html</url>
     <content><![CDATA[<p><img src="https://img.yjll.art/img/20200428102310.png" srcset="/img/loading.gif" alt="20200428102310"></p>
+<p>在docker中安装软件，下载地址在外国，下载速度奇慢，这个时候可以通过宿主的代理访问。</p>
 <a id="more"></a>
 
-<p>在docker中安装软件，下载地址在外国，下载速度奇慢，这个时候想通过宿主的代理访问。</p>
 <p>Docker启动容器，默认使用bridge模式分配网络，会在宿主机安装一个虚拟网卡docker0。我们通过<code>ifconfig</code>命令查看一下</p>
 <div class="hljs"><pre><code class="hljs angelscript">docker0: flags=<span class="hljs-number">4163</span>&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu <span class="hljs-number">1500</span>
         inet <span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>  netmask <span class="hljs-number">255.255</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>  broadcast <span class="hljs-number">172.17</span><span class="hljs-number">.255</span><span class="hljs-number">.255</span>
@@ -922,9 +922,27 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
         TX packets <span class="hljs-number">8654991</span>  bytes <span class="hljs-number">11073643780</span> (<span class="hljs-number">11.0</span> GB)
         TX errors <span class="hljs-number">0</span>  dropped <span class="hljs-number">0</span> overruns <span class="hljs-number">0</span>  carrier <span class="hljs-number">0</span>  collisions <span class="hljs-number">0</span></code></pre></div>
 
-<p>对于容器来说，宿主的IP地址为<code>172.17.0.1</code>，我们进入容器进行代理配置</p>
+
+<p>对于容器来说，宿主的IP地址为<code>172.17.0.1</code></p>
+<h3 id="在已有的容器中使用代理"><a href="#在已有的容器中使用代理" class="headerlink" title="在已有的容器中使用代理"></a>在已有的容器中使用代理</h3><p>我们进入容器进行代理配置</p>
 <div class="hljs"><pre><code class="hljs angelscript">export http_proxy=http:<span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">1081</span>
 export https_proxy=http:<span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">1081</span></code></pre></div>
+
+<h3 id="bulid-Dockerfile-使用代理"><a href="#bulid-Dockerfile-使用代理" class="headerlink" title="bulid Dockerfile 使用代理"></a>bulid Dockerfile 使用代理</h3><p>编辑Dokkerfile添加以下环境</p>
+<div class="hljs"><pre><code class="hljs dockerfile"><span class="hljs-keyword">ENV</span> http_proxy <span class="hljs-string">"http://172.17.0.1:1081"</span>
+<span class="hljs-keyword">ENV</span> https_proxy <span class="hljs-string">"http://172.17.0.1:1081"</span></code></pre></div>
+
+<h3 id="下载镜像时使用代理"><a href="#下载镜像时使用代理" class="headerlink" title="下载镜像时使用代理"></a>下载镜像时使用代理</h3><p>官方的镜像源在国外，我们可以使用国内的镜像，但有时还是需要通过官方的源拉取镜像</p>
+<div class="hljs"><pre><code class="hljs routeros">sudo mkdir -p /etc/systemd/system/docker.service.d
+<span class="hljs-comment"># 创建proxy文件</span>
+vim /etc/systemd/system/docker.service.d/http-proxy.conf
+
+<span class="hljs-comment"># 配置代理地址</span>
+[Service]
+<span class="hljs-attribute">Environment</span>=<span class="hljs-string">"HTTPS_PROXY=http://localhost:1081"</span>
+
+<span class="hljs-comment"># 需要重启Docker</span>
+sudo<span class="hljs-built_in"> service </span>docker restart</code></pre></div>
 
 <p>好了，可以愉快的乱搞了。</p>
 ]]></content>
@@ -944,7 +962,11 @@ export https_proxy=http:<span class="hljs-number">172.17</span><span class="hljs
 <h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在阿里云的后台下载备份文件</p>
 <p><img src="https://img.yjll.art/img/bak.png" srcset="/img/loading.gif" alt="bak"></p>
 <p>生产环境的数据库使用的Mysql 8.0.16，我直接通过docker运行，并直接进入容器内部。</p>
-<div class="hljs"><pre><code>docker run -v /root/bak.xb:/root/bak.xb  -p 3308:3306 -it mysql:8.0.16 bash</code></pre></div><p>先更换<a href="https://mirrors.163.com/.help/debian.html" target="_blank" rel="noopener">163源</a>方便安装软件</p>
+<div class="hljs"><pre><code class="hljs angelscript">docker run -v /root/bak.xb:/root/bak.xb  -p <span class="hljs-number">3308</span>:<span class="hljs-number">3306</span> -it mysql:<span class="hljs-number">8.0</span><span class="hljs-number">.16</span> bash</code></pre></div>
+
+
+
+<p>先更换<a href="https://mirrors.163.com/.help/debian.html" target="_blank" rel="noopener">163源</a>方便安装软件</p>
 <div class="hljs"><pre><code class="hljs vim"><span class="hljs-keyword">cat</span> &gt;&gt;/etc/apt/sources.<span class="hljs-keyword">list</span>&lt;&lt;EOF
 <span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch main non-free contrib
 <span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch-updates main non-free contrib
@@ -970,7 +992,9 @@ apt-<span class="hljs-built_in">get</span> -<span class="hljs-keyword">y</span> 
 
 
 <p>创建解压目录，官方文档中使用的这个路径，我懒得改了，就创建了一个</p>
-<div class="hljs"><pre><code>mkdir -p /home/mysql/data</code></pre></div><p>开始解压</p>
+<div class="hljs"><pre><code class="hljs arduino"><span class="hljs-built_in">mkdir</span> -p /<span class="hljs-built_in">home</span>/mysql/data</code></pre></div>
+
+<p>开始解压</p>
 <div class="hljs"><pre><code class="hljs jboss-cli">先安装qpress解压软件
 aria2c http:<span class="hljs-string">//www.quicklz.com/qpress-11-linux-x64.tar</span>
 tar xvf qpress-11-linux-x64.tar
@@ -1002,17 +1026,27 @@ xtrabackup --prepare --target-dir=<span class="hljs-regexp">/home/mysql</span><s
 <span class="hljs-meta">#server_uuid</span></code></pre></div>
 
 <p>启动</p>
-<div class="hljs"><pre><code>mysqld_safe --defaults-file=/home/mysql/data/backup-my.cnf --user=root --datadir=/home/mysql/data &amp;</code></pre></div><div class="hljs"><pre><code class="hljs routeros">2020-04-28T09:43:49.658819Z mysqld_safe<span class="hljs-built_in"> Logging </span><span class="hljs-keyword">to</span> <span class="hljs-string">'/home/mysql/data/14864923d3cb.err'</span>.
+<div class="hljs"><pre><code class="hljs routeros">mysqld_safe <span class="hljs-attribute">--defaults-file</span>=/home/mysql/data/backup-my.cnf <span class="hljs-attribute">--user</span>=root <span class="hljs-attribute">--datadir</span>=/home/mysql/data &amp;</code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs routeros">2020-04-28T09:43:49.658819Z mysqld_safe<span class="hljs-built_in"> Logging </span><span class="hljs-keyword">to</span> <span class="hljs-string">'/home/mysql/data/14864923d3cb.err'</span>.
 2020-04-28T09:43:49.703474Z mysqld_safe Starting mysqld daemon with databases <span class="hljs-keyword">from</span> /home/mysql/data</code></pre></div>
 
 <p>如果mysql服务没起来，可以查看/home/mysql/data/14864923d3cb.err这个日志文件</p>
 <p>实际使用遇到过的问题</p>
 <div class="hljs"><pre><code class="hljs angelscript"><span class="hljs-number">2020</span><span class="hljs-number">-08</span><span class="hljs-number">-18</span>T06:<span class="hljs-number">18</span>:<span class="hljs-number">32.304152</span>Z <span class="hljs-number">0</span> [ERROR] [MY<span class="hljs-number">-010095</span>] [Server] Failed to access directory <span class="hljs-keyword">for</span> --secure-file-priv. Please make sure that directory exists <span class="hljs-keyword">and</span> <span class="hljs-keyword">is</span> accessible by MySQL Server. Supplied value : /var/lib/mysql-files</code></pre></div>
 <p><code>--secure-file-priv</code> 默认使用 <code>/var/lib/mysql-files</code>这个目录，我们更改一下</p>
-<div class="hljs"><pre><code>vim /home/mysql/data/backup-my.cnf
-secure-file-priv=/home/mysql/data</code></pre></div><div class="hljs"><pre><code class="hljs routeros">2020-08-18T06:20:49.765666Z 1 [<span class="hljs-builtin-name">ERROR</span>] [MY-011087] [Server] Different lower_case_table_names<span class="hljs-built_in"> settings </span><span class="hljs-keyword">for</span><span class="hljs-built_in"> server </span>(<span class="hljs-string">'0'</span>) <span class="hljs-keyword">and</span> data dictionary (<span class="hljs-string">'1'</span>).</code></pre></div>
+<div class="hljs"><pre><code class="hljs gradle">vim <span class="hljs-regexp">/home/my</span>sql<span class="hljs-regexp">/data/</span>backup-my.cnf
+secure-<span class="hljs-keyword">file</span>-priv=<span class="hljs-regexp">/home/my</span>sql<span class="hljs-regexp">/data</span></code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs routeros">2020-08-18T06:20:49.765666Z 1 [<span class="hljs-builtin-name">ERROR</span>] [MY-011087] [Server] Different lower_case_table_names<span class="hljs-built_in"> settings </span><span class="hljs-keyword">for</span><span class="hljs-built_in"> server </span>(<span class="hljs-string">'0'</span>) <span class="hljs-keyword">and</span> data dictionary (<span class="hljs-string">'1'</span>).</code></pre></div>
 <p>大小写配置问题</p>
-<div class="hljs"><pre><code>lower_case_table_names=1</code></pre></div><p>再次启动后我们登录一下</p>
+<div class="hljs"><pre><code class="hljs ini"><span class="hljs-attr">lower_case_table_names</span>=<span class="hljs-number">1</span></code></pre></div>
+
+
+
+<p>再次启动后我们登录一下</p>
 <div class="hljs"><pre><code class="hljs routeros">root@a8a32828e279:/home/mysql/data# mysql -upro -p            
 Enter password: 
 Welcome <span class="hljs-keyword">to</span> the MySQL monitor.  Commands end with ; <span class="hljs-keyword">or</span> \g.
