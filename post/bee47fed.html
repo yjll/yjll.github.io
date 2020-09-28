@@ -17,7 +17,7 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>使用Logstash同步Mysql数据到Elasticsearch - Youj&#39;s blog</title>
+  <title>IDEA部署应用到远程Docker - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -148,8 +148,8 @@
               
   <div class="mt-3 post-meta">
     <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-    <time datetime="2020-09-05 00:00" pubdate>
-      2020年9月5日 凌晨
+    <time datetime="2020-09-27 19:23" pubdate>
+      2020年9月27日 晚上
     </time>
   </div>
 
@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      792 字
+      617 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      10
+      8
        分钟
     </span>
   
@@ -199,102 +199,89 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">使用Logstash同步Mysql数据到Elasticsearch</h1>
+            <h1 style="display: none">IDEA部署应用到远程Docker</h1>
             
             <div class="markdown-body" id="post-body">
-              <p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
-<p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
+              <p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。</p>
 <a id="more"></a>
 
-
-<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p>首先要编写同步数据的配置文件，从Mysql同步数据到ElasticSearch中，使用jdbc里连接数据库作为input，ouput为ES。</p>
-<div class="hljs"><pre><code class="hljs puppet"><span class="hljs-keyword">input</span> &#123;
- stdin &#123; &#125;
-    <span class="hljs-keyword">jdbc</span> &#123;
-        <span class="hljs-comment">#注意mysql连接地址一定要用ip，不能使用localhost等</span>
-        <span class="hljs-attr">jdbc_connection_string</span> =&gt; <span class="hljs-string">"jdbc:mysql://192.168.1.200:3308/test"</span>
-        <span class="hljs-attr">jdbc_user</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-attr">jdbc_password</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-comment">#这个jar包的地址是容器内的地址</span>
-        <span class="hljs-attr">jdbc_driver_library</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/mysql-connector-java-8.0.11.jar"</span>
-        <span class="hljs-attr">jdbc_driver_class</span> =&gt; <span class="hljs-string">"com.mysql.jdbc.Driver"</span>
-        <span class="hljs-attr">jdbc_paging_enabled</span> =&gt; <span class="hljs-string">"true"</span>
-        <span class="hljs-attr">jdbc_page_size</span> =&gt; <span class="hljs-string">"5000"</span>
-        <span class="hljs-attr">statement</span> =&gt; <span class="hljs-string">"SELECT * FROM base_areas where id &gt; :sql_last_value"</span>
-        <span class="hljs-attr">tracking_column</span> =&gt; <span class="hljs-built_in">id</span>
-        <span class="hljs-attr">use_column_value</span> =&gt; <span class="hljs-keyword">true</span>
-        <span class="hljs-attr">last_run_metadata_path</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/area"</span>
-        <span class="hljs-attr">schedule</span> =&gt; <span class="hljs-string">"* * * * *"</span>
-    &#125;
- &#125;
-  
- <span class="hljs-keyword">output</span> &#123;
-     stdout &#123;
-        <span class="hljs-attr">codec</span> =&gt; json_lines
-    &#125;
-    <span class="hljs-keyword">elasticsearch</span> &#123;
-        <span class="hljs-attr">hosts</span> =&gt; <span class="hljs-string">"192.168.1.200:9200"</span>
-        <span class="hljs-attr">index</span> =&gt; <span class="hljs-string">"area"</span>
-        <span class="hljs-attr">document_type</span> =&gt; <span class="hljs-string">"_doc"</span>
-        <span class="hljs-attr">document_id</span> =&gt; <span class="hljs-string">"%&#123;id&#125;"</span>
-    &#125;
+<h3 id="配置服务端Docker"><a href="#配置服务端Docker" class="headerlink" title="配置服务端Docker"></a>配置服务端Docker</h3><p>首先需要修改 Docker 配置文件让其开放 <code>Docker REST API</code></p>
+<p>vim /etc/docker/daemon.json</p>
+<div class="hljs"><pre><code class="hljs json">&#123;
+  <span class="hljs-attr">"hosts"</span>:[
+    <span class="hljs-string">"unix:///var/run/docker.sock"</span>,
+    <span class="hljs-string">"tcp://0.0.0.0:2375"</span>
+  ]
 &#125;</code></pre></div>
 
+<div class="hljs"><pre><code class="hljs properties"><span class="hljs-comment"># 重新加载配置文件，并重启Docker</span>
+<span class="hljs-attr">systemctl</span> <span class="hljs-string">daemon-reload</span>
+<span class="hljs-attr">systemctl</span> <span class="hljs-string">restart docker</span></code></pre></div>
 
-<p>重点在于 <code>use_column_value</code> 和 <code>tracking_column</code> 这两个参数，当use_column_value为true时，可以用 :sql_last_value 这个变量来获取tracking_column对应的字段的最新值，默认即第一次启动时为 0 。我的示例中tracking_column对应id，即Logstash都会记录每次查询结果id的最大值，供下一次查询使用。</p>
-<p>Logstash将tracking_column的最新值记录到<code>last_run_metadata_path</code>配置的文件，启动时读取该文件</p>
-<div class="hljs"><pre><code class="hljs awk">docker run -it -v  <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipeline/</span>:<span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/logstash/</span>pipeline -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/logstash.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>logstash.yml -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipelines.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>pipelines.yml   logstash:<span class="hljs-number">6.4</span>.<span class="hljs-number">3</span>  bash</code></pre></div>
+<h3 id="IDEA连接Docker"><a href="#IDEA连接Docker" class="headerlink" title="IDEA连接Docker"></a>IDEA连接Docker</h3><p>Docker配置完成后，我们配置IDEA</p>
+<p><img src="https://img.yjll.art/img/20200927194234.png" srcset="/img/loading.gif" alt="20200927194234"></p>
+<p>配置正确会有Connection successful提示</p>
+<h3 id="Dockerfile文件"><a href="#Dockerfile文件" class="headerlink" title="Dockerfile文件"></a>Dockerfile文件</h3><p>熟悉Docker的对Dockerfile应该不会陌生，我这里写一个简单的</p>
+<div class="hljs"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> openjdk:<span class="hljs-number">8</span>u102-jdk
 
-<p>先安装jdbc和es的插件</p>
-<div class="hljs"><pre><code class="hljs sql">bash-4.2$ ~/bin/logstash-plugin <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">input</span>-jdbc
-Validating logstash-<span class="hljs-keyword">input</span>-jdbc
-Installing logstash-<span class="hljs-keyword">input</span>-jdbc
-Installation successful
+<span class="hljs-keyword">ADD</span><span class="bash"> target/*.jar app.jar</span>
+<span class="hljs-keyword">RUN</span><span class="bash"> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span>
 
-bash<span class="hljs-number">-4.2</span>$ ~/<span class="hljs-keyword">bin</span>/logstash-<span class="hljs-keyword">plugin</span> <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Validating logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installing logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installation successful</code></pre></div>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="bash"> [<span class="hljs-string">"java"</span>,<span class="hljs-string">"-Djava.security.egd=file:/dev/./urandom"</span>,<span class="hljs-string">"-jar"</span>,<span class="hljs-string">"/app.jar"</span>]</span></code></pre></div>
 
-<p>由于是在容器内部连接服务，所以ES的连接不要使用localhost和127.0.0.1，更改为实际IP地址</p>
-<div class="hljs"><pre><code class="hljs stylus">bash-<span class="hljs-number">4.2</span>$ cat ~/config/logstash<span class="hljs-selector-class">.yml</span> 
-http<span class="hljs-selector-class">.host</span>: <span class="hljs-string">"0.0.0.0"</span>
-xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selector-class">.elasticsearch</span><span class="hljs-selector-class">.url</span>: http:<span class="hljs-comment">//192.168.1.200:9200</span></code></pre></div>
+<p>我用的是maven进行打包，打包后的文件放在target目录中，<code>ADD target/*.jar app.jar</code>是将target中的jar文件添加近容器并重命名为<code>app.jar</code>。</p>
+<p>docker中的时区与我们不同，手动设置东八区。</p>
+<p>注意openjdk的版本，我最开始使用的是<code>alpine</code>版本，占用体积较小。但实际运行时，生成验证码接口报错，同样的代码我在CentOS中能运行，Docker中报错。最后换了JDK的版本解决了，猜测是<code>alpine</code>可能阉精简一部分功能。</p>
+<h3 id="IDEA部署Docker"><a href="#IDEA部署Docker" class="headerlink" title="IDEA部署Docker"></a>IDEA部署Docker</h3><p>在Run/Debug Configurations中添加Docker配置，支持<code>Docker Image</code>,<code>Docker-compose</code>,<code>Dockerfile</code>，我这里使用<code>Dockerfile</code>进行部署</p>
+<p><img src="https://img.yjll.art/img/20200928090658.png" srcset="/img/loading.gif" alt="20200928090658"></p>
+<p>这是一个Spring Cloud项目，启动容器后发现向调度中心注册的地址不是本机IP，而是Docker中的桥接网卡的地址，运行参数我添加了<code>--network=host</code>，容器直接使用宿主机的网络，不进行桥接。</p>
+<p>以上直接配置好后，启动项目</p>
+<div class="hljs"><pre><code class="hljs ada">Deploying <span class="hljs-symbol">'admin</span>-service Dockerfile: Dockerfile'...
+Building image...
+Preparing build context archive...
+[==================================================&gt;]<span class="hljs-number">1540</span>/<span class="hljs-number">1540</span> files
+Done
 
-<h3 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h3><p>运行同步脚本可手动执行也可以配置调度执行</p>
-<h4 id="手动执行"><a href="#手动执行" class="headerlink" title="手动执行"></a>手动执行</h4><p><code>~/bin/logstash -f ***.config</code></p>
-<h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
-<div class="hljs"><pre><code class="hljs groovy">bash<span class="hljs-number">-4.2</span>$ cat <span class="hljs-regexp">~/config/</span>pipelines.yml 
+Sending build context to Docker daemon...
+[==================================================&gt;] <span class="hljs-number">107.5</span>MB
+Done
 
-- pipeline.<span class="hljs-string">id:</span> main
-  path.<span class="hljs-string">config:</span> <span class="hljs-string">"/usr/share/logstash/pipeline"</span></code></pre></div>
+Step <span class="hljs-number">1</span>/<span class="hljs-number">4</span> : <span class="hljs-type">FROM</span> openjdk:<span class="hljs-number">8</span>u102-jdk
+ <span class="hljs-comment">---&gt; ca5dd051db43</span>
+Step <span class="hljs-number">2</span>/<span class="hljs-number">4</span> : <span class="hljs-type">ADD</span> target/*.jar app.jar
+ <span class="hljs-comment">---&gt; 8d0c14567ec9</span>
+Step <span class="hljs-number">3</span>/<span class="hljs-number">4</span> : <span class="hljs-type">RUN</span> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ <span class="hljs-comment">---&gt; Running in a289f48a6aa9</span>
+Removing intermediate container a289f48a6aa9
+ <span class="hljs-comment">---&gt; 12cbefb7337e</span>
+Step <span class="hljs-number">4</span>/<span class="hljs-number">4</span> : <span class="hljs-type">ENTRYPOINT</span> [<span class="hljs-string">"java"</span>,<span class="hljs-string">"-Djava.security.egd=file:/dev/./urandom"</span>,<span class="hljs-string">"-jar"</span>,<span class="hljs-string">"/app.jar"</span>]
+ <span class="hljs-comment">---&gt; Running in 208933b6329b</span>
+Removing intermediate container <span class="hljs-number">208933</span>b6329b
+ <span class="hljs-comment">---&gt; 7e398428e4c6</span>
 
-<p>好，配置已完成，运行<code>/usr/local/bin/docker-entrypoint</code>启动调度任务</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
+Successfully built <span class="hljs-number">7e398428</span>e4c6
+Successfully <span class="hljs-keyword">tagged</span> admin-service:latest
+Creating container...
+Container Id: b45137c747b9fd52713b191b92bf826fba7b0bdefd2996ddcbbfde98dbe872bc
+Container name: <span class="hljs-symbol">'admin</span>-service'
+Attaching to container <span class="hljs-symbol">'admin</span>-service'...
+Starting container <span class="hljs-symbol">'admin</span>-service'
+<span class="hljs-symbol">'admin</span>-service Dockerfile: Dockerfile' has been deployed successfully.</code></pre></div>
+
+<p>好了，部署完成了，可以访问项目试一试了。</p>
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
-                    
-                  </div>
-                
                 
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/Mysql/">Mysql</a>
+                      <a class="hover-with-bg" href="/tags/Docker/">Docker</a>
                     
-                      <a class="hover-with-bg" href="/tags/Logstash/">Logstash</a>
-                    
-                      <a class="hover-with-bg" href="/tags/Elasticsearch/">Elasticsearch</a>
+                      <a class="hover-with-bg" href="/tags/IDEA/">IDEA</a>
                     
                   </div>
                 
@@ -307,18 +294,12 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/bee47fed.html">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">IDEA部署应用到远程Docker</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/d9d0da7d.html">
-                        <span class="hidden-mobile">Manjaro安装与配置</span>
+                      <a href="/post/863f4886.html">
+                        <span class="hidden-mobile">使用Logstash同步Mysql数据到Elasticsearch</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -457,7 +438,7 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "使用Logstash同步Mysql数据到Elasticsearch&nbsp;",
+        "IDEA部署应用到远程Docker&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,

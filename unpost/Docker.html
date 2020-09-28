@@ -234,6 +234,16 @@ docker <span class="hljs-builtin-name">run</span> -d --name kibana --net esnetwo
 docker <span class="hljs-builtin-name">run</span> -d --name elasticsearch --net esnetwork  -p 9200:9200 -p 9300:9300 -e <span class="hljs-string">"discovery.type=single-node"</span> elasticsearch:6.4.3
 
 docker <span class="hljs-builtin-name">run</span> -it -d -v  <span class="hljs-variable">$PWD</span>/pipeline/:/etc/logstash/pipeline/ logstash:6.4.3 bash</code></pre></div>
+
+
+<p>需要修改 Docker 配置文件让其开放 Docker Remote API （docker REST API）</p>
+<p>查看配置文件位于哪里：</p>
+<p> [root@localhost ~]# systemctl show –property=FragmentPath docker<br> FragmentPath=/usr/lib/systemd/system/docker.service</p>
+<p> 更改配置文件，添加端口</p>
+<p>  ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375</p>
+<p>  {<br>  “hosts”:[<br>    “unix:///var/run/docker.sock”,<br>    “tcp://0.0.0.0:2375”<br>  ]<br>}</p>
+<p>alpine版本 导致生成验证码报错</p>
+
 </div>
 
               </div>

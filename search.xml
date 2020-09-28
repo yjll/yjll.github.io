@@ -151,6 +151,82 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
       </tags>
   </entry>
   <entry>
+    <title>IDEA部署应用到远程Docker</title>
+    <url>/post/bee47fed.html</url>
+    <content><![CDATA[<p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。</p>
+<a id="more"></a>
+
+<h3 id="配置服务端Docker"><a href="#配置服务端Docker" class="headerlink" title="配置服务端Docker"></a>配置服务端Docker</h3><p>首先需要修改 Docker 配置文件让其开放 <code>Docker REST API</code></p>
+<p>vim /etc/docker/daemon.json</p>
+<div class="hljs"><pre><code class="hljs json">&#123;
+  <span class="hljs-attr">"hosts"</span>:[
+    <span class="hljs-string">"unix:///var/run/docker.sock"</span>,
+    <span class="hljs-string">"tcp://0.0.0.0:2375"</span>
+  ]
+&#125;</code></pre></div>
+
+<div class="hljs"><pre><code class="hljs properties"><span class="hljs-comment"># 重新加载配置文件，并重启Docker</span>
+<span class="hljs-attr">systemctl</span> <span class="hljs-string">daemon-reload</span>
+<span class="hljs-attr">systemctl</span> <span class="hljs-string">restart docker</span></code></pre></div>
+
+<h3 id="IDEA连接Docker"><a href="#IDEA连接Docker" class="headerlink" title="IDEA连接Docker"></a>IDEA连接Docker</h3><p>Docker配置完成后，我们配置IDEA</p>
+<p><img src="https://img.yjll.art/img/20200927194234.png" srcset="/img/loading.gif" alt="20200927194234"></p>
+<p>配置正确会有Connection successful提示</p>
+<h3 id="Dockerfile文件"><a href="#Dockerfile文件" class="headerlink" title="Dockerfile文件"></a>Dockerfile文件</h3><p>熟悉Docker的对Dockerfile应该不会陌生，我这里写一个简单的</p>
+<div class="hljs"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> openjdk:<span class="hljs-number">8</span>u102-jdk
+
+<span class="hljs-keyword">ADD</span><span class="bash"> target/*.jar app.jar</span>
+<span class="hljs-keyword">RUN</span><span class="bash"> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span>
+
+<span class="hljs-keyword">ENTRYPOINT</span><span class="bash"> [<span class="hljs-string">"java"</span>,<span class="hljs-string">"-Djava.security.egd=file:/dev/./urandom"</span>,<span class="hljs-string">"-jar"</span>,<span class="hljs-string">"/app.jar"</span>]</span></code></pre></div>
+
+<p>我用的是maven进行打包，打包后的文件放在target目录中，<code>ADD target/*.jar app.jar</code>是将target中的jar文件添加近容器并重命名为<code>app.jar</code>。</p>
+<p>docker中的时区与我们不同，手动设置东八区。</p>
+<p>注意openjdk的版本，我最开始使用的是<code>alpine</code>版本，占用体积较小。但实际运行时，生成验证码接口报错，同样的代码我在CentOS中能运行，Docker中报错。最后换了JDK的版本解决了，猜测是<code>alpine</code>可能阉精简一部分功能。</p>
+<h3 id="IDEA部署Docker"><a href="#IDEA部署Docker" class="headerlink" title="IDEA部署Docker"></a>IDEA部署Docker</h3><p>在Run/Debug Configurations中添加Docker配置，支持<code>Docker Image</code>,<code>Docker-compose</code>,<code>Dockerfile</code>，我这里使用<code>Dockerfile</code>进行部署</p>
+<p><img src="https://img.yjll.art/img/20200928090658.png" srcset="/img/loading.gif" alt="20200928090658"></p>
+<p>这是一个Spring Cloud项目，启动容器后发现向调度中心注册的地址不是本机IP，而是Docker中的桥接网卡的地址，运行参数我添加了<code>--network=host</code>，容器直接使用宿主机的网络，不进行桥接。</p>
+<p>以上直接配置好后，启动项目</p>
+<div class="hljs"><pre><code class="hljs ada">Deploying <span class="hljs-symbol">'admin</span>-service Dockerfile: Dockerfile'...
+Building image...
+Preparing build context archive...
+[==================================================&gt;]<span class="hljs-number">1540</span>/<span class="hljs-number">1540</span> files
+Done
+
+Sending build context to Docker daemon...
+[==================================================&gt;] <span class="hljs-number">107.5</span>MB
+Done
+
+Step <span class="hljs-number">1</span>/<span class="hljs-number">4</span> : <span class="hljs-type">FROM</span> openjdk:<span class="hljs-number">8</span>u102-jdk
+ <span class="hljs-comment">---&gt; ca5dd051db43</span>
+Step <span class="hljs-number">2</span>/<span class="hljs-number">4</span> : <span class="hljs-type">ADD</span> target/*.jar app.jar
+ <span class="hljs-comment">---&gt; 8d0c14567ec9</span>
+Step <span class="hljs-number">3</span>/<span class="hljs-number">4</span> : <span class="hljs-type">RUN</span> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ <span class="hljs-comment">---&gt; Running in a289f48a6aa9</span>
+Removing intermediate container a289f48a6aa9
+ <span class="hljs-comment">---&gt; 12cbefb7337e</span>
+Step <span class="hljs-number">4</span>/<span class="hljs-number">4</span> : <span class="hljs-type">ENTRYPOINT</span> [<span class="hljs-string">"java"</span>,<span class="hljs-string">"-Djava.security.egd=file:/dev/./urandom"</span>,<span class="hljs-string">"-jar"</span>,<span class="hljs-string">"/app.jar"</span>]
+ <span class="hljs-comment">---&gt; Running in 208933b6329b</span>
+Removing intermediate container <span class="hljs-number">208933</span>b6329b
+ <span class="hljs-comment">---&gt; 7e398428e4c6</span>
+
+Successfully built <span class="hljs-number">7e398428</span>e4c6
+Successfully <span class="hljs-keyword">tagged</span> admin-service:latest
+Creating container...
+Container Id: b45137c747b9fd52713b191b92bf826fba7b0bdefd2996ddcbbfde98dbe872bc
+Container name: <span class="hljs-symbol">'admin</span>-service'
+Attaching to container <span class="hljs-symbol">'admin</span>-service'...
+Starting container <span class="hljs-symbol">'admin</span>-service'
+<span class="hljs-symbol">'admin</span>-service Dockerfile: Dockerfile' has been deployed successfully.</code></pre></div>
+
+<p>好了，部署完成了，可以访问项目试一试了。</p>
+]]></content>
+      <tags>
+        <tag>Docker</tag>
+        <tag>IDEA</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用Logstash同步Mysql数据到Elasticsearch</title>
     <url>/post/863f4886.html</url>
     <content><![CDATA[<p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
