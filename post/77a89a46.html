@@ -222,7 +222,8 @@
 <div class="hljs"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> python2-certbot-nginx</code></pre></div>
 
 <h3 id="通过Certbot获取配置证书"><a href="#通过Certbot获取配置证书" class="headerlink" title="通过Certbot获取配置证书"></a>通过Certbot获取配置证书</h3><p>安装完成后，输入命令</p>
-<div class="hljs"><pre><code>certbot --nginx</code></pre></div><p>期间会要求输入邮箱信息，确认协议和域名等，根据提示输入就好。我们看一下生成好的nginx.conf，原来的80变成了443端口，增加了证书配置。</p>
+<div class="hljs"><pre><code class="hljs ada">certbot <span class="hljs-comment">--nginx</span></code></pre></div>
+<p>期间会要求输入邮箱信息，确认协议和域名等，根据提示输入就好。我们看一下生成好的nginx.conf，原来的80变成了443端口，增加了证书配置。</p>
 <div class="hljs"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;
     <span class="hljs-attribute">server_name</span> blog.yjll.art;
     <span class="hljs-attribute">location</span> / &#123;

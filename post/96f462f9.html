@@ -281,7 +281,7 @@ CacheBuilder.newBuilder()
   .removalListener(removalListener)
   .build(loader);</code></pre></div>
 
-<h2 id="Refresh"><a href="#Refresh" class="headerlink" title="Refresh"></a>Refresh</h2><p>对于失效性比较强的元素，我们可以配置刷新的策略。刷新和淘汰不同，刷新元素是异步操作，刷新未完成时返回还是原数据，刷新成功则返回新数据。</p>
+<h2 id="Refresh"><a href="#Refresh" class="headerlink" title="Refresh"></a>Refresh</h2><p>对于失效性比较强的元素，我们可以配置刷新的策略。刷新和淘汰不同，刷新元素是可以是异步操作，刷新未完成时返回还是原数据，刷新成功则返回新数据。</p>
 <div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// Some keys don't need refreshing, and we want refreshes to be done asynchronously.</span>
 LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
        .maximumSize(<span class="hljs-number">1000</span>)
