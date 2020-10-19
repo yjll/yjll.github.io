@@ -178,6 +178,17 @@
 <p>场景二：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080/server" target="_blank" rel="noopener">http://127.0.0.1:8080/server</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/server/login" target="_blank" rel="noopener">http://127.0.0.1:8080/server/login</a></p>
 <p>场景三：<br>location /admin/ {<br>    proxy_pass <a href="http://127.0.0.1:8080" target="_blank" rel="noopener">http://127.0.0.1:8080</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/admin/login" target="_blank" rel="noopener">http://127.0.0.1:8080/admin/login</a></p>
 <p>场景四：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080" target="_blank" rel="noopener">http://127.0.0.1:8080</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/admin/login" target="_blank" rel="noopener">http://127.0.0.1:8080/admin/login</a></p>
+<p><a href="http://hxd.best/2019/05/15/Nginx-%E5%86%85%E5%AE%B9%E7%BC%93%E5%AD%98%E5%8F%8A%E5%B8%B8%E8%A7%81%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE/" target="_blank" rel="noopener">Nginx 内容缓存及常见参数配置</a></p>
+<p><a href="https://www.qttc.net/355-nginx-proxy-cache-not-working.html" target="_blank" rel="noopener">Nginx配置proxy_cache后缓存目录里没有生成缓存文件</a></p>
+<div class="hljs"><pre><code class="hljs nginx"><span class="hljs-attribute">proxy_cache_path</span> /var/cache/nginx levels=<span class="hljs-number">1</span>:<span class="hljs-number">2</span> keys_zone=my_cache:<span class="hljs-number">10m</span> max_size=<span class="hljs-number">10g</span> inactive=<span class="hljs-number">30d</span> use_temp_path=<span class="hljs-literal">off</span>;
+
+    <span class="hljs-section">server</span> &#123;
+        <span class="hljs-attribute">server_name</span> localhost;
+        <span class="hljs-attribute">location</span> / &#123;
+            <span class="hljs-attribute">proxy_cache</span> my_cache;
+            <span class="hljs-attribute">proxy_cache_valid</span>  <span class="hljs-number">200</span>;
+            <span class="hljs-attribute">proxy_pass</span> https://remote.com;
+        &#125;</code></pre></div>
 
 </div>
 

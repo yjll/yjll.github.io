@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      235 字
+      321 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      3
+      4
        分钟
     </span>
   
@@ -209,8 +209,7 @@
 <blockquote>
 <p><code>spring-cloud-openfeign</code>版本<code>2.1.1.RELEASE</code></p>
 </blockquote>
-<p>声明使用Form表单形式提交</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span>
+<h3 id="声明使用Form表单形式提交"><a href="#声明使用Form表单形式提交" class="headerlink" title="声明使用Form表单形式提交"></a>声明使用Form表单形式提交</h3><div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span>
 <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MultipartSupportConfig</span> </span>&#123;
     <span class="hljs-meta">@Bean</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> Encoder <span class="hljs-title">feignFormEncoder</span><span class="hljs-params">()</span> </span>&#123;
@@ -227,8 +226,7 @@
 
 &#125;</code></pre></div>
 
-<p>我将文件放在了对象中作为form表单中的一项进行提交</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span>
+<h3 id="将文件放在对象中作为form表单中的一部分进行提交"><a href="#将文件放在对象中作为form表单中的一部分进行提交" class="headerlink" title="将文件放在对象中作为form表单中的一部分进行提交"></a>将文件放在对象中作为form表单中的一部分进行提交</h3><div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span>
    <span class="hljs-keyword">private</span> UploadFileClient uploadFileClient;
 
    <span class="hljs-meta">@Test</span>
@@ -253,6 +251,14 @@
 
 &#125;</code></pre></div>
 
+
+<h3 id="多个client使用相同name报错"><a href="#多个client使用相同name报错" class="headerlink" title="多个client使用相同name报错"></a>多个client使用相同name报错</h3><div class="hljs"><pre><code class="hljs stylus">Caused by: org<span class="hljs-selector-class">.springframework</span><span class="hljs-selector-class">.beans</span><span class="hljs-selector-class">.factory</span><span class="hljs-selector-class">.support</span><span class="hljs-selector-class">.BeanDefinitionOverrideException</span>: Invalid bean definition with name <span class="hljs-string">'XXX.FeignClientSpecification'</span> defined <span class="hljs-keyword">in</span> null:</code></pre></div>
+
+<p>Spring Bean定义冲突导致服务不能启动,可以添加如下配置</p>
+<div class="hljs"><pre><code class="hljs ini"><span class="hljs-attr">spring.main.allow-bean-definition-overriding</span>=<span class="hljs-literal">true</span></code></pre></div>
+
+<p>如果不想更改整体Spring配置的话，可以手动指定contextId,优先使用contextId作为ClientName</p>
+<div class="hljs"><pre><code class="hljs reasonml">@<span class="hljs-constructor">FeignClient(<span class="hljs-params">value</span> = <span class="hljs-string">"admin"</span>,<span class="hljs-params">contextId</span> = <span class="hljs-string">"aTest"</span>)</span></code></pre></div>
 
 
 
