@@ -165,11 +165,7 @@
                 
 
 <div class="page-content">
-  <p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
-<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
-<p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
-<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
-<div class="hljs"><pre><code class="hljs routeros"><span class="hljs-builtin-name">GET</span> business_code_finished/_search
+  <div class="hljs"><pre><code class="hljs routeros"><span class="hljs-builtin-name">GET</span> business_code_finished/_search
 &#123;
   <span class="hljs-string">"query"</span>: &#123;
     <span class="hljs-string">"range"</span>: &#123;
@@ -203,12 +199,7 @@ Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().pe
 
 String resp = EntityUtils.toString(response.getEntity())</code></pre></div>
 
-<p>简单查询，使用QueryBuilders组装SearchRequest</p>
-<div class="hljs"><pre><code class="hljs groovy">SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
-SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"business_code_finished"</span>)
-        .types(<span class="hljs-string">"data"</span>)
-        .source(ssb)
-<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
+
 </div>
 
               </div>

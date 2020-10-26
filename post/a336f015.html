@@ -17,7 +17,7 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>使用Logstash同步Mysql数据到Elasticsearch - Youj&#39;s blog</title>
+  <title>Spring使用@Value注入List和Map - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -148,8 +148,8 @@
               
   <div class="mt-3 post-meta">
     <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-    <time datetime="2020-09-05 00:00" pubdate>
-      2020年9月5日 凌晨
+    <time datetime="2020-10-26 18:11" pubdate>
+      2020年10月26日 晚上
     </time>
   </div>
 
@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      792 字
+      198 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      10
+      3
        分钟
     </span>
   
@@ -199,80 +199,66 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">使用Logstash同步Mysql数据到Elasticsearch</h1>
+            <h1 style="display: none">Spring使用@Value注入List和Map</h1>
             
             <div class="markdown-body" id="post-body">
-              <p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
-<p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
-<a id="more"></a>
+              <h3 id="yml常规写法"><a href="#yml常规写法" class="headerlink" title="yml常规写法"></a>yml常规写法</h3><p>需要添加<code>spring-boot-configuration-processor</code>模块，并且对要注入的对象添加<code>set</code>方法</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-configuration-processor<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">optional</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">optional</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">interceptorconfig:</span>
+  <span class="hljs-attr">path:</span>
+    <span class="hljs-attr">exclude:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/source</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/login</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/getCheckCode/</span>
+<span class="hljs-string">```</span>      
+
+<span class="hljs-string">```</span> <span class="hljs-string">java</span>
+<span class="hljs-string">@Component</span>
+<span class="hljs-string">@Data</span>
+<span class="hljs-string">@ConfigurationProperties(prefix</span> <span class="hljs-string">=</span> <span class="hljs-string">"interceptorconfig.path"</span><span class="hljs-string">)</span>
+<span class="hljs-string">public</span> <span class="hljs-string">class</span> <span class="hljs-string">TokenFilter</span> <span class="hljs-string">&#123;</span>
+
+    <span class="hljs-string">private</span>  <span class="hljs-string">List&lt;String&gt;</span> <span class="hljs-string">exclude;</span>
+
+<span class="hljs-string">&#125;</span></code></pre></div>
 
 
-<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p>首先要编写同步数据的配置文件，从Mysql同步数据到ElasticSearch中，使用jdbc里连接数据库作为input，ouput为ES。</p>
-<div class="hljs"><pre><code class="hljs puppet"><span class="hljs-keyword">input</span> &#123;
- stdin &#123; &#125;
-    <span class="hljs-keyword">jdbc</span> &#123;
-        <span class="hljs-comment">#注意mysql连接地址一定要用ip，不能使用localhost等</span>
-        <span class="hljs-attr">jdbc_connection_string</span> =&gt; <span class="hljs-string">"jdbc:mysql://192.168.1.200:3308/test"</span>
-        <span class="hljs-attr">jdbc_user</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-attr">jdbc_password</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-comment">#这个jar包的地址是容器内的地址</span>
-        <span class="hljs-attr">jdbc_driver_library</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/mysql-connector-java-8.0.11.jar"</span>
-        <span class="hljs-attr">jdbc_driver_class</span> =&gt; <span class="hljs-string">"com.mysql.jdbc.Driver"</span>
-        <span class="hljs-attr">jdbc_paging_enabled</span> =&gt; <span class="hljs-string">"true"</span>
-        <span class="hljs-attr">jdbc_page_size</span> =&gt; <span class="hljs-string">"5000"</span>
-        <span class="hljs-attr">statement</span> =&gt; <span class="hljs-string">"SELECT * FROM base_areas where id &gt; :sql_last_value"</span>
-        <span class="hljs-attr">tracking_column</span> =&gt; <span class="hljs-built_in">id</span>
-        <span class="hljs-attr">use_column_value</span> =&gt; <span class="hljs-keyword">true</span>
-        <span class="hljs-attr">last_run_metadata_path</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/area"</span>
-        <span class="hljs-attr">schedule</span> =&gt; <span class="hljs-string">"* * * * *"</span>
-    &#125;
- &#125;
-  
- <span class="hljs-keyword">output</span> &#123;
-     stdout &#123;
-        <span class="hljs-attr">codec</span> =&gt; json_lines
-    &#125;
-    <span class="hljs-keyword">elasticsearch</span> &#123;
-        <span class="hljs-attr">hosts</span> =&gt; <span class="hljs-string">"192.168.1.200:9200"</span>
-        <span class="hljs-attr">index</span> =&gt; <span class="hljs-string">"area"</span>
-        <span class="hljs-attr">document_type</span> =&gt; <span class="hljs-string">"_doc"</span>
-        <span class="hljs-attr">document_id</span> =&gt; <span class="hljs-string">"%&#123;id&#125;"</span>
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">generate:</span>
+  <span class="hljs-attr">companyAndPlanMap:</span>
+    <span class="hljs-attr">101:</span> <span class="hljs-number">2018081601</span>
+    <span class="hljs-attr">121:</span> <span class="hljs-number">2018081602</span>
+    <span class="hljs-attr">111:</span> <span class="hljs-number">2018081603</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/c"</span>)
+<span class="hljs-meta">@Slf</span>4j
+<span class="hljs-meta">@ConfigurationProperties</span>(<span class="hljs-string">"generate"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C35Controller</span> </span>&#123;
+
+    <span class="hljs-keyword">private</span> Map&lt;String, String&gt; companyAndPlanMap;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setCompanyAndPlanMap</span><span class="hljs-params">(Map&lt;String, String&gt; companyAndPlanMap)</span> </span>&#123;
+        <span class="hljs-keyword">this</span>.companyAndPlanMap = companyAndPlanMap;
     &#125;
 &#125;</code></pre></div>
 
+<h3 id="EL表达式-JSON写法"><a href="#EL表达式-JSON写法" class="headerlink" title="EL表达式+JSON写法"></a>EL表达式+JSON写法</h3><div class="hljs"><pre><code class="hljs yml"><span class="hljs-attr">scio.cloud.list:</span> <span class="hljs-string">topic1,topic2,topic3</span>
+<span class="hljs-attr">scio.cloud.maps:</span> <span class="hljs-string">"&#123;key1: 'value1', key2: 'value2'&#125;"</span></code></pre></div>
 
-<p>重点在于 <code>use_column_value</code> 和 <code>tracking_column</code> 这两个参数，当use_column_value为true时，可以用 :sql_last_value 这个变量来获取tracking_column对应的字段的最新值，默认即第一次启动时为 0 。我的示例中tracking_column对应id，即Logstash都会记录每次查询结果id的最大值，供下一次查询使用。</p>
-<p>Logstash将tracking_column的最新值记录到<code>last_run_metadata_path</code>配置的文件，启动时读取该文件</p>
-<div class="hljs"><pre><code class="hljs awk">docker run -it -v  <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipeline/</span>:<span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/logstash/</span>pipeline -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/logstash.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>logstash.yml -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipelines.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>pipelines.yml   logstash:<span class="hljs-number">6.4</span>.<span class="hljs-number">3</span>  bash</code></pre></div>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;'$&#123;scio.cloud.list&#125;'.split(',')&#125;"</span>)
+<span class="hljs-keyword">private</span> List&lt;String&gt; list;
+ 
+<span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;$&#123;scio.cloud.maps&#125;&#125;"</span>)  
+<span class="hljs-keyword">private</span> Map&lt;String,String&gt; maps;</code></pre></div>
 
-<p>先安装jdbc和es的插件</p>
-<div class="hljs"><pre><code class="hljs sql">bash-4.2$ ~/bin/logstash-plugin <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">input</span>-jdbc
-Validating logstash-<span class="hljs-keyword">input</span>-jdbc
-Installing logstash-<span class="hljs-keyword">input</span>-jdbc
-Installation successful
 
-bash<span class="hljs-number">-4.2</span>$ ~/<span class="hljs-keyword">bin</span>/logstash-<span class="hljs-keyword">plugin</span> <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Validating logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installing logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installation successful</code></pre></div>
-
-<p>由于是在容器内部连接服务，所以ES的连接不要使用localhost和127.0.0.1，更改为实际IP地址</p>
-<div class="hljs"><pre><code class="hljs stylus">bash-<span class="hljs-number">4.2</span>$ cat ~/config/logstash<span class="hljs-selector-class">.yml</span> 
-http<span class="hljs-selector-class">.host</span>: <span class="hljs-string">"0.0.0.0"</span>
-xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selector-class">.elasticsearch</span><span class="hljs-selector-class">.url</span>: http:<span class="hljs-comment">//192.168.1.200:9200</span></code></pre></div>
-
-<h3 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h3><p>运行同步脚本可手动执行也可以配置调度执行</p>
-<h4 id="手动执行"><a href="#手动执行" class="headerlink" title="手动执行"></a>手动执行</h4><p><code>~/bin/logstash -f ***.config</code></p>
-<h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
-<div class="hljs"><pre><code class="hljs groovy">bash<span class="hljs-number">-4.2</span>$ cat <span class="hljs-regexp">~/config/</span>pipelines.yml 
-
-- pipeline.<span class="hljs-string">id:</span> main
-  path.<span class="hljs-string">config:</span> <span class="hljs-string">"/usr/share/logstash/pipeline"</span></code></pre></div>
-
-<p>好，配置已完成，运行<code>/usr/local/bin/docker-entrypoint</code>启动调度任务</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.jianshu.com/p/1aa662a5f170" target="_blank" rel="noopener">Spring @Value 注入List和Map</a></p>
+<p><a href="https://juejin.im/post/6844903972403150861" target="_blank" rel="noopener">Spring Boot配置文件注入</a></p>
 
             </div>
             <hr>
@@ -282,7 +268,7 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
                   <div class="post-meta mr-3">
                     <i class="iconfont icon-category"></i>
                     
-                      <a class="hover-with-bg" href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
+                      <a class="hover-with-bg" href="/categories/Java/">Java</a>
                     
                   </div>
                 
@@ -290,11 +276,9 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/Elasticsearch/">Elasticsearch</a>
+                      <a class="hover-with-bg" href="/tags/Java/">Java</a>
                     
-                      <a class="hover-with-bg" href="/tags/Mysql/">Mysql</a>
-                    
-                      <a class="hover-with-bg" href="/tags/Logstash/">Logstash</a>
+                      <a class="hover-with-bg" href="/tags/Spring/">Spring</a>
                     
                   </div>
                 
@@ -307,18 +291,12 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/bee47fed.html">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">IDEA部署应用到远程Docker</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/d9d0da7d.html">
-                        <span class="hidden-mobile">Manjaro安装与配置</span>
+                      <a href="/post/45e649c7.html">
+                        <span class="hidden-mobile">Java加密压缩Zip</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -457,7 +435,7 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "使用Logstash同步Mysql数据到Elasticsearch&nbsp;",
+        "Spring使用@Value注入List和Map&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,

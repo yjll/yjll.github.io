@@ -152,6 +152,280 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
       </tags>
   </entry>
   <entry>
+    <title>Spring使用@Value注入List和Map</title>
+    <url>/post/a336f015.html</url>
+    <content><![CDATA[<h3 id="yml常规写法"><a href="#yml常规写法" class="headerlink" title="yml常规写法"></a>yml常规写法</h3><p>需要添加<code>spring-boot-configuration-processor</code>模块，并且对要注入的对象添加<code>set</code>方法</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-configuration-processor<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">optional</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">optional</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">interceptorconfig:</span>
+  <span class="hljs-attr">path:</span>
+    <span class="hljs-attr">exclude:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/source</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/login</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/getCheckCode/</span>
+<span class="hljs-string">```</span>      
+
+<span class="hljs-string">```</span> <span class="hljs-string">java</span>
+<span class="hljs-string">@Component</span>
+<span class="hljs-string">@Data</span>
+<span class="hljs-string">@ConfigurationProperties(prefix</span> <span class="hljs-string">=</span> <span class="hljs-string">"interceptorconfig.path"</span><span class="hljs-string">)</span>
+<span class="hljs-string">public</span> <span class="hljs-string">class</span> <span class="hljs-string">TokenFilter</span> <span class="hljs-string">&#123;</span>
+
+    <span class="hljs-string">private</span>  <span class="hljs-string">List&lt;String&gt;</span> <span class="hljs-string">exclude;</span>
+
+<span class="hljs-string">&#125;</span></code></pre></div>
+
+
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">generate:</span>
+  <span class="hljs-attr">companyAndPlanMap:</span>
+    <span class="hljs-attr">101:</span> <span class="hljs-number">2018081601</span>
+    <span class="hljs-attr">121:</span> <span class="hljs-number">2018081602</span>
+    <span class="hljs-attr">111:</span> <span class="hljs-number">2018081603</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/c"</span>)
+<span class="hljs-meta">@Slf</span>4j
+<span class="hljs-meta">@ConfigurationProperties</span>(<span class="hljs-string">"generate"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C35Controller</span> </span>&#123;
+
+    <span class="hljs-keyword">private</span> Map&lt;String, String&gt; companyAndPlanMap;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setCompanyAndPlanMap</span><span class="hljs-params">(Map&lt;String, String&gt; companyAndPlanMap)</span> </span>&#123;
+        <span class="hljs-keyword">this</span>.companyAndPlanMap = companyAndPlanMap;
+    &#125;
+&#125;</code></pre></div>
+
+<h3 id="EL表达式-JSON写法"><a href="#EL表达式-JSON写法" class="headerlink" title="EL表达式+JSON写法"></a>EL表达式+JSON写法</h3><div class="hljs"><pre><code class="hljs yml"><span class="hljs-attr">scio.cloud.list:</span> <span class="hljs-string">topic1,topic2,topic3</span>
+<span class="hljs-attr">scio.cloud.maps:</span> <span class="hljs-string">"&#123;key1: 'value1', key2: 'value2'&#125;"</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;'$&#123;scio.cloud.list&#125;'.split(',')&#125;"</span>)
+<span class="hljs-keyword">private</span> List&lt;String&gt; list;
+ 
+<span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;$&#123;scio.cloud.maps&#125;&#125;"</span>)  
+<span class="hljs-keyword">private</span> Map&lt;String,String&gt; maps;</code></pre></div>
+
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.jianshu.com/p/1aa662a5f170" target="_blank" rel="noopener">Spring @Value 注入List和Map</a></p>
+<p><a href="https://juejin.im/post/6844903972403150861" target="_blank" rel="noopener">Spring Boot配置文件注入</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java加密压缩Zip</title>
+    <url>/post/45e649c7.html</url>
+    <content><![CDATA[<p>JDK自带的ZIP操作接口（java.util.zip包）不直接支持加密压缩，项目中需要用到加密压缩，在网上查了查，已经有人封装好了。<a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j</a>功能比较强大，支持加密、解密压缩，支持文件的添加、删除等。</p>
+<h3 id="使用Zip4j进行加密压缩"><a href="#使用Zip4j进行加密压缩" class="headerlink" title="使用Zip4j进行加密压缩"></a>使用Zip4j进行加密压缩</h3><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>net.lingala.zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.4<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs java">
+<span class="hljs-keyword">byte</span>[] buffer = writer.toString().getBytes(StandardCharsets.US_ASCII);
+
+ZipParameters zipParameters = <span class="hljs-keyword">new</span> ZipParameters();
+<span class="hljs-comment">// 使用密码</span>
+zipParameters.setEncryptFiles(<span class="hljs-keyword">true</span>);
+<span class="hljs-comment">// 加密方式</span>
+zipParameters.setEncryptionMethod(EncryptionMethod.AES);
+zipParameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
+<span class="hljs-comment">// zip中的文件名</span>
+zipParameters.setFileNameInZip(String.format(<span class="hljs-string">"%s.txt"</span>, packageName));
+
+File tempFile = File.createTempFile(packageName, <span class="hljs-string">".zip"</span>);
+<span class="hljs-comment">// 先删除，fileZip会自动创建</span>
+tempFile.delete();
+log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.getAbsolutePath());
+
+<span class="hljs-keyword">new</span> ZipFile(tempFile, <span class="hljs-keyword">this</span>.password.toCharArray()).addStream(<span class="hljs-keyword">new</span> ByteArrayInputStream(buffer), zipParameters);</code></pre></div>
+
+<p>我生成压缩文件是为了上传使用，所以使用了<code>File.createTempFile</code>创建了一个临时文件，实际使用时发现生成压缩包时<code>zip4j</code>会判断我们传入的<code>file</code>是否为一个zip文件，我们这个文件是临时创建的是一个长度为0的空文件，所以直接报错了。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (zip4jRaf.length() &lt; ENDHDR) &#123;
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ZipException(<span class="hljs-string">"Zip file size less than minimum expected zip file size. "</span> +
+        <span class="hljs-string">"Probably not a zip file or a corrupted zip file"</span>);
+&#125;</code></pre></div>
+
+<p>我再<code>File.createTempFile</code>后又将这个文件删除了，把生成文件的任务交给<code>zip4j</code>去处理，这样就没有问题了。</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j - A Java library for zip files / streams</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Zip</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Elasticsearch使用JSON字符串的原生DSL查询</title>
+    <url>/post/3b7237cd.html</url>
+    <content><![CDATA[<blockquote>
+<p>注：本文的<code>spring-boot-starter-data-elasticsearch</code>的版本为<code>2.2.10.RELEASE</code><br>Elasticsearch版本为<code>6.8.12</code></p>
+</blockquote>
+<p><code>RestHighLevelClient</code>是ES官方推荐使用的客户端，新版本的<code>spring-data-elasticsearch</code>也对<code>RestHighLevelClient</code>进行了支持，使用<code>ElasticsearchRestTemplate</code>对<code>RestHighLevelClient</code>进行封装，我们直接使用<code>ElasticsearchRestTemplate</code>即可，但是对于参数较多特别是有嵌套聚合的查询，使用Spring提供的API过于繁琐，我们想使用原生的DSL进行查询，但是<code>ElasticsearchRestTemplate</code>并不支持这种写法。我们知道<code>ElasticsearchRestTemplate</code>底层一定通过JSON传输，分析内部实现，看看实现方式。</p>
+<h3 id="ElasticsearchRestTemplate底层"><a href="#ElasticsearchRestTemplate底层" class="headerlink" title="ElasticsearchRestTemplate底层"></a>ElasticsearchRestTemplate底层</h3><p>拿ElasticsearchRestTemplate#query这个方法举例，<code>query</code>调用<code>client.search()</code>，这个client就是<code>RestHighLevelClient</code>，Spring对其进行了二次封装。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Override</span>
+<span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">query</span><span class="hljs-params">(SearchQuery query, ResultsExtractor&lt;T&gt; resultsExtractor)</span> </span>&#123;
+	SearchResponse response = doSearch(prepareSearch(query, Optional.ofNullable(query.getQuery()), <span class="hljs-keyword">null</span>), query);
+	<span class="hljs-keyword">return</span> resultsExtractor.extract(response);
+&#125;
+
+   <span class="hljs-function"><span class="hljs-keyword">private</span> SearchResponse <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest, SearchQuery searchQuery)</span> </span>&#123;
+	prepareSearch(searchRequest, searchQuery);
+
+	<span class="hljs-keyword">try</span> &#123;
+		<span class="hljs-keyword">return</span> client.search(searchRequest, RequestOptions.DEFAULT);
+	&#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ElasticsearchException(<span class="hljs-string">"Error for search request with scroll: "</span> + searchRequest.toString(), e);
+	&#125;
+&#125;</code></pre></div>
+
+<p>继续看<code>RestHighLevelClient#search</code>方法，主要是对参数和返回值进行封装，层层跟进该方法会调用<code>client.performRequest</code>，此处的<code>client</code>并非指<code>RestHighLevelClient</code>，而是更底层的客户端<code>RestClient</code>。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> SearchResponse <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest, RequestOptions options)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    <span class="hljs-keyword">return</span> performRequestAndParseEntity(
+            searchRequest,
+            r -&gt; RequestConverters.search(r, <span class="hljs-string">"_search"</span>),
+            options,
+            SearchResponse::fromXContent,
+            emptySet());
+&#125;
+
+<span class="hljs-keyword">private</span> &lt;Req, Resp&gt; <span class="hljs-function">Resp <span class="hljs-title">internalPerformRequest</span><span class="hljs-params">(Req request,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Req, Request, IOException&gt; requestConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        RequestOptions options,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Response, Resp, IOException&gt; responseConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        Set&lt;Integer&gt; ignores)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    Request req = requestConverter.apply(request);
+    req.setOptions(options);
+    Response response;
+    <span class="hljs-keyword">try</span> &#123;
+        response = client.performRequest(req);
+    &#125; <span class="hljs-keyword">catch</span> (ResponseException e) &#123;
+        <span class="hljs-keyword">if</span> (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) &#123;
+            <span class="hljs-keyword">try</span> &#123;
+                <span class="hljs-keyword">return</span> responseConverter.apply(e.getResponse());
+            &#125; <span class="hljs-keyword">catch</span> (Exception innerException) &#123;
+                <span class="hljs-comment">// the exception is ignored as we now try to parse the response as an error.</span>
+                <span class="hljs-comment">// this covers cases like get where 404 can either be a valid document not found response,</span>
+                <span class="hljs-comment">// or an error for which parsing is completely different. We try to consider the 404 response as a valid one</span>
+                <span class="hljs-comment">// first. If parsing of the response breaks, we fall back to parsing it as an error.</span>
+                <span class="hljs-keyword">throw</span> parseResponseException(e);
+            &#125;
+        &#125;
+        <span class="hljs-keyword">throw</span> parseResponseException(e);
+    &#125;
+
+    <span class="hljs-keyword">try</span> &#123;
+        <span class="hljs-keyword">return</span> responseConverter.apply(response);
+    &#125; <span class="hljs-keyword">catch</span>(Exception e) &#123;
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Unable to parse response body for "</span> + response, e);
+    &#125;
+&#125;</code></pre></div>
+
+<p><code>RestClient#performRequest</code>接受的参数为<code>org.elasticsearch.client.Request</code>，其中重要的参数有一下几个:<br><code>method</code>:Http的方法<code>GET</code>,<code>POST</code>等<br><code>endpoint</code>:包含<code>index</code>,<code>type</code>,查询类别等,如<code>code/data/_search</code><br><code>entity</code>:包好JSON的实体</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">performRequest</span><span class="hljs-params">(Request request)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    SyncResponseListener listener = <span class="hljs-keyword">new</span> SyncResponseListener(maxRetryTimeoutMillis);
+    performRequestAsyncNoCatch(request, listener);
+    <span class="hljs-keyword">return</span> listener.get();
+&#125;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Request</span> </span>&#123;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String method;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String endpoint;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, String&gt; parameters = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+
+    <span class="hljs-keyword">private</span> HttpEntity entity;
+    <span class="hljs-keyword">private</span> RequestOptions options = RequestOptions.DEFAULT;
+&#125;</code></pre></div>
+
+<h3 id="使用RestClient进行请求"><a href="#使用RestClient进行请求" class="headerlink" title="使用RestClient进行请求"></a>使用RestClient进行请求</h3><p>知道底层的运行方式，我们构建一个Request再调用<code>RestClient#performRequest</code>即可。因为涉及到字符串拼接和json序列化，用Java不太方便，我这里使用Groovy语法编写。</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">"""</span>
+<span class="hljs-string">        &#123;</span>
+<span class="hljs-string">          "size": 0,</span>
+<span class="hljs-string">          "query": &#123;</span>
+<span class="hljs-string">            "terms": &#123;</span>
+<span class="hljs-string">              "xxx": [</span>
+<span class="hljs-string">                $&#123;xxx&#125;</span>
+<span class="hljs-string">              ]</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;,</span>
+<span class="hljs-string">          "aggs": &#123;</span>
+<span class="hljs-string">            "first": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "first_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;,</span>
+<span class="hljs-string">            "second": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "second_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;</span>
+<span class="hljs-string">        &#125;</span>
+<span class="hljs-string">        """</span>
+String endpoint = <span class="hljs-string">'code/data/_search'</span>
+Request request = <span class="hljs-keyword">new</span> Request(HttpPost.METHOD_NAME, endpoint);
+request.setJsonEntity(dsl)
+
+Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().performRequest(request)
+
+<span class="hljs-keyword">def</span> respJson = <span class="hljs-keyword">new</span> JsonSlurper().parse(response.getEntity().getContent())
+
+CodeTerms codeTerms = <span class="hljs-keyword">new</span> CodeTerms().with &#123;
+    firstCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'first'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    secondCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'second'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    it
+&#125;</code></pre></div>
+
+<h3 id="使用RestHighLevelClient直接进行简单查询"><a href="#使用RestHighLevelClient直接进行简单查询" class="headerlink" title="使用RestHighLevelClient直接进行简单查询"></a>使用RestHighLevelClient直接进行简单查询</h3><p>简单查询，使用QueryBuilders组装SearchRequest</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">'''</span>
+<span class="hljs-string">&#123;</span>
+<span class="hljs-string">  "range": &#123;</span>
+<span class="hljs-string">      "second_upload_time": &#123;</span>
+<span class="hljs-string">      "gte": "2020-06-01 00:00:00",</span>
+<span class="hljs-string">      "lte": "2020-06-02 00:00:00"</span>
+<span class="hljs-string">      &#125;</span>
+<span class="hljs-string">  &#125;</span>
+<span class="hljs-string">&#125;</span>
+<span class="hljs-string">'''</span>
+SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
+SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"code"</span>)
+        .types(<span class="hljs-string">"data"</span>)
+        .source(ssb)
+<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
+
+<h3 id="使用ElasticsearchRestTemplate直接进行简单查询"><a href="#使用ElasticsearchRestTemplate直接进行简单查询" class="headerlink" title="使用ElasticsearchRestTemplate直接进行简单查询"></a>使用ElasticsearchRestTemplate直接进行简单查询</h3><p>使用StringQuery基于DSL定义的JSON的查询，底层使用<code>SearchRequest</code></p>
+<div class="hljs"><pre><code class="hljs Java">StringQuery stringQuery = <span class="hljs-keyword">new</span> StringQuery(
+		<span class="hljs-string">"&#123;\"query\":&#123;\"bool\":&#123;\"must\":[&#123;\"term\":&#123;\"id\":\"1\"&#125;&#125;],\"must_not\":[],</span>
+<span class="hljs-string">		\"should\":[]&#125;&#125;,\"from\":0,\"size\":10,\"sort\":[],\"aggs\":&#123;&#125;&#125;"</span>);
+    searchQuery.addIndices(<span class="hljs-string">"test"</span>);
+    searchQuery.addTypes(<span class="hljs-string">"test"</span>);
+					
+List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;</code></pre></div>
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
+<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
+<p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
+<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
+]]></content>
+      <tags>
+        <tag>Elasticsearch</tag>
+        <tag>Java</tag>
+        <tag>Groovy</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>IDEA部署应用到远程Docker</title>
     <url>/post/bee47fed.html</url>
     <content><![CDATA[<p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。</p>
@@ -306,9 +580,9 @@ xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selec
         <category>中间件</category>
       </categories>
       <tags>
+        <tag>Elasticsearch</tag>
         <tag>Mysql</tag>
         <tag>Logstash</tag>
-        <tag>Elasticsearch</tag>
       </tags>
   </entry>
   <entry>
