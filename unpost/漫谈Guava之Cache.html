@@ -179,6 +179,7 @@
 &#125;</code></pre></div>
 
 <p>LocalManualCache 相当于LocalCache的包装类，大部分方法直接使用LocalCache的实现，部分方法自己实现了一下。我们直接看LocalCache的逻辑，LocalCache的实现参考了<code>ConcurrentHashMap</code>，采用分段锁技术，当一个线程访问一个 <code>Segment</code> 时，不会影响其他的 <code>Segment</code>。</p>
+<p><img src="https://img.yjll.art/img/Segment.png" srcset="/img/loading.gif" alt="Segment"></p>
 <div class="hljs"><pre><code class="hljs java">  <span class="hljs-function">Segment&lt;K, V&gt; <span class="hljs-title">segmentFor</span><span class="hljs-params">(<span class="hljs-keyword">int</span> hash)</span> </span>&#123;
     <span class="hljs-keyword">return</span> segments[(hash &gt;&gt;&gt; segmentShift) &amp; segmentMask];
   &#125;
@@ -187,11 +188,11 @@
 
 Segment中维护了<span class="hljs-number">5</span>个队列
 
-* keyReferenceQueue 
-* valueReferenceQueue 
-* recencyQueue 
-* writeQueue 
-* accessQueue 
+* keyReferenceQueue key引用队列
+* valueReferenceQueue value引用队列 
+* recencyQueue LRU队列
+* writeQueue 写队列
+* accessQueue 访问队列
 
 ### 存放元素
 
@@ -306,6 +307,8 @@ Segment中维护了<span class="hljs-number">5</span>个队列
 <span class="hljs-keyword">StrongAccessWriteEntry</span></code></pre></div>
 
 <p>com.google.common.cache.RemovalCause 删除原因</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.cnblogs.com/aspirant/p/11734918.html" target="_blank" rel="noopener">Guava cacha 机制及源码分析</a></p>
+<p><a href="https://www.jianshu.com/p/cb320639e3cb" target="_blank" rel="noopener">guava Cache源码分析（一）</a></p>
 
 </div>
 
