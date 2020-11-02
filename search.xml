@@ -1,6 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>DataX同步全量Mqsql数据到Elasticsearch</title>
+    <url>/post/6a3f5dff.html</url>
+    <content><![CDATA[<p><a href="https://github.com/alibaba/DataX" target="_blank" rel="noopener">DataX</a> 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、ODPS 等各种异构数据源之间高效的数据同步功能。</p>
+<p>DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。</p>
+<a id="more"></a>
+
+
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>官方提供的二进制包缺少必要的组件，我们需要下载源码自己编译</p>
+<div class="hljs"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>codeload.github.com<span class="hljs-regexp">/alibaba/</span>DataX<span class="hljs-regexp">/zip/m</span>aster</code></pre></div>
+
+<p>解压后编辑pom.xml，只保留部分必要module和mysql，es即可</p>
+<div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">modules</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>common<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>core<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>transformer<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- reader --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>mysqlreader<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- writer --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>elasticsearchwriter<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- common support module --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>plugin-rdbms-util<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>plugin-unstructured-storage-util<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>hbase20xsqlreader<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>hbase20xsqlwriter<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">module</span>&gt;</span>kuduwriter<span class="hljs-tag">&lt;/<span class="hljs-name">module</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">modules</span>&gt;</span></code></pre></div>
+
+<p>更改配置后打包</p>
+<div class="hljs"><pre><code class="hljs crystal">
+mvn -U clean package <span class="hljs-symbol">assembly:</span>assembly -Dmaven.test.skip=<span class="hljs-literal">true</span>
+
+ls ./target/datax/datax/
+bin		conf		job		<span class="hljs-class"><span class="hljs-keyword">lib</span>		<span class="hljs-title">log</span>		<span class="hljs-title">log_perf</span>	<span class="hljs-title">plugin</span>		<span class="hljs-title">script</span>		<span class="hljs-title">tmp</span></span></code></pre></div>
+
+
+<h3 id="设置动态模板"><a href="#设置动态模板" class="headerlink" title="设置动态模板"></a>设置动态模板</h3><p>开始同步数据前，在es中创建一个动态模板</p>
+<div class="hljs"><pre><code class="hljs json">PUT _template/hkey_transferbill
+&#123;
+    <span class="hljs-attr">"index_patterns"</span>:<span class="hljs-string">"hkey_transferbill"</span>,
+    <span class="hljs-attr">"settings"</span>:&#123;
+        <span class="hljs-attr">"number_of_shards"</span>:<span class="hljs-number">2</span>,
+        <span class="hljs-attr">"number_of_replicas"</span>:<span class="hljs-number">1</span>
+    &#125;,
+    <span class="hljs-attr">"mappings"</span>:&#123;
+        <span class="hljs-attr">"data"</span>:&#123;
+            <span class="hljs-attr">"dynamic_templates"</span>:[
+                &#123;
+                    <span class="hljs-attr">"keyword_field"</span>:&#123;
+                        <span class="hljs-attr">"unmatch"</span>:<span class="hljs-string">"*Name"</span>,
+                        <span class="hljs-attr">"match_mapping_type"</span>:<span class="hljs-string">"string"</span>,
+                        <span class="hljs-attr">"mapping"</span>:&#123;
+                            <span class="hljs-attr">"type"</span>:<span class="hljs-string">"keyword"</span>
+                        &#125;
+                    &#125;
+                &#125;,
+                &#123;
+                    <span class="hljs-attr">"text_fields"</span>:&#123;
+                        <span class="hljs-attr">"match"</span>:<span class="hljs-string">"*Name"</span>,
+                        <span class="hljs-attr">"match_mapping_type"</span>:<span class="hljs-string">"string"</span>,
+                        <span class="hljs-attr">"mapping"</span>:&#123;
+                            <span class="hljs-attr">"type"</span>:<span class="hljs-string">"text"</span>,
+                            <span class="hljs-attr">"fields"</span>:&#123;
+                                <span class="hljs-attr">"raw"</span>:&#123;
+                                    <span class="hljs-attr">"type"</span>:<span class="hljs-string">"keyword"</span>
+                                &#125;
+                            &#125;
+                        &#125;
+                    &#125;
+                &#125;
+            ],
+            <span class="hljs-attr">"properties"</span>:&#123;
+                <span class="hljs-attr">"rowkey"</span>:&#123;
+                    <span class="hljs-attr">"type"</span>:<span class="hljs-string">"keyword"</span>
+                &#125;,
+                <span class="hljs-attr">"age"</span>:&#123;
+                    <span class="hljs-attr">"type"</span>:<span class="hljs-string">"keyword"</span>
+                &#125;
+            &#125;
+        &#125;
+    &#125;
+&#125;</code></pre></div>
+
+<h3 id="编写同步配置文件"><a href="#编写同步配置文件" class="headerlink" title="编写同步配置文件"></a>编写同步配置文件</h3><p><a href="https://github.com/alibaba/DataX/blob/master/mysqlreader/doc/mysqlreader.md" target="_blank" rel="noopener">MysqlReader 插件文档</a></p>
+<p><a href="https://github.com/alibaba/DataX/blob/master/elasticsearchwriter/doc/elasticsearchwriter.md" target="_blank" rel="noopener">ElasticSearchWriter 插件文档</a></p>
+<p>同步时间类型问题，部分mysql中时间字段为空，导入到ES中时间变成了系统时间，我在导入时将ES中column的type更改为<code>text</code>解决了这个问题。</p>
+<div class="hljs"><pre><code class="hljs json">&#123;
+    <span class="hljs-attr">"job"</span>:&#123;
+        <span class="hljs-attr">"setting"</span>:&#123;
+            <span class="hljs-attr">"speed"</span>:&#123;
+                <span class="hljs-attr">"channel"</span>:<span class="hljs-number">4</span>
+            &#125;
+        &#125;,
+        <span class="hljs-attr">"content"</span>:[
+            &#123;
+                <span class="hljs-attr">"reader"</span>:&#123;
+                    <span class="hljs-attr">"name"</span>:<span class="hljs-string">"mysqlreader"</span>,
+                    <span class="hljs-attr">"parameter"</span>:&#123;
+                        <span class="hljs-attr">"username"</span>:<span class="hljs-string">"root"</span>,
+                        <span class="hljs-attr">"password"</span>:<span class="hljs-string">"test"</span>,
+                        <span class="hljs-attr">"column"</span>:[
+                            <span class="hljs-string">"code"</span>,
+                            <span class="hljs-string">"internal_code"</span>,
+                            <span class="hljs-string">"internal_code_md5"</span>
+                        ],
+                        <span class="hljs-attr">"connection"</span>:[
+                            &#123;
+                                <span class="hljs-attr">"jdbcUrl"</span>:[
+                                    <span class="hljs-string">"jdbc:mysql://192.168.1.200:3306/test"</span>
+                                ],
+                                <span class="hljs-attr">"table"</span>:[
+                                    <span class="hljs-string">"code_t"</span>
+                                ]
+                            &#125;
+                        ]
+                    &#125;
+                &#125;,
+                <span class="hljs-attr">"writer"</span>:&#123;
+                    <span class="hljs-attr">"name"</span>:<span class="hljs-string">"elasticsearchwriter"</span>,
+                    <span class="hljs-attr">"parameter"</span>:&#123;
+                        <span class="hljs-attr">"endpoint"</span>:<span class="hljs-string">"http://192.168.1.200:9200"</span>,
+                        <span class="hljs-attr">"accessId"</span>:<span class="hljs-string">"1"</span>,
+                        <span class="hljs-attr">"accessKey"</span>:<span class="hljs-string">"1"</span>,
+                        <span class="hljs-attr">"index"</span>:<span class="hljs-string">"code_t"</span>,
+                        <span class="hljs-attr">"type"</span>:<span class="hljs-string">"_doc"</span>,
+                        <span class="hljs-attr">"cleanup"</span>:<span class="hljs-literal">true</span>,
+                        <span class="hljs-attr">"dynamic"</span>:<span class="hljs-literal">true</span>,
+                        <span class="hljs-attr">"batchSize"</span>:<span class="hljs-number">5000</span>,
+                        <span class="hljs-attr">"splitter"</span>:<span class="hljs-string">","</span>,
+                        <span class="hljs-attr">"column"</span>:[
+                            &#123;
+                                <span class="hljs-attr">"name"</span>:<span class="hljs-string">"code"</span>,
+                                <span class="hljs-attr">"type"</span>:<span class="hljs-string">"long"</span>
+                            &#125;,
+                            &#123;
+                                <span class="hljs-attr">"name"</span>:<span class="hljs-string">"internal_code"</span>,
+                                <span class="hljs-attr">"type"</span>:<span class="hljs-string">"text"</span>
+                            &#125;,
+                            &#123;
+                                <span class="hljs-attr">"name"</span>:<span class="hljs-string">"internal_code_md5"</span>,
+                                <span class="hljs-attr">"type"</span>:<span class="hljs-string">"text"</span>
+                            &#125;
+                        ]
+                    &#125;
+                &#125;
+            &#125;
+        ]
+    &#125;
+&#125;</code></pre></div>
+
+<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>运行需要python环境，官方推荐2.6，我本地装的是2.7，实测可以正常使用</p>
+<div class="hljs"><pre><code class="hljs vim"><span class="hljs-keyword">python</span> datax.<span class="hljs-keyword">py</span> ./es.json</code></pre></div>
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://blog.csdn.net/Zsigner/article/details/108362724" target="_blank" rel="noopener">【DataX 增量同步】Mysql 同步数据到 es（Elasticsearch）</a></p>
+<p><a href="https://blog.csdn.net/ASN_forever/article/details/106340961" target="_blank" rel="noopener">datax从mysql同步数据到elasticsearch（使用es的动态模板）</a></p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>DataX</tag>
+        <tag>Mysql</tag>
+        <tag>Elasticsearch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Docker使用宿主代理</title>
     <url>/post/21f939f5.html</url>
     <content><![CDATA[<p><img src="https://img.yjll.art/img/20200428102310.png" srcset="/img/loading.gif" alt="20200428102310"></p>
@@ -46,164 +214,6 @@ sudo<span class="hljs-built_in"> service </span>docker restart</code></pre></div
       </categories>
       <tags>
         <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Elasticsearch使用JSON字符串的原生DSL查询</title>
-    <url>/post/3b7237cd.html</url>
-    <content><![CDATA[<blockquote>
-<p>注：本文的<code>spring-boot-starter-data-elasticsearch</code>的版本为<code>2.2.10.RELEASE</code><br>Elasticsearch版本为<code>6.8.12</code></p>
-</blockquote>
-<p><code>RestHighLevelClient</code>是ES官方推荐使用的客户端，新版本的<code>spring-data-elasticsearch</code>也对<code>RestHighLevelClient</code>进行了支持，使用<code>ElasticsearchRestTemplate</code>对<code>RestHighLevelClient</code>进行封装，我们直接使用<code>ElasticsearchRestTemplate</code>即可，但是对于参数较多特别是有嵌套聚合的查询，使用Spring提供的API过于繁琐，我们想使用原生的DSL进行查询，但是<code>ElasticsearchRestTemplate</code>并不支持这种写法。我们知道<code>ElasticsearchRestTemplate</code>底层一定通过JSON传输，分析内部实现，看看实现方式。</p>
-<h3 id="ElasticsearchRestTemplate底层"><a href="#ElasticsearchRestTemplate底层" class="headerlink" title="ElasticsearchRestTemplate底层"></a>ElasticsearchRestTemplate底层</h3><p>拿ElasticsearchRestTemplate#query这个方法举例，<code>query</code>调用<code>client.search()</code>，这个client就是<code>RestHighLevelClient</code>，Spring对其进行了二次封装。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Override</span>
-<span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">query</span><span class="hljs-params">(SearchQuery query, ResultsExtractor&lt;T&gt; resultsExtractor)</span> </span>&#123;
-	SearchResponse response = doSearch(prepareSearch(query, Optional.ofNullable(query.getQuery()), <span class="hljs-keyword">null</span>), query);
-	<span class="hljs-keyword">return</span> resultsExtractor.extract(response);
-&#125;
-
-   <span class="hljs-function"><span class="hljs-keyword">private</span> SearchResponse <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest, SearchQuery searchQuery)</span> </span>&#123;
-	prepareSearch(searchRequest, searchQuery);
-
-	<span class="hljs-keyword">try</span> &#123;
-		<span class="hljs-keyword">return</span> client.search(searchRequest, RequestOptions.DEFAULT);
-	&#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;
-		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ElasticsearchException(<span class="hljs-string">"Error for search request with scroll: "</span> + searchRequest.toString(), e);
-	&#125;
-&#125;</code></pre></div>
-
-<p>继续看<code>RestHighLevelClient#search</code>方法，主要是对参数和返回值进行封装，层层跟进该方法会调用<code>client.performRequest</code>，此处的<code>client</code>并非指<code>RestHighLevelClient</code>，而是更底层的客户端<code>RestClient</code>。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> SearchResponse <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest, RequestOptions options)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    <span class="hljs-keyword">return</span> performRequestAndParseEntity(
-            searchRequest,
-            r -&gt; RequestConverters.search(r, <span class="hljs-string">"_search"</span>),
-            options,
-            SearchResponse::fromXContent,
-            emptySet());
-&#125;
-
-<span class="hljs-keyword">private</span> &lt;Req, Resp&gt; <span class="hljs-function">Resp <span class="hljs-title">internalPerformRequest</span><span class="hljs-params">(Req request,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Req, Request, IOException&gt; requestConverter,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        RequestOptions options,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Response, Resp, IOException&gt; responseConverter,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        Set&lt;Integer&gt; ignores)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    Request req = requestConverter.apply(request);
-    req.setOptions(options);
-    Response response;
-    <span class="hljs-keyword">try</span> &#123;
-        response = client.performRequest(req);
-    &#125; <span class="hljs-keyword">catch</span> (ResponseException e) &#123;
-        <span class="hljs-keyword">if</span> (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) &#123;
-            <span class="hljs-keyword">try</span> &#123;
-                <span class="hljs-keyword">return</span> responseConverter.apply(e.getResponse());
-            &#125; <span class="hljs-keyword">catch</span> (Exception innerException) &#123;
-                <span class="hljs-comment">// the exception is ignored as we now try to parse the response as an error.</span>
-                <span class="hljs-comment">// this covers cases like get where 404 can either be a valid document not found response,</span>
-                <span class="hljs-comment">// or an error for which parsing is completely different. We try to consider the 404 response as a valid one</span>
-                <span class="hljs-comment">// first. If parsing of the response breaks, we fall back to parsing it as an error.</span>
-                <span class="hljs-keyword">throw</span> parseResponseException(e);
-            &#125;
-        &#125;
-        <span class="hljs-keyword">throw</span> parseResponseException(e);
-    &#125;
-
-    <span class="hljs-keyword">try</span> &#123;
-        <span class="hljs-keyword">return</span> responseConverter.apply(response);
-    &#125; <span class="hljs-keyword">catch</span>(Exception e) &#123;
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Unable to parse response body for "</span> + response, e);
-    &#125;
-&#125;</code></pre></div>
-
-<p><code>RestClient#performRequest</code>接受的参数为<code>org.elasticsearch.client.Request</code>，其中重要的参数有一下几个:<br><code>method</code>:Http的方法<code>GET</code>,<code>POST</code>等<br><code>endpoint</code>:包含<code>index</code>,<code>type</code>,查询类别等,如<code>code/data/_search</code><br><code>entity</code>:包好JSON的实体</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">performRequest</span><span class="hljs-params">(Request request)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    SyncResponseListener listener = <span class="hljs-keyword">new</span> SyncResponseListener(maxRetryTimeoutMillis);
-    performRequestAsyncNoCatch(request, listener);
-    <span class="hljs-keyword">return</span> listener.get();
-&#125;
-
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Request</span> </span>&#123;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String method;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String endpoint;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, String&gt; parameters = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
-
-    <span class="hljs-keyword">private</span> HttpEntity entity;
-    <span class="hljs-keyword">private</span> RequestOptions options = RequestOptions.DEFAULT;
-&#125;</code></pre></div>
-
-<h3 id="使用RestClient进行请求"><a href="#使用RestClient进行请求" class="headerlink" title="使用RestClient进行请求"></a>使用RestClient进行请求</h3><p>知道底层的运行方式，我们构建一个Request再调用<code>RestClient#performRequest</code>即可。因为涉及到字符串拼接和json序列化，用Java不太方便，我这里使用Groovy语法编写。</p>
-<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">"""</span>
-<span class="hljs-string">        &#123;</span>
-<span class="hljs-string">          "size": 0,</span>
-<span class="hljs-string">          "query": &#123;</span>
-<span class="hljs-string">            "terms": &#123;</span>
-<span class="hljs-string">              "xxx": [</span>
-<span class="hljs-string">                $&#123;xxx&#125;</span>
-<span class="hljs-string">              ]</span>
-<span class="hljs-string">            &#125;</span>
-<span class="hljs-string">          &#125;,</span>
-<span class="hljs-string">          "aggs": &#123;</span>
-<span class="hljs-string">            "first": &#123;</span>
-<span class="hljs-string">              "value_count": &#123;</span>
-<span class="hljs-string">                "field": "first_id"</span>
-<span class="hljs-string">              &#125;</span>
-<span class="hljs-string">            &#125;,</span>
-<span class="hljs-string">            "second": &#123;</span>
-<span class="hljs-string">              "value_count": &#123;</span>
-<span class="hljs-string">                "field": "second_id"</span>
-<span class="hljs-string">              &#125;</span>
-<span class="hljs-string">            &#125;</span>
-<span class="hljs-string">          &#125;</span>
-<span class="hljs-string">        &#125;</span>
-<span class="hljs-string">        """</span>
-String endpoint = <span class="hljs-string">'code/data/_search'</span>
-Request request = <span class="hljs-keyword">new</span> Request(HttpPost.METHOD_NAME, endpoint);
-request.setJsonEntity(dsl)
-
-Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().performRequest(request)
-
-<span class="hljs-keyword">def</span> respJson = <span class="hljs-keyword">new</span> JsonSlurper().parse(response.getEntity().getContent())
-
-CodeTerms codeTerms = <span class="hljs-keyword">new</span> CodeTerms().with &#123;
-    firstCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'first'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
-    secondCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'second'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
-    it
-&#125;</code></pre></div>
-
-<h3 id="使用RestHighLevelClient直接进行简单查询"><a href="#使用RestHighLevelClient直接进行简单查询" class="headerlink" title="使用RestHighLevelClient直接进行简单查询"></a>使用RestHighLevelClient直接进行简单查询</h3><p>简单查询，使用QueryBuilders组装SearchRequest</p>
-<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">'''</span>
-<span class="hljs-string">&#123;</span>
-<span class="hljs-string">  "range": &#123;</span>
-<span class="hljs-string">      "second_upload_time": &#123;</span>
-<span class="hljs-string">      "gte": "2020-06-01 00:00:00",</span>
-<span class="hljs-string">      "lte": "2020-06-02 00:00:00"</span>
-<span class="hljs-string">      &#125;</span>
-<span class="hljs-string">  &#125;</span>
-<span class="hljs-string">&#125;</span>
-<span class="hljs-string">'''</span>
-SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
-SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"code"</span>)
-        .types(<span class="hljs-string">"data"</span>)
-        .source(ssb)
-<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
-
-<h3 id="使用ElasticsearchRestTemplate直接进行简单查询"><a href="#使用ElasticsearchRestTemplate直接进行简单查询" class="headerlink" title="使用ElasticsearchRestTemplate直接进行简单查询"></a>使用ElasticsearchRestTemplate直接进行简单查询</h3><p>使用StringQuery基于DSL定义的JSON的查询，底层使用<code>SearchRequest</code></p>
-<div class="hljs"><pre><code class="hljs Java">StringQuery stringQuery = <span class="hljs-keyword">new</span> StringQuery(
-		<span class="hljs-string">"&#123;\"query\":&#123;\"bool\":&#123;\"must\":[&#123;\"term\":&#123;\"id\":\"1\"&#125;&#125;],\"must_not\":[],</span>
-<span class="hljs-string">		\"should\":[]&#125;&#125;,\"from\":0,\"size\":10,\"sort\":[],\"aggs\":&#123;&#125;&#125;"</span>);
-    searchQuery.addIndices(<span class="hljs-string">"test"</span>);
-    searchQuery.addTypes(<span class="hljs-string">"test"</span>);
-					
-List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;</code></pre></div>
-
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
-<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
-<p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
-<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
-]]></content>
-      <tags>
-        <tag>Elasticsearch</tag>
-        <tag>Java</tag>
-        <tag>Groovy</tag>
       </tags>
   </entry>
   <entry>
@@ -263,53 +273,6 @@ docker run \
       </categories>
       <tags>
         <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java加密压缩Zip</title>
-    <url>/post/45e649c7.html</url>
-    <content><![CDATA[<p>JDK自带的ZIP操作接口（java.util.zip包）不直接支持加密压缩，项目中需要用到加密压缩，在网上查了查，已经有人封装好了。<a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j</a>功能比较强大，支持加密、解密压缩，支持文件的添加、删除等。</p>
-<h3 id="使用Zip4j进行加密压缩"><a href="#使用Zip4j进行加密压缩" class="headerlink" title="使用Zip4j进行加密压缩"></a>使用Zip4j进行加密压缩</h3><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>net.lingala.zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.4<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
-
-
-<div class="hljs"><pre><code class="hljs java">
-<span class="hljs-keyword">byte</span>[] buffer = writer.toString().getBytes(StandardCharsets.US_ASCII);
-
-ZipParameters zipParameters = <span class="hljs-keyword">new</span> ZipParameters();
-<span class="hljs-comment">// 使用密码</span>
-zipParameters.setEncryptFiles(<span class="hljs-keyword">true</span>);
-<span class="hljs-comment">// 加密方式</span>
-zipParameters.setEncryptionMethod(EncryptionMethod.AES);
-zipParameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
-<span class="hljs-comment">// zip中的文件名</span>
-zipParameters.setFileNameInZip(String.format(<span class="hljs-string">"%s.txt"</span>, packageName));
-
-File tempFile = File.createTempFile(packageName, <span class="hljs-string">".zip"</span>);
-<span class="hljs-comment">// 先删除，fileZip会自动创建</span>
-tempFile.delete();
-log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.getAbsolutePath());
-
-<span class="hljs-keyword">new</span> ZipFile(tempFile, <span class="hljs-keyword">this</span>.password.toCharArray()).addStream(<span class="hljs-keyword">new</span> ByteArrayInputStream(buffer), zipParameters);</code></pre></div>
-
-<p>我生成压缩文件是为了上传使用，所以使用了<code>File.createTempFile</code>创建了一个临时文件，实际使用时发现生成压缩包时<code>zip4j</code>会判断我们传入的<code>file</code>是否为一个zip文件，我们这个文件是临时创建的是一个长度为0的空文件，所以直接报错了。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (zip4jRaf.length() &lt; ENDHDR) &#123;
-    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ZipException(<span class="hljs-string">"Zip file size less than minimum expected zip file size. "</span> +
-        <span class="hljs-string">"Probably not a zip file or a corrupted zip file"</span>);
-&#125;</code></pre></div>
-
-<p>我再<code>File.createTempFile</code>后又将这个文件删除了，把生成文件的任务交给<code>zip4j</code>去处理，这样就没有问题了。</p>
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j - A Java library for zip files / streams</a></p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Zip</tag>
       </tags>
   </entry>
   <entry>
@@ -524,6 +487,365 @@ beans &#123;
       </tags>
   </entry>
   <entry>
+    <title>Java加密压缩Zip</title>
+    <url>/post/45e649c7.html</url>
+    <content><![CDATA[<p>JDK自带的ZIP操作接口（java.util.zip包）不直接支持加密压缩，项目中需要用到加密压缩，在网上查了查，已经有人封装好了。<a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j</a>功能比较强大，支持加密、解密压缩，支持文件的添加、删除等。</p>
+<h3 id="使用Zip4j进行加密压缩"><a href="#使用Zip4j进行加密压缩" class="headerlink" title="使用Zip4j进行加密压缩"></a>使用Zip4j进行加密压缩</h3><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>net.lingala.zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>zip4j<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.4<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs java">
+<span class="hljs-keyword">byte</span>[] buffer = writer.toString().getBytes(StandardCharsets.US_ASCII);
+
+ZipParameters zipParameters = <span class="hljs-keyword">new</span> ZipParameters();
+<span class="hljs-comment">// 使用密码</span>
+zipParameters.setEncryptFiles(<span class="hljs-keyword">true</span>);
+<span class="hljs-comment">// 加密方式</span>
+zipParameters.setEncryptionMethod(EncryptionMethod.AES);
+zipParameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
+<span class="hljs-comment">// zip中的文件名</span>
+zipParameters.setFileNameInZip(String.format(<span class="hljs-string">"%s.txt"</span>, packageName));
+
+File tempFile = File.createTempFile(packageName, <span class="hljs-string">".zip"</span>);
+<span class="hljs-comment">// 先删除，fileZip会自动创建</span>
+tempFile.delete();
+log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.getAbsolutePath());
+
+<span class="hljs-keyword">new</span> ZipFile(tempFile, <span class="hljs-keyword">this</span>.password.toCharArray()).addStream(<span class="hljs-keyword">new</span> ByteArrayInputStream(buffer), zipParameters);</code></pre></div>
+
+<p>我生成压缩文件是为了上传使用，所以使用了<code>File.createTempFile</code>创建了一个临时文件，实际使用时发现生成压缩包时<code>zip4j</code>会判断我们传入的<code>file</code>是否为一个zip文件，我们这个文件是临时创建的是一个长度为0的空文件，所以直接报错了。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (zip4jRaf.length() &lt; ENDHDR) &#123;
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ZipException(<span class="hljs-string">"Zip file size less than minimum expected zip file size. "</span> +
+        <span class="hljs-string">"Probably not a zip file or a corrupted zip file"</span>);
+&#125;</code></pre></div>
+
+<p>我再<code>File.createTempFile</code>后又将这个文件删除了，把生成文件的任务交给<code>zip4j</code>去处理，这样就没有问题了。</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/srikanth-lingala/zip4j" target="_blank" rel="noopener">Zip4j - A Java library for zip files / streams</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Zip</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mysql主从配置</title>
+    <url>/post/776d488.html</url>
+    <content><![CDATA[<p>主从复制是指一台服务器充当主数据库服务器，另一台或多台服务器充当从数据库服务器，主服务器中的数据自动复制到从服务器之中。对于多级复制，数据库服务器即可充当主机，也可充当从机。MySQL主从复制的基础是主服务器对数据库修改记录二进制日志，从服务器通过主服务器的二进制日志自动执行更新。</p>
+<a id="more"></a>
+
+
+<h3 id="主库配置"><a href="#主库配置" class="headerlink" title="主库配置"></a>主库配置</h3><div class="hljs"><pre><code class="hljs routeros">$ cat ./mysql-master/etc/my.cnf 
+[mysqld]
+<span class="hljs-comment">## 设置server_id，一般设置为IP，注意要唯一</span>
+<span class="hljs-attribute">server_id</span>=1  
+<span class="hljs-comment">## 复制过滤：也就是指定哪个数据库不用同步（mysql库一般不同步）</span>
+<span class="hljs-attribute">binlog-ignore-db</span>=mysql  
+<span class="hljs-comment">## 开启二进制日志功能，可以随便取，最好有含义（关键就是这里了）</span>
+<span class="hljs-attribute">log-bin</span>=replicas-mysql-bin  
+<span class="hljs-comment">## 为每个session分配的内存，在事务过程中用来存储二进制日志的缓存</span>
+<span class="hljs-attribute">binlog_cache_size</span>=1M  
+<span class="hljs-comment">## 主从复制的格式（mixed,statement,row，默认格式是statement）</span>
+<span class="hljs-attribute">binlog_format</span>=mixed  
+<span class="hljs-comment">## 二进制日志自动删除/过期的天数。默认值为0，表示不自动删除。</span>
+<span class="hljs-attribute">expire_logs_days</span>=7  
+<span class="hljs-comment">## 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断。</span>
+<span class="hljs-comment">## 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致</span>
+<span class="hljs-attribute">slave_skip_errors</span>=1062
+
+<span class="hljs-comment"># 忽略大小写</span>
+<span class="hljs-attribute">lower_case_table_names</span>=1</code></pre></div>
+
+
+
+<p>添加同步账户</p>
+<p><code>grant replication slave on *.* to &#39;slave&#39;@&#39;%&#39; identified by &#39;slave@123456&#39;;</code></p>
+<p>查看主库状态</p>
+<div class="hljs"><pre><code class="hljs asciidoc">
+mysql&gt; show master status;
+<span class="hljs-code">+---------------------------+</span>----------<span class="hljs-code">+--------------+</span>------------------<span class="hljs-code">+-------------------+</span>
+| File                      | Position | Binlog<span class="hljs-emphasis">_Do_</span>DB | Binlog<span class="hljs-emphasis">_Ignore_</span>DB | Executed<span class="hljs-emphasis">_Gtid_</span>Set |
+<span class="hljs-code">+---------------------------+</span>----------<span class="hljs-code">+--------------+</span>------------------<span class="hljs-code">+-------------------+</span>
+| replicas-mysql-bin.000003 |  2841451 |              | mysql            |                   |
+<span class="hljs-code">+---------------------------+</span>----------<span class="hljs-code">+--------------+</span>------------------<span class="hljs-code">+-------------------+</span>
+1 row in set (0.00 sec)</code></pre></div>
+
+<blockquote>
+<p>File &amp;&amp; Position 需记住配置从库时使用</p>
+</blockquote>
+<h3 id="从库配置"><a href="#从库配置" class="headerlink" title="从库配置"></a>从库配置</h3><div class="hljs"><pre><code class="hljs routeros">$ cat mysql-slave/etc/my.cnf 
+[mysqld]
+<span class="hljs-comment">## 设置server_id，一般设置为IP，注意要唯一</span>
+<span class="hljs-attribute">server_id</span>=101  
+<span class="hljs-comment">## 复制过滤：也就是指定哪个数据库不用同步（mysql库一般不同步）</span>
+<span class="hljs-attribute">binlog-ignore-db</span>=mysql  
+<span class="hljs-comment">## 开启二进制日志功能，以备Slave作为其它Slave的Master时使用</span>
+<span class="hljs-attribute">log-bin</span>=replicas-mysql-slave1-bin  
+<span class="hljs-comment">## 为每个session 分配的内存，在事务过程中用来存储二进制日志的缓存</span>
+<span class="hljs-attribute">binlog_cache_size</span>=1M  
+<span class="hljs-comment">## 主从复制的格式（mixed,statement,row，默认格式是statement）</span>
+<span class="hljs-attribute">binlog_format</span>=mixed  
+<span class="hljs-comment">## 二进制日志自动删除/过期的天数。默认值为0，表示不自动删除。</span>
+<span class="hljs-attribute">expire_logs_days</span>=7  
+<span class="hljs-comment">## 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断。</span>
+<span class="hljs-comment">## 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致</span>
+<span class="hljs-attribute">slave_skip_errors</span>=1062  
+<span class="hljs-comment">## relay_log配置中继日志</span>
+<span class="hljs-attribute">relay_log</span>=replicas-mysql-relay-bin  
+<span class="hljs-comment">## log_slave_updates表示slave将复制事件写进自己的二进制日志</span>
+<span class="hljs-attribute">log_slave_updates</span>=1  
+<span class="hljs-comment">## 防止改变数据(除了特殊的线程)</span>
+<span class="hljs-attribute">read_only</span>=1 
+
+<span class="hljs-attribute">lower_case_table_names</span>=1</code></pre></div>
+
+<p>链接到主库</p>
+<div class="hljs"><pre><code class="hljs routeros">CHANGE MASTER <span class="hljs-keyword">TO</span>
+    <span class="hljs-attribute">MASTER_HOST</span>=<span class="hljs-string">'172.17.0.2'</span>,
+    <span class="hljs-attribute">MASTER_USER</span>=<span class="hljs-string">'slave'</span>,
+    <span class="hljs-attribute">MASTER_PASSWORD</span>=<span class="hljs-string">'slave@123456'</span>,
+    <span class="hljs-attribute">MASTER_LOG_FILE</span>=<span class="hljs-string">'replicas-mysql-bin.000003'</span>,
+    <span class="hljs-attribute">MASTER_LOG_POS</span>=2841451;</code></pre></div>
+
+<p>启动同步</p>
+<div class="hljs"><pre><code class="hljs angelscript">mysql&gt; start slave;
+Query OK, <span class="hljs-number">0</span> rows affected, <span class="hljs-number">1</span> warning (<span class="hljs-number">0.00</span> sec)</code></pre></div>
+
+<p>查询同步状态</p>
+<div class="hljs"><pre><code class="hljs yaml"><span class="hljs-string">mysql&gt;</span> <span class="hljs-string">show</span> <span class="hljs-string">slave</span> <span class="hljs-string">status</span> <span class="hljs-string">\G;</span>
+<span class="hljs-string">***************************</span> <span class="hljs-number">1</span><span class="hljs-string">.</span> <span class="hljs-string">row</span> <span class="hljs-string">***************************</span>
+               <span class="hljs-attr">Slave_IO_State:</span> <span class="hljs-string">Waiting</span> <span class="hljs-string">for</span> <span class="hljs-string">master</span> <span class="hljs-string">to</span> <span class="hljs-string">send</span> <span class="hljs-string">event</span>
+                  <span class="hljs-attr">Master_Host:</span> <span class="hljs-number">172.17</span><span class="hljs-number">.0</span><span class="hljs-number">.2</span>
+                  <span class="hljs-attr">Master_User:</span> <span class="hljs-string">slave</span>
+                  <span class="hljs-attr">Master_Port:</span> <span class="hljs-number">3306</span>
+                <span class="hljs-attr">Connect_Retry:</span> <span class="hljs-number">60</span>
+              <span class="hljs-attr">Master_Log_File:</span> <span class="hljs-string">replicas-mysql-bin.000003</span>
+          <span class="hljs-attr">Read_Master_Log_Pos:</span> <span class="hljs-number">2854957</span>
+               <span class="hljs-attr">Relay_Log_File:</span> <span class="hljs-string">replicas-mysql-relay-bin.000002</span>
+                <span class="hljs-attr">Relay_Log_Pos:</span> <span class="hljs-number">2854848</span>
+        <span class="hljs-attr">Relay_Master_Log_File:</span> <span class="hljs-string">replicas-mysql-bin.000003</span>
+             <span class="hljs-attr">Slave_IO_Running:</span> <span class="hljs-literal">Yes</span>
+            <span class="hljs-attr">Slave_SQL_Running:</span> <span class="hljs-literal">Yes</span>
+              <span class="hljs-attr">Replicate_Do_DB:</span> 
+          <span class="hljs-attr">Replicate_Ignore_DB:</span> 
+           <span class="hljs-attr">Replicate_Do_Table:</span> 
+       <span class="hljs-attr">Replicate_Ignore_Table:</span> 
+      <span class="hljs-attr">Replicate_Wild_Do_Table:</span> 
+  <span class="hljs-attr">Replicate_Wild_Ignore_Table:</span> 
+                   <span class="hljs-attr">Last_Errno:</span> <span class="hljs-number">0</span>
+                   <span class="hljs-attr">Last_Error:</span> 
+                 <span class="hljs-attr">Skip_Counter:</span> <span class="hljs-number">0</span>
+          <span class="hljs-attr">Exec_Master_Log_Pos:</span> <span class="hljs-number">2854957</span>
+              <span class="hljs-attr">Relay_Log_Space:</span> <span class="hljs-number">2855064</span>
+              <span class="hljs-attr">Until_Condition:</span> <span class="hljs-string">None</span>
+               <span class="hljs-attr">Until_Log_File:</span> 
+                <span class="hljs-attr">Until_Log_Pos:</span> <span class="hljs-number">0</span>
+           <span class="hljs-attr">Master_SSL_Allowed:</span> <span class="hljs-literal">No</span>
+           <span class="hljs-attr">Master_SSL_CA_File:</span> 
+           <span class="hljs-attr">Master_SSL_CA_Path:</span> 
+              <span class="hljs-attr">Master_SSL_Cert:</span> 
+            <span class="hljs-attr">Master_SSL_Cipher:</span> 
+               <span class="hljs-attr">Master_SSL_Key:</span> 
+        <span class="hljs-attr">Seconds_Behind_Master:</span> <span class="hljs-number">0</span>
+<span class="hljs-attr">Master_SSL_Verify_Server_Cert:</span> <span class="hljs-literal">No</span>
+                <span class="hljs-attr">Last_IO_Errno:</span> <span class="hljs-number">0</span>
+                <span class="hljs-attr">Last_IO_Error:</span> 
+               <span class="hljs-attr">Last_SQL_Errno:</span> <span class="hljs-number">0</span>
+               <span class="hljs-attr">Last_SQL_Error:</span> 
+  <span class="hljs-attr">Replicate_Ignore_Server_Ids:</span> 
+             <span class="hljs-attr">Master_Server_Id:</span> <span class="hljs-number">1</span>
+                  <span class="hljs-attr">Master_UUID:</span> <span class="hljs-string">306755a5-d46e-11e9-9f46-0242ac110002</span>
+             <span class="hljs-attr">Master_Info_File:</span> <span class="hljs-string">/var/lib/mysql/master.info</span>
+                    <span class="hljs-attr">SQL_Delay:</span> <span class="hljs-number">0</span>
+          <span class="hljs-attr">SQL_Remaining_Delay:</span> <span class="hljs-literal">NULL</span>
+      <span class="hljs-attr">Slave_SQL_Running_State:</span> <span class="hljs-string">Slave</span> <span class="hljs-string">has</span> <span class="hljs-string">read</span> <span class="hljs-string">all</span> <span class="hljs-string">relay</span> <span class="hljs-string">log;</span> <span class="hljs-string">waiting</span> <span class="hljs-string">for</span> <span class="hljs-string">more</span> <span class="hljs-string">updates</span>
+           <span class="hljs-attr">Master_Retry_Count:</span> <span class="hljs-number">86400</span>
+                  <span class="hljs-attr">Master_Bind:</span> 
+      <span class="hljs-attr">Last_IO_Error_Timestamp:</span> 
+     <span class="hljs-attr">Last_SQL_Error_Timestamp:</span> 
+               <span class="hljs-attr">Master_SSL_Crl:</span> 
+           <span class="hljs-attr">Master_SSL_Crlpath:</span> 
+           <span class="hljs-attr">Retrieved_Gtid_Set:</span> 
+            <span class="hljs-attr">Executed_Gtid_Set:</span> 
+                <span class="hljs-attr">Auto_Position:</span> <span class="hljs-number">0</span>
+         <span class="hljs-attr">Replicate_Rewrite_DB:</span> 
+                 <span class="hljs-attr">Channel_Name:</span> 
+           <span class="hljs-attr">Master_TLS_Version:</span> 
+<span class="hljs-number">1</span> <span class="hljs-string">row</span> <span class="hljs-string">in</span> <span class="hljs-string">set</span> <span class="hljs-string">(0.00</span> <span class="hljs-string">sec)</span></code></pre></div>
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://juejin.im/post/6844903921677238285" target="_blank" rel="noopener">Mysql主从复制原理及搭建</a></p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Mqsql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Elasticsearch使用JSON字符串的原生DSL查询</title>
+    <url>/post/3b7237cd.html</url>
+    <content><![CDATA[<blockquote>
+<p>注：本文的<code>spring-boot-starter-data-elasticsearch</code>的版本为<code>2.2.10.RELEASE</code><br>Elasticsearch版本为<code>6.8.12</code></p>
+</blockquote>
+<p><code>RestHighLevelClient</code>是ES官方推荐使用的客户端，新版本的<code>spring-data-elasticsearch</code>也对<code>RestHighLevelClient</code>进行了支持，使用<code>ElasticsearchRestTemplate</code>对<code>RestHighLevelClient</code>进行封装，我们直接使用<code>ElasticsearchRestTemplate</code>即可，但是对于参数较多特别是有嵌套聚合的查询，使用Spring提供的API过于繁琐，我们想使用原生的DSL进行查询，但是<code>ElasticsearchRestTemplate</code>并不支持这种写法。我们知道<code>ElasticsearchRestTemplate</code>底层一定通过JSON传输，分析内部实现，看看实现方式。</p>
+<h3 id="ElasticsearchRestTemplate底层"><a href="#ElasticsearchRestTemplate底层" class="headerlink" title="ElasticsearchRestTemplate底层"></a>ElasticsearchRestTemplate底层</h3><p>拿ElasticsearchRestTemplate#query这个方法举例，<code>query</code>调用<code>client.search()</code>，这个client就是<code>RestHighLevelClient</code>，Spring对其进行了二次封装。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Override</span>
+<span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">query</span><span class="hljs-params">(SearchQuery query, ResultsExtractor&lt;T&gt; resultsExtractor)</span> </span>&#123;
+	SearchResponse response = doSearch(prepareSearch(query, Optional.ofNullable(query.getQuery()), <span class="hljs-keyword">null</span>), query);
+	<span class="hljs-keyword">return</span> resultsExtractor.extract(response);
+&#125;
+
+   <span class="hljs-function"><span class="hljs-keyword">private</span> SearchResponse <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest, SearchQuery searchQuery)</span> </span>&#123;
+	prepareSearch(searchRequest, searchQuery);
+
+	<span class="hljs-keyword">try</span> &#123;
+		<span class="hljs-keyword">return</span> client.search(searchRequest, RequestOptions.DEFAULT);
+	&#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ElasticsearchException(<span class="hljs-string">"Error for search request with scroll: "</span> + searchRequest.toString(), e);
+	&#125;
+&#125;</code></pre></div>
+
+<p>继续看<code>RestHighLevelClient#search</code>方法，主要是对参数和返回值进行封装，层层跟进该方法会调用<code>client.performRequest</code>，此处的<code>client</code>并非指<code>RestHighLevelClient</code>，而是更底层的客户端<code>RestClient</code>。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> SearchResponse <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest, RequestOptions options)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    <span class="hljs-keyword">return</span> performRequestAndParseEntity(
+            searchRequest,
+            r -&gt; RequestConverters.search(r, <span class="hljs-string">"_search"</span>),
+            options,
+            SearchResponse::fromXContent,
+            emptySet());
+&#125;
+
+<span class="hljs-keyword">private</span> &lt;Req, Resp&gt; <span class="hljs-function">Resp <span class="hljs-title">internalPerformRequest</span><span class="hljs-params">(Req request,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Req, Request, IOException&gt; requestConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        RequestOptions options,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Response, Resp, IOException&gt; responseConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        Set&lt;Integer&gt; ignores)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    Request req = requestConverter.apply(request);
+    req.setOptions(options);
+    Response response;
+    <span class="hljs-keyword">try</span> &#123;
+        response = client.performRequest(req);
+    &#125; <span class="hljs-keyword">catch</span> (ResponseException e) &#123;
+        <span class="hljs-keyword">if</span> (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) &#123;
+            <span class="hljs-keyword">try</span> &#123;
+                <span class="hljs-keyword">return</span> responseConverter.apply(e.getResponse());
+            &#125; <span class="hljs-keyword">catch</span> (Exception innerException) &#123;
+                <span class="hljs-comment">// the exception is ignored as we now try to parse the response as an error.</span>
+                <span class="hljs-comment">// this covers cases like get where 404 can either be a valid document not found response,</span>
+                <span class="hljs-comment">// or an error for which parsing is completely different. We try to consider the 404 response as a valid one</span>
+                <span class="hljs-comment">// first. If parsing of the response breaks, we fall back to parsing it as an error.</span>
+                <span class="hljs-keyword">throw</span> parseResponseException(e);
+            &#125;
+        &#125;
+        <span class="hljs-keyword">throw</span> parseResponseException(e);
+    &#125;
+
+    <span class="hljs-keyword">try</span> &#123;
+        <span class="hljs-keyword">return</span> responseConverter.apply(response);
+    &#125; <span class="hljs-keyword">catch</span>(Exception e) &#123;
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Unable to parse response body for "</span> + response, e);
+    &#125;
+&#125;</code></pre></div>
+
+<p><code>RestClient#performRequest</code>接受的参数为<code>org.elasticsearch.client.Request</code>，其中重要的参数有一下几个:<br><code>method</code>:Http的方法<code>GET</code>,<code>POST</code>等<br><code>endpoint</code>:包含<code>index</code>,<code>type</code>,查询类别等,如<code>code/data/_search</code><br><code>entity</code>:包好JSON的实体</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">performRequest</span><span class="hljs-params">(Request request)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    SyncResponseListener listener = <span class="hljs-keyword">new</span> SyncResponseListener(maxRetryTimeoutMillis);
+    performRequestAsyncNoCatch(request, listener);
+    <span class="hljs-keyword">return</span> listener.get();
+&#125;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Request</span> </span>&#123;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String method;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String endpoint;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, String&gt; parameters = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+
+    <span class="hljs-keyword">private</span> HttpEntity entity;
+    <span class="hljs-keyword">private</span> RequestOptions options = RequestOptions.DEFAULT;
+&#125;</code></pre></div>
+
+<h3 id="使用RestClient进行请求"><a href="#使用RestClient进行请求" class="headerlink" title="使用RestClient进行请求"></a>使用RestClient进行请求</h3><p>知道底层的运行方式，我们构建一个Request再调用<code>RestClient#performRequest</code>即可。因为涉及到字符串拼接和json序列化，用Java不太方便，我这里使用Groovy语法编写。</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">"""</span>
+<span class="hljs-string">        &#123;</span>
+<span class="hljs-string">          "size": 0,</span>
+<span class="hljs-string">          "query": &#123;</span>
+<span class="hljs-string">            "terms": &#123;</span>
+<span class="hljs-string">              "xxx": [</span>
+<span class="hljs-string">                $&#123;xxx&#125;</span>
+<span class="hljs-string">              ]</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;,</span>
+<span class="hljs-string">          "aggs": &#123;</span>
+<span class="hljs-string">            "first": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "first_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;,</span>
+<span class="hljs-string">            "second": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "second_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;</span>
+<span class="hljs-string">        &#125;</span>
+<span class="hljs-string">        """</span>
+String endpoint = <span class="hljs-string">'code/data/_search'</span>
+Request request = <span class="hljs-keyword">new</span> Request(HttpPost.METHOD_NAME, endpoint);
+request.setJsonEntity(dsl)
+
+Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().performRequest(request)
+
+<span class="hljs-keyword">def</span> respJson = <span class="hljs-keyword">new</span> JsonSlurper().parse(response.getEntity().getContent())
+
+CodeTerms codeTerms = <span class="hljs-keyword">new</span> CodeTerms().with &#123;
+    firstCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'first'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    secondCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'second'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    it
+&#125;</code></pre></div>
+
+<h3 id="使用RestHighLevelClient直接进行简单查询"><a href="#使用RestHighLevelClient直接进行简单查询" class="headerlink" title="使用RestHighLevelClient直接进行简单查询"></a>使用RestHighLevelClient直接进行简单查询</h3><p>简单查询，使用QueryBuilders组装SearchRequest</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">'''</span>
+<span class="hljs-string">&#123;</span>
+<span class="hljs-string">  "range": &#123;</span>
+<span class="hljs-string">      "second_upload_time": &#123;</span>
+<span class="hljs-string">      "gte": "2020-06-01 00:00:00",</span>
+<span class="hljs-string">      "lte": "2020-06-02 00:00:00"</span>
+<span class="hljs-string">      &#125;</span>
+<span class="hljs-string">  &#125;</span>
+<span class="hljs-string">&#125;</span>
+<span class="hljs-string">'''</span>
+SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
+SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"code"</span>)
+        .types(<span class="hljs-string">"data"</span>)
+        .source(ssb)
+<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
+
+<h3 id="使用ElasticsearchRestTemplate直接进行简单查询"><a href="#使用ElasticsearchRestTemplate直接进行简单查询" class="headerlink" title="使用ElasticsearchRestTemplate直接进行简单查询"></a>使用ElasticsearchRestTemplate直接进行简单查询</h3><p>使用StringQuery基于DSL定义的JSON的查询，底层使用<code>SearchRequest</code></p>
+<div class="hljs"><pre><code class="hljs Java">StringQuery stringQuery = <span class="hljs-keyword">new</span> StringQuery(
+		<span class="hljs-string">"&#123;\"query\":&#123;\"bool\":&#123;\"must\":[&#123;\"term\":&#123;\"id\":\"1\"&#125;&#125;],\"must_not\":[],</span>
+<span class="hljs-string">		\"should\":[]&#125;&#125;,\"from\":0,\"size\":10,\"sort\":[],\"aggs\":&#123;&#125;&#125;"</span>);
+    searchQuery.addIndices(<span class="hljs-string">"test"</span>);
+    searchQuery.addTypes(<span class="hljs-string">"test"</span>);
+					
+List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;</code></pre></div>
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
+<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
+<p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
+<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
+]]></content>
+      <tags>
+        <tag>Elasticsearch</tag>
+        <tag>Groovy</tag>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Manjaro安装与配置</title>
     <url>/post/d9d0da7d.html</url>
     <content><![CDATA[<p>闲来无事折腾了一下Manjaro，本文记录安装配置Manjaro的过程，一方面备忘，另一方面希望可以帮助到有需要的人</p>
@@ -578,32 +900,6 @@ sudo pacman -S google-chrome</code></pre></div>
       <tags>
         <tag>Manjaro</tag>
         <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MacOS上玩怀旧游戏</title>
-    <url>/post/12c7a153.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/OpenEmu.png" srcset="/img/loading.gif" alt="OpenEmu"></p>
-<p>OpenEmu是MacOS上的开源项目模拟器项目，它整合了几乎全部主流的游戏机平台，你可以在mac系统上畅玩FC/NES、SFC/SNES、N64、PlayStation、GameBoy等游戏。</p>
-<h3 id="下载模拟器"><a href="#下载模拟器" class="headerlink" title="下载模拟器"></a>下载模拟器</h3><p>官网：<a href="http://openemu.org" target="_blank" rel="noopener">http://openemu.org</a></p>
-<p>注意一定要下载里面的Experimental版本，正式版不支持Arcade街机游戏。</p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p><img src="https://img.yjll.art/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
-<p>打开后在核心中下载对应的游戏核心，由于源在国外，访问不是很稳定，可以借助梯子解决。可以去单独下载核心core，放到指定位置<code>/Users/用户名/Library/Application Support/OpenEmu/Cores</code></p>
-<p>后边的系统文件，指的是我们常说的BIOS，BIOS 就是从游戏机里 dump 出来的基本 IO 模块。绝大部分模拟器都需要这个模块来启动游戏。为了规避版权问题， BIOS 是要自己找的。因为 BIOS 的版权属于游戏机厂商（而模拟器本身只要不提供 BIOS 一般是不侵权的）。</p>
-<p>BIOS文件放置在mac系统的位置 <code>/Users/用户名/Library/Application Support/OpenEmu/BIOS</code></p>
-<h3 id="游戏下载"><a href="#游戏下载" class="headerlink" title="游戏下载"></a>游戏下载</h3><p>核心设置好后，我们还缺少对应的游戏，比如小时候常玩的任天堂(Nintendo)红白机，可以在下边的这个网站上下载</p>
-<p><a href="https://www.retrostic.com/roms/nes" target="_blank" rel="noopener">https://www.retrostic.com/roms/nes</a></p>
-<p>我们将下载后的nes文件拖拽到Nintendo(NES)对应的窗口中即可。</p>
-<p>对于如合金弹头和拳皇等街机游戏直接运行的话会提示缺少文件，还需要和游戏配套的游戏BIOS，可通过以下链接下载。</p>
-<p><a href="https://www.mamechannel.it/pages/BIOS.php" target="_blank" rel="noopener">www.mamechannel.it</a></p>
-<p>附街机游戏下载<br><a href="https://ia803104.us.archive.org/view_archive.php?archive=/8/items/MAME217RomsOnlyMerged/MAME%200.217%20ROMs%20%28merged%29.zip" target="_blank" rel="noopener">archive.org</a></p>
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.imtrq.com/archives/1629" target="_blank" rel="noopener">MacOS上的MAME街机模拟器，附三国战记+恐龙快打+拳皇97</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/42108658" target="_blank" rel="noopener">想在Mac上玩红白机吗？OpenEmu了解一下！</a></p>
-<p><a href="https://post.smzdm.com/p/aoo8lr79/" target="_blank" rel="noopener">OpenEmu，mac上最完整的街机和游戏机怀旧全能模拟器</a></p>
-]]></content>
-      <tags>
-        <tag>MacOS</tag>
-        <tag>OpenEmu</tag>
       </tags>
   </entry>
   <entry>
@@ -733,9 +1029,9 @@ mysql&gt;</code></pre></div>
         <category>Linux</category>
       </categories>
       <tags>
+        <tag>Mysql</tag>
         <tag>Docker</tag>
         <tag>Aliyun</tag>
-        <tag>Mysql</tag>
       </tags>
   </entry>
   <entry>
@@ -801,6 +1097,424 @@ mysql&gt;</code></pre></div>
         <tag>Nginx</tag>
         <tag>Https</tag>
         <tag>Certbot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Redis进阶</title>
+    <url>/post/3a12d43e.html</url>
+    <content><![CDATA[<p>日常开发中Redis是常用的缓存工具，Redis其实不仅仅能做缓存，Redis支持string(字符串)、list(列表)、hash(字典)、set(集合) 和zset(有序集合)这五种数据结构，本文介绍更多Redis的使用场景。</p>
+<a id="more"></a>
+
+
+<h3 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h3><p><code>SET key value [EX seconds] [PX milliseconds] [NX|XX]</code></p>
+<p>将字符串值 value 关联到 key 。</p>
+<p>如果 key 已经持有其他值， SET 就覆写旧值，无视类型。</p>
+<p>对于某个原本带有生存时间（TTL）的键来说， 当 SET 命令成功在这个键上执行时， 这个键原有的 TTL 将被清除。</p>
+<p>可选参数</p>
+<p>从 Redis 2.6.12 版本开始， SET 命令的行为可以通过一系列参数来修改：</p>
+<p>EX second ：设置键的过期时间为 second 秒。<br>PX millisecond ：设置键的过期时间为 millisecond 毫秒。<br>NX ：只在键不存在时，才对键进行设置操作。 SET key value NX 效果等同于 SETNX key value 。<br>XX ：只在键已经存在时，才对键进行设置操作。</p>
+<blockquote>
+<p>因为 SET 命令可以通过参数来实现和 SETNX 、 SETEX 和 PSETEX 三个命令的效果，所以将来的 Redis 版本可能会废弃并最终移除 SETNX 、 SETEX 和 PSETEX 这三个命令。</p>
+</blockquote>
+<p>使用RedisTemplate加锁</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">lock</span><span class="hljs-params">(String lockKey, String lockValue, <span class="hljs-keyword">int</span> expire)</span> </span>&#123;
+    <span class="hljs-comment">// 加锁</span>
+    String lock = stringRedisTemplate.execute((RedisCallback&lt;String&gt;) connection -&gt; &#123;
+        JedisCommands commands = (JedisCommands) connection.getNativeConnection();
+        <span class="hljs-keyword">return</span> commands.set(lockKey, lockValue, <span class="hljs-string">"NX"</span>, <span class="hljs-string">"EX"</span>, expire);
+    &#125;);
+
+    <span class="hljs-keyword">return</span> Objects.equals(LOCK_RESULT, lock);
+&#125;</code></pre></div>
+<p>使用RedisTemplate解锁</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">unlock</span><span class="hljs-params">(String lockKey)</span></span>&#123;
+    <span class="hljs-comment">// 解锁</span>
+    stringRedisTemplate.delete(lockKey);
+&#125;</code></pre></div>
+
+<blockquote>
+<p>锁不具备拥有者标识，即任何客户端都可以解锁。</p>
+</blockquote>
+<div class="hljs"><pre><code class="hljs lua"><span class="hljs-keyword">if</span> redis.call(<span class="hljs-string">"get"</span>, KEYS[<span class="hljs-number">1</span>]) == ARGV[<span class="hljs-number">1</span>]
+<span class="hljs-keyword">then</span>
+    <span class="hljs-keyword">return</span> redis.call(<span class="hljs-string">"del"</span>, KEYS)
+<span class="hljs-keyword">else</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>
+<span class="hljs-keyword">end</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">unlock</span><span class="hljs-params">(String lockKey,String requestId)</span></span>&#123;
+
+    List&lt;String&gt; keys = Collections.singletonList(lockKey);
+    <span class="hljs-comment">// 采用lua脚本方式保证在多线程环境下也是原子操作</span>
+    DefaultRedisScript&lt;Long&gt; script = <span class="hljs-keyword">new</span> DefaultRedisScript&lt;&gt;();
+    script.setResultType(Long<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;
+    script.setScriptText(luaScriptText);
+    stringRedisTemplate.execute(script,keys,requestId);
+&#125;</code></pre></div>
+
+<h3 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h3><h4 id="可使用list实现一个简单的消息队列"><a href="#可使用list实现一个简单的消息队列" class="headerlink" title="可使用list实现一个简单的消息队列"></a>可使用list实现一个简单的消息队列</h4><p><code>RPUSH key value [value ...]</code></p>
+<p>将一个或多个值 value 插入到列表 key 的表尾(最右边)。</p>
+<div class="hljs"><pre><code class="hljs python">redis_conn.lpush(key,<span class="hljs-number">3</span>)</code></pre></div>
+
+
+<p><code>LRANGE key start stop</code></p>
+<p>返回列表 key 中指定区间内的元素，区间以偏移量 start 和 stop 指定。</p>
+<div class="hljs"><pre><code class="hljs python">redis_conn.lrange(key,<span class="hljs-number">0</span>,<span class="hljs-number">-1</span>)</code></pre></div>
+
+<p><code>BLPOP key [key ...] timeout</code></p>
+<p>BLPOP 是列表的阻塞式(blocking)弹出原语。</p>
+<div class="hljs"><pre><code class="hljs python"><span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+    <span class="hljs-comment"># 阻塞</span>
+    data = redis_conn.blpop(key)
+    print(data)</code></pre></div>
+
+
+<h3 id="有序集合"><a href="#有序集合" class="headerlink" title="有序集合"></a>有序集合</h3><h4 id="有序集合实现排行榜功能"><a href="#有序集合实现排行榜功能" class="headerlink" title="有序集合实现排行榜功能"></a>有序集合实现排行榜功能</h4><p><code>ZINCRBY key increment member</code></p>
+<p>为有序集 key 的成员 member 的 score 值加上增量 increment 。</p>
+<div class="hljs"><pre><code class="hljs java">BoundZSetOperations&lt;String, String&gt; operations = stringRedisTemplate.boundZSetOps(INVITE_ACTIVITY_KEY);
+
+operations.incrementScore(userId.toString(), <span class="hljs-number">1</span>);</code></pre></div>
+
+<p><code>ZREVRANGE key start stop [WITHSCORES]</code></p>
+<p>返回有序集 key 中，指定区间内的成员。<br><strong>bscore相同时会按照member字典顺序排序</strong></p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// 取前十名</span>
+Set&lt;ZSetOperations.TypedTuple&lt;String&gt;&gt; typedTuples = operations.reverseRangeWithScores(<span class="hljs-number">0</span>, <span class="hljs-number">9</span>);
+<span class="hljs-comment">// 遍历取用户Id和积分</span>
+<span class="hljs-keyword">for</span> (ZSetOperations.TypedTuple&lt;String&gt; typedTuple : typedTuples) &#123;
+    Integer inviterId = Integer.parseInt(typedTuple.getValue().trim());
+
+    <span class="hljs-comment">// 邀请用户数量</span>
+    Integer inviteCount = typedTuple.getScore().intValue();
+&#125;</code></pre></div>
+<p><code>ZSCORE key member</code></p>
+<p>返回有序集 key 中，成员 member 的 score 值。</p>
+<div class="hljs"><pre><code class="hljs java">Double score = operations.score(userId.toString());</code></pre></div>
+
+<h3 id="发布-订阅"><a href="#发布-订阅" class="headerlink" title="发布/订阅"></a>发布/订阅</h3><h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><p><code>MULTI</code></p>
+<p>标记一个事务块的开始。</p>
+<p>事务块内的多条命令会按照先后顺序被放进一个队列当中，最后由 <code>EXEC</code> 命令原子性(atomic)地执行。</p>
+<p><code>EXEC</code></p>
+<p>执行所有事务块内的命令。</p>
+<p><code>WATCH key [key ...]</code></p>
+<p>监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。</p>
+<p>减库存操作</p>
+<div class="hljs"><pre><code class="hljs python"><span class="hljs-comment"># 监视一个key</span>
+pipe.watch(<span class="hljs-string">'stock_count'</span>)
+count = int(pipe.get(<span class="hljs-string">'stock_count'</span>))
+<span class="hljs-comment"># 有库存</span>
+<span class="hljs-keyword">if</span> count &gt; <span class="hljs-number">0</span>: 
+    <span class="hljs-comment"># 事务开始</span>
+    pipe.multi()
+    <span class="hljs-comment"># pipe.decr('stock_count')</span>
+    pipe.set(<span class="hljs-string">'stock_count'</span>, count - <span class="hljs-number">1</span>)
+    <span class="hljs-comment"># 事务结束(可能会抛异常)</span>
+    pipe.execute()</code></pre></div>]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Redis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MacOS上使用OpenEmu玩怀旧游戏</title>
+    <url>/post/12c7a153.html</url>
+    <content><![CDATA[<p><img src="https://img.yjll.art/img/OpenEmu.png" srcset="/img/loading.gif" alt="OpenEmu"></p>
+<p>OpenEmu是MacOS上的开源项目模拟器项目，它整合了几乎全部主流的游戏机平台，你可以在mac系统上畅玩FC/NES、SFC/SNES、N64、PlayStation、GameBoy等游戏。</p>
+<h3 id="下载模拟器"><a href="#下载模拟器" class="headerlink" title="下载模拟器"></a>下载模拟器</h3><p>官网：<a href="http://openemu.org" target="_blank" rel="noopener">http://openemu.org</a></p>
+<p>注意一定要下载里面的Experimental版本，正式版不支持Arcade街机游戏。</p>
+<h3 id="下载核心"><a href="#下载核心" class="headerlink" title="下载核心"></a>下载核心</h3><p><img src="https://img.yjll.art/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
+<p>打开后在核心中下载对应的游戏核心，由于源在国外，访问不是很稳定，可以借助梯子解决。可以去单独下载核心core，放到指定位置<code>~/Library/Application Support/OpenEmu/Cores</code></p>
+<p>后边的系统文件，指的是我们常说的BIOS，BIOS 就是从游戏机里 dump 出来的基本 IO 模块。绝大部分模拟器都需要这个模块来启动游戏。为了规避版权问题， BIOS 是要自己找的。因为 BIOS 的版权属于游戏机厂商（而模拟器本身只要不提供 BIOS 一般是不侵权的）。</p>
+<p>BIOS文件放置在mac系统的位置 <code>~/Library/Application Support/OpenEmu/bios</code></p>
+<h3 id="游戏下载"><a href="#游戏下载" class="headerlink" title="游戏下载"></a>游戏下载</h3><p>核心设置好后，我们还缺少对应的游戏，比如小时候常玩的任天堂(Nintendo)红白机，可以在下边的这个网站上下载</p>
+<p><a href="https://www.retrostic.com/roms/nes" target="_blank" rel="noopener">https://www.retrostic.com/roms/nes</a></p>
+<p>我们将下载后的nes文件拖拽到Nintendo(NES)对应的窗口中即可。</p>
+<p><img src="http://openemu.org/img/intro-nes-grid.png" srcset="/img/loading.gif" alt=""></p>
+<p>对于如合金弹头和拳皇等街机游戏直接运行的话会提示缺少文件，还需要和游戏配套的游戏BIOS，可通过以下链接下载。放置在<code>~/Library/Application Support/OpenEmu/Game Library/roms/Arcade</code>即可</p>
+<p><a href="https://www.mamechannel.it/pages/bios.php" target="_blank" rel="noopener">www.mamechannel.it</a></p>
+<p>附街机游戏下载</p>
+<p><a href="https://ia803104.us.archive.org/view_archive.php?archive=/8/items/MAME217RomsOnlyMerged/MAME%200.217%20ROMs%20%28merged%29.zip" target="_blank" rel="noopener">archive.org</a></p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.imtrq.com/archives/1629" target="_blank" rel="noopener">MacOS上的MAME街机模拟器，附三国战记+恐龙快打+拳皇97</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/42108658" target="_blank" rel="noopener">想在Mac上玩红白机吗？OpenEmu了解一下！</a></p>
+<p><a href="https://post.smzdm.com/p/aoo8lr79/" target="_blank" rel="noopener">OpenEmu，mac上最完整的街机和游戏机怀旧全能模拟器</a></p>
+]]></content>
+      <tags>
+        <tag>MacOS</tag>
+        <tag>OpenEmu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows下的包管理工具</title>
+    <url>/post/82ab8e0c.html</url>
+    <content><![CDATA[<p>Centos安装软件可使用yum，Ubuntu上可使用apt，MacOS可使用brew。Windows平台也有开发者开发对应的安装程序——Scoop，Scoop类似MacOS平台的brew，没有brew强大，但常见开发环境都可以轻松搞定。</p>
+<p>使用scoop安装常用软件，可直接敲命令</p>
+<div class="hljs"><pre><code class="hljs powershell">scoop install git curl <span class="hljs-number">7</span>zip</code></pre></div>
+
+<a id="more"></a>
+
+<h3 id="安装Scoop"><a href="#安装Scoop" class="headerlink" title="安装Scoop"></a>安装Scoop</h3><p>设置安装目录，非必须，默认安装在用户目录</p>
+<div class="hljs"><pre><code class="hljs elixir"><span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP=<span class="hljs-string">'D:\ProgramFile\scoop'</span></span>
+[environment]::setEnvironmentVariable(<span class="hljs-string">'SCOOP'</span>,<span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP</span>,<span class="hljs-string">'User'</span>)</code></pre></div>
+
+<p>在 PowerShell 中输入下面内容，保证允许本地脚本的执行</p>
+<div class="hljs"><pre><code class="hljs dsconfig"><span class="hljs-built_in">set-executionpolicy</span> <span class="hljs-string">remotesigned </span>-<span class="hljs-string">scope </span><span class="hljs-string">currentuser</span></code></pre></div>
+
+<p>安装scoop</p>
+<div class="hljs"><pre><code class="hljs ceylon">iex (<span class="hljs-keyword">new</span>-<span class="hljs-keyword">object</span> net.webclient).downloadstring(<span class="hljs-string">'https://get.scoop.sh'</span>)</code></pre></div>
+
+
+
+<p>Scoop 可以利用<a href="https://github.com/aria2/aria2" target="_blank" rel="noopener"><code>aria2</code></a> 进行多线程下载。</p>
+<div class="hljs"><pre><code class="hljs powershell">scoop install aria2</code></pre></div>
+
+<p>可以使用<code>scoop config</code>对aria2进行配置</p>
+<ul>
+<li>aria2-enabled (default: true)</li>
+<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-retry-wait" target="_blank" rel="noopener">aria2-retry-wait</a> (default: 2)</li>
+<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s" target="_blank" rel="noopener">aria2-split</a> (default: 5)</li>
+<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x" target="_blank" rel="noopener">aria2-max-connection-per-server</a> (default: 5)</li>
+<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k" target="_blank" rel="noopener">aria2-min-split-size</a> (default: 5M)</li>
+</ul>
+<p>代理设置 </p>
+<div class="hljs"><pre><code class="hljs powershell"><span class="hljs-comment"># 设置代理</span>
+scoop config proxy localhost:<span class="hljs-number">1081</span>
+<span class="hljs-comment"># 删除代理</span>
+scoop config rm proxy</code></pre></div>
+
+<p>添加<code>buckets</code><br>buckets类似Linux中的源，默认包含<code>main</code>,可手动添加其他bucket</p>
+<div class="hljs"><pre><code class="hljs powershell">scoop bucket add extras
+scoop bucket add versions
+scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
+<p>bucket收录列表</p>
+<p><a href="https://rasa.github.io/scoop-directory/by-score.html" target="_blank" rel="noopener">https://rasa.github.io/scoop-directory/by-score.html</a></p>
+]]></content>
+      <tags>
+        <tag>工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spring使用@Value注入List和Map</title>
+    <url>/post/a336f015.html</url>
+    <content><![CDATA[<h3 id="yml常规写法"><a href="#yml常规写法" class="headerlink" title="yml常规写法"></a>yml常规写法</h3><p>需要添加<code>spring-boot-configuration-processor</code>模块，并且对要注入的对象添加<code>set</code>方法</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-configuration-processor<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">optional</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">optional</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">interceptorconfig:</span>
+  <span class="hljs-attr">path:</span>
+    <span class="hljs-attr">exclude:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/source</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/login</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/getCheckCode/</span>
+<span class="hljs-string">```</span>      
+
+<span class="hljs-string">```</span> <span class="hljs-string">java</span>
+<span class="hljs-string">@Component</span>
+<span class="hljs-string">@Data</span>
+<span class="hljs-string">@ConfigurationProperties(prefix</span> <span class="hljs-string">=</span> <span class="hljs-string">"interceptorconfig.path"</span><span class="hljs-string">)</span>
+<span class="hljs-string">public</span> <span class="hljs-string">class</span> <span class="hljs-string">TokenFilter</span> <span class="hljs-string">&#123;</span>
+
+    <span class="hljs-string">private</span>  <span class="hljs-string">List&lt;String&gt;</span> <span class="hljs-string">exclude;</span>
+
+<span class="hljs-string">&#125;</span></code></pre></div>
+
+
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">generate:</span>
+  <span class="hljs-attr">companyAndPlanMap:</span>
+    <span class="hljs-attr">101:</span> <span class="hljs-number">2018081601</span>
+    <span class="hljs-attr">121:</span> <span class="hljs-number">2018081602</span>
+    <span class="hljs-attr">111:</span> <span class="hljs-number">2018081603</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/c"</span>)
+<span class="hljs-meta">@Slf</span>4j
+<span class="hljs-meta">@ConfigurationProperties</span>(<span class="hljs-string">"generate"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C35Controller</span> </span>&#123;
+
+    <span class="hljs-keyword">private</span> Map&lt;String, String&gt; companyAndPlanMap;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setCompanyAndPlanMap</span><span class="hljs-params">(Map&lt;String, String&gt; companyAndPlanMap)</span> </span>&#123;
+        <span class="hljs-keyword">this</span>.companyAndPlanMap = companyAndPlanMap;
+    &#125;
+&#125;</code></pre></div>
+
+<h3 id="EL表达式-JSON写法"><a href="#EL表达式-JSON写法" class="headerlink" title="EL表达式+JSON写法"></a>EL表达式+JSON写法</h3><div class="hljs"><pre><code class="hljs yml"><span class="hljs-attr">scio.cloud.list:</span> <span class="hljs-string">topic1,topic2,topic3</span>
+<span class="hljs-attr">scio.cloud.maps:</span> <span class="hljs-string">"&#123;key1: 'value1', key2: 'value2'&#125;"</span></code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;'$&#123;scio.cloud.list&#125;'.split(',')&#125;"</span>)
+<span class="hljs-keyword">private</span> List&lt;String&gt; list;
+ 
+<span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;$&#123;scio.cloud.maps&#125;&#125;"</span>)  
+<span class="hljs-keyword">private</span> Map&lt;String,String&gt; maps;</code></pre></div>
+
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.jianshu.com/p/1aa662a5f170" target="_blank" rel="noopener">Spring @Value 注入List和Map</a></p>
+<p><a href="https://juejin.im/post/6844903972403150861" target="_blank" rel="noopener">Spring Boot配置文件注入</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Logstash同步Mysql数据到Elasticsearch</title>
+    <url>/post/863f4886.html</url>
+    <content><![CDATA[<p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
+<p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
+<a id="more"></a>
+
+
+<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p>首先要编写同步数据的配置文件，从Mysql同步数据到ElasticSearch中，使用jdbc里连接数据库作为input，ouput为ES。</p>
+<div class="hljs"><pre><code class="hljs puppet"><span class="hljs-keyword">input</span> &#123;
+ stdin &#123; &#125;
+    <span class="hljs-keyword">jdbc</span> &#123;
+        <span class="hljs-comment">#注意mysql连接地址一定要用ip，不能使用localhost等</span>
+        <span class="hljs-attr">jdbc_connection_string</span> =&gt; <span class="hljs-string">"jdbc:mysql://192.168.1.200:3308/test"</span>
+        <span class="hljs-attr">jdbc_user</span> =&gt; <span class="hljs-string">"test"</span>
+        <span class="hljs-attr">jdbc_password</span> =&gt; <span class="hljs-string">"test"</span>
+        <span class="hljs-comment">#这个jar包的地址是容器内的地址</span>
+        <span class="hljs-attr">jdbc_driver_library</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/mysql-connector-java-8.0.11.jar"</span>
+        <span class="hljs-attr">jdbc_driver_class</span> =&gt; <span class="hljs-string">"com.mysql.jdbc.Driver"</span>
+        <span class="hljs-attr">jdbc_paging_enabled</span> =&gt; <span class="hljs-string">"true"</span>
+        <span class="hljs-attr">jdbc_page_size</span> =&gt; <span class="hljs-string">"5000"</span>
+        <span class="hljs-attr">statement</span> =&gt; <span class="hljs-string">"SELECT * FROM base_areas where id &gt; :sql_last_value"</span>
+        <span class="hljs-attr">tracking_column</span> =&gt; <span class="hljs-built_in">id</span>
+        <span class="hljs-attr">use_column_value</span> =&gt; <span class="hljs-keyword">true</span>
+        <span class="hljs-attr">last_run_metadata_path</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/area"</span>
+        <span class="hljs-attr">schedule</span> =&gt; <span class="hljs-string">"* * * * *"</span>
+    &#125;
+ &#125;
+  
+ <span class="hljs-keyword">output</span> &#123;
+     stdout &#123;
+        <span class="hljs-attr">codec</span> =&gt; json_lines
+    &#125;
+    <span class="hljs-keyword">elasticsearch</span> &#123;
+        <span class="hljs-attr">hosts</span> =&gt; <span class="hljs-string">"192.168.1.200:9200"</span>
+        <span class="hljs-attr">index</span> =&gt; <span class="hljs-string">"area"</span>
+        <span class="hljs-attr">document_type</span> =&gt; <span class="hljs-string">"_doc"</span>
+        <span class="hljs-attr">document_id</span> =&gt; <span class="hljs-string">"%&#123;id&#125;"</span>
+    &#125;
+&#125;</code></pre></div>
+
+
+<p>重点在于 <code>use_column_value</code> 和 <code>tracking_column</code> 这两个参数，当use_column_value为true时，可以用 :sql_last_value 这个变量来获取tracking_column对应的字段的最新值，默认即第一次启动时为 0 。我的示例中tracking_column对应id，即Logstash都会记录每次查询结果id的最大值，供下一次查询使用。</p>
+<p>Logstash将tracking_column的最新值记录到<code>last_run_metadata_path</code>配置的文件，启动时读取该文件</p>
+<div class="hljs"><pre><code class="hljs awk">docker run -it -v  <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipeline/</span>:<span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/logstash/</span>pipeline -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/logstash.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>logstash.yml -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipelines.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>pipelines.yml   logstash:<span class="hljs-number">6.4</span>.<span class="hljs-number">3</span>  bash</code></pre></div>
+
+<p>先安装jdbc和es的插件</p>
+<div class="hljs"><pre><code class="hljs sql">bash-4.2$ ~/bin/logstash-plugin <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">input</span>-jdbc
+Validating logstash-<span class="hljs-keyword">input</span>-jdbc
+Installing logstash-<span class="hljs-keyword">input</span>-jdbc
+Installation successful
+
+bash<span class="hljs-number">-4.2</span>$ ~/<span class="hljs-keyword">bin</span>/logstash-<span class="hljs-keyword">plugin</span> <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">output</span>-elasticsearch
+Validating logstash-<span class="hljs-keyword">output</span>-elasticsearch
+Installing logstash-<span class="hljs-keyword">output</span>-elasticsearch
+Installation successful</code></pre></div>
+
+<p>由于是在容器内部连接服务，所以ES的连接不要使用localhost和127.0.0.1，更改为实际IP地址</p>
+<div class="hljs"><pre><code class="hljs stylus">bash-<span class="hljs-number">4.2</span>$ cat ~/config/logstash<span class="hljs-selector-class">.yml</span> 
+http<span class="hljs-selector-class">.host</span>: <span class="hljs-string">"0.0.0.0"</span>
+xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selector-class">.elasticsearch</span><span class="hljs-selector-class">.url</span>: http:<span class="hljs-comment">//192.168.1.200:9200</span></code></pre></div>
+
+<h3 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h3><p>运行同步脚本可手动执行也可以配置调度执行</p>
+<h4 id="手动执行"><a href="#手动执行" class="headerlink" title="手动执行"></a>手动执行</h4><p><code>~/bin/logstash -f ***.config</code></p>
+<h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
+<div class="hljs"><pre><code class="hljs groovy">bash<span class="hljs-number">-4.2</span>$ cat <span class="hljs-regexp">~/config/</span>pipelines.yml 
+
+- pipeline.<span class="hljs-string">id:</span> main
+  path.<span class="hljs-string">config:</span> <span class="hljs-string">"/usr/share/logstash/pipeline"</span></code></pre></div>
+
+<p>好，配置已完成，运行<code>/usr/local/bin/docker-entrypoint</code>启动调度任务</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
+<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Mysql</tag>
+        <tag>Elasticsearch</tag>
+        <tag>Logstash</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Mycat实现读写分离</title>
+    <url>/post/6ea54e66.html</url>
+    <content><![CDATA[<p>Mycat是常用的数据库代理层中间件，本文通过Mycat实现读写分离，应用程序先访问Mycat服务，Mycat根据SQL语句进行分发，读操作并且无事务走从库，写操作走主库。</p>
+<a id="more"></a>
+
+<h3 id="Mycat服务配置"><a href="#Mycat服务配置" class="headerlink" title="Mycat服务配置"></a>Mycat服务配置</h3><p>$ cat mycat/conf/server.xml</p>
+<div class="hljs"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="hljs-comment">&lt;!-- - - Licensed under the Apache License, Version 2.0 (the "License"); </span>
+<span class="hljs-comment">	- you may not use this file except in compliance with the License. - You </span>
+<span class="hljs-comment">	may obtain a copy of the License at - - http://www.apache.org/licenses/LICENSE-2.0 </span>
+<span class="hljs-comment">	- - Unless required by applicable law or agreed to in writing, software - </span>
+<span class="hljs-comment">	distributed under the License is distributed on an "AS IS" BASIS, - WITHOUT </span>
+<span class="hljs-comment">	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the </span>
+<span class="hljs-comment">	License for the specific language governing permissions and - limitations </span>
+<span class="hljs-comment">	under the License. --&gt;</span>
+<span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">mycat</span>:server <span class="hljs-meta-keyword">SYSTEM</span> <span class="hljs-meta-string">"server.dtd"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">mycat:server</span> <span class="hljs-attr">xmlns:mycat</span>=<span class="hljs-string">"http://io.mycat/"</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">system</span>&gt;</span>
+	<span class="hljs-comment">&lt;!-- 这里配置的都是一些系统属性，可以自己查看mycat文档 --&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"defaultSqlParser"</span>&gt;</span>druidparser<span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+	<span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"charset"</span>&gt;</span>utf8mb4<span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">system</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">user</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"root"</span> <span class="hljs-attr">defaultAccount</span>=<span class="hljs-string">"true"</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"password"</span>&gt;</span>123456<span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"schemas"</span>&gt;</span>prod<span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span>
+		
+	<span class="hljs-tag">&lt;/<span class="hljs-name">user</span>&gt;</span>
+
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">mycat:server</span>&gt;</span></code></pre></div>
+<blockquote>
+<p><code>schemas</code>表示<code>schema.xml</code>中的<code>schema</code>节点，多个库用逗号分隔</p>
+</blockquote>
+<h3 id="表配置"><a href="#表配置" class="headerlink" title="表配置"></a>表配置</h3><p>$ cat mycat/conf/schema.xml </p>
+<div class="hljs"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version="1.0"?&gt;</span>
+<span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">mycat</span>:schema <span class="hljs-meta-keyword">SYSTEM</span> <span class="hljs-meta-string">"schema.dtd"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">mycat:schema</span> <span class="hljs-attr">xmlns:mycat</span>=<span class="hljs-string">"http://io.mycat/"</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">schema</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"prod"</span> <span class="hljs-attr">checkSQLschema</span>=<span class="hljs-string">"false"</span> <span class="hljs-attr">sqlMaxLimit</span>=<span class="hljs-string">"100"</span> <span class="hljs-attr">dataNode</span>=<span class="hljs-string">"pcxNode"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">schema</span>&gt;</span>
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">dataNode</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"pcxNode"</span> <span class="hljs-attr">dataHost</span>=<span class="hljs-string">"dtHost"</span> <span class="hljs-attr">database</span>=<span class="hljs-string">"test"</span> /&gt;</span>
+
+
+
+	<span class="hljs-tag">&lt;<span class="hljs-name">dataHost</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"dtHost"</span> <span class="hljs-attr">maxCon</span>=<span class="hljs-string">"1000"</span> <span class="hljs-attr">minCon</span>=<span class="hljs-string">"10"</span> <span class="hljs-attr">balance</span>=<span class="hljs-string">"3"</span></span>
+<span class="hljs-tag">			  <span class="hljs-attr">writeType</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">dbType</span>=<span class="hljs-string">"mysql"</span> <span class="hljs-attr">dbDriver</span>=<span class="hljs-string">"native"</span> <span class="hljs-attr">switchType</span>=<span class="hljs-string">"1"</span>  <span class="hljs-attr">slaveThreshold</span>=<span class="hljs-string">"100"</span>&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">heartbeat</span>&gt;</span>select user()<span class="hljs-tag">&lt;/<span class="hljs-name">heartbeat</span>&gt;</span>
+		<span class="hljs-comment">&lt;!-- can have multi write hosts --&gt;</span>
+		<span class="hljs-tag">&lt;<span class="hljs-name">writeHost</span> <span class="hljs-attr">host</span>=<span class="hljs-string">"hostM1"</span> <span class="hljs-attr">url</span>=<span class="hljs-string">"localhost:3308"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"root"</span></span>
+<span class="hljs-tag">				   <span class="hljs-attr">password</span>=<span class="hljs-string">"123456"</span>&gt;</span>
+			<span class="hljs-comment">&lt;!-- can have multi read hosts --&gt;</span>
+			<span class="hljs-tag">&lt;<span class="hljs-name">readHost</span> <span class="hljs-attr">host</span>=<span class="hljs-string">"hostS1"</span> <span class="hljs-attr">url</span>=<span class="hljs-string">"localhost:3307"</span> <span class="hljs-attr">user</span>=<span class="hljs-string">"root"</span> <span class="hljs-attr">password</span>=<span class="hljs-string">"123456"</span> /&gt;</span>
+		<span class="hljs-tag">&lt;/<span class="hljs-name">writeHost</span>&gt;</span>
+	<span class="hljs-tag">&lt;/<span class="hljs-name">dataHost</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">mycat:schema</span>&gt;</span></code></pre></div>
+<blockquote>
+<p>增加数据库时要添加<code>dataNode</code>及<code>schema</code></p>
+</blockquote>
+<h3 id="Mycat-启动"><a href="#Mycat-启动" class="headerlink" title="Mycat 启动"></a>Mycat 启动</h3><p><code>./mycat start</code></p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>Mqsql</tag>
+        <tag>Mycat</tag>
+        <tag>读写分离</tag>
       </tags>
   </entry>
   <entry>
@@ -985,208 +1699,6 @@ mysql&gt;</code></pre></div>
       </tags>
   </entry>
   <entry>
-    <title>Spring使用@Value注入List和Map</title>
-    <url>/post/a336f015.html</url>
-    <content><![CDATA[<h3 id="yml常规写法"><a href="#yml常规写法" class="headerlink" title="yml常规写法"></a>yml常规写法</h3><p>需要添加<code>spring-boot-configuration-processor</code>模块，并且对要注入的对象添加<code>set</code>方法</p>
-<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-configuration-processor<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">optional</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">optional</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
-
-<div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">interceptorconfig:</span>
-  <span class="hljs-attr">path:</span>
-    <span class="hljs-attr">exclude:</span>
-      <span class="hljs-bullet">-</span> <span class="hljs-string">/source</span>
-      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/login</span>
-      <span class="hljs-bullet">-</span> <span class="hljs-string">/sep/user/getCheckCode/</span>
-<span class="hljs-string">```</span>      
-
-<span class="hljs-string">```</span> <span class="hljs-string">java</span>
-<span class="hljs-string">@Component</span>
-<span class="hljs-string">@Data</span>
-<span class="hljs-string">@ConfigurationProperties(prefix</span> <span class="hljs-string">=</span> <span class="hljs-string">"interceptorconfig.path"</span><span class="hljs-string">)</span>
-<span class="hljs-string">public</span> <span class="hljs-string">class</span> <span class="hljs-string">TokenFilter</span> <span class="hljs-string">&#123;</span>
-
-    <span class="hljs-string">private</span>  <span class="hljs-string">List&lt;String&gt;</span> <span class="hljs-string">exclude;</span>
-
-<span class="hljs-string">&#125;</span></code></pre></div>
-
-
-<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">generate:</span>
-  <span class="hljs-attr">companyAndPlanMap:</span>
-    <span class="hljs-attr">101:</span> <span class="hljs-number">2018081601</span>
-    <span class="hljs-attr">121:</span> <span class="hljs-number">2018081602</span>
-    <span class="hljs-attr">111:</span> <span class="hljs-number">2018081603</span></code></pre></div>
-
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span>
-<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/c"</span>)
-<span class="hljs-meta">@Slf</span>4j
-<span class="hljs-meta">@ConfigurationProperties</span>(<span class="hljs-string">"generate"</span>)
-<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">C35Controller</span> </span>&#123;
-
-    <span class="hljs-keyword">private</span> Map&lt;String, String&gt; companyAndPlanMap;
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setCompanyAndPlanMap</span><span class="hljs-params">(Map&lt;String, String&gt; companyAndPlanMap)</span> </span>&#123;
-        <span class="hljs-keyword">this</span>.companyAndPlanMap = companyAndPlanMap;
-    &#125;
-&#125;</code></pre></div>
-
-<h3 id="EL表达式-JSON写法"><a href="#EL表达式-JSON写法" class="headerlink" title="EL表达式+JSON写法"></a>EL表达式+JSON写法</h3><div class="hljs"><pre><code class="hljs yml"><span class="hljs-attr">scio.cloud.list:</span> <span class="hljs-string">topic1,topic2,topic3</span>
-<span class="hljs-attr">scio.cloud.maps:</span> <span class="hljs-string">"&#123;key1: 'value1', key2: 'value2'&#125;"</span></code></pre></div>
-
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;'$&#123;scio.cloud.list&#125;'.split(',')&#125;"</span>)
-<span class="hljs-keyword">private</span> List&lt;String&gt; list;
- 
-<span class="hljs-meta">@Value</span>(<span class="hljs-string">"#&#123;$&#123;scio.cloud.maps&#125;&#125;"</span>)  
-<span class="hljs-keyword">private</span> Map&lt;String,String&gt; maps;</code></pre></div>
-
-
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.jianshu.com/p/1aa662a5f170" target="_blank" rel="noopener">Spring @Value 注入List和Map</a></p>
-<p><a href="https://juejin.im/post/6844903972403150861" target="_blank" rel="noopener">Spring Boot配置文件注入</a></p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Spring</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows下的包管理工具</title>
-    <url>/post/82ab8e0c.html</url>
-    <content><![CDATA[<p>Centos安装软件可使用yum，Ubuntu上可使用apt，MacOS可使用brew。Windows平台也有开发者开发对应的安装程序——Scoop，Scoop类似MacOS平台的brew，没有brew强大，但常见开发环境都可以轻松搞定。</p>
-<p>使用scoop安装常用软件，可直接敲命令</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install git curl <span class="hljs-number">7</span>zip</code></pre></div>
-
-<a id="more"></a>
-
-<h3 id="安装Scoop"><a href="#安装Scoop" class="headerlink" title="安装Scoop"></a>安装Scoop</h3><p>设置安装目录，非必须，默认安装在用户目录</p>
-<div class="hljs"><pre><code class="hljs elixir"><span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP=<span class="hljs-string">'D:\ProgramFile\scoop'</span></span>
-[environment]::setEnvironmentVariable(<span class="hljs-string">'SCOOP'</span>,<span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP</span>,<span class="hljs-string">'User'</span>)</code></pre></div>
-
-<p>在 PowerShell 中输入下面内容，保证允许本地脚本的执行</p>
-<div class="hljs"><pre><code class="hljs dsconfig"><span class="hljs-built_in">set-executionpolicy</span> <span class="hljs-string">remotesigned </span>-<span class="hljs-string">scope </span><span class="hljs-string">currentuser</span></code></pre></div>
-
-<p>安装scoop</p>
-<div class="hljs"><pre><code class="hljs ceylon">iex (<span class="hljs-keyword">new</span>-<span class="hljs-keyword">object</span> net.webclient).downloadstring(<span class="hljs-string">'https://get.scoop.sh'</span>)</code></pre></div>
-
-
-
-<p>Scoop 可以利用<a href="https://github.com/aria2/aria2" target="_blank" rel="noopener"><code>aria2</code></a> 进行多线程下载。</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install aria2</code></pre></div>
-
-<p>可以使用<code>scoop config</code>对aria2进行配置</p>
-<ul>
-<li>aria2-enabled (default: true)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-retry-wait" target="_blank" rel="noopener">aria2-retry-wait</a> (default: 2)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s" target="_blank" rel="noopener">aria2-split</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x" target="_blank" rel="noopener">aria2-max-connection-per-server</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k" target="_blank" rel="noopener">aria2-min-split-size</a> (default: 5M)</li>
-</ul>
-<p>代理设置 </p>
-<div class="hljs"><pre><code class="hljs powershell"><span class="hljs-comment"># 设置代理</span>
-scoop config proxy localhost:<span class="hljs-number">1081</span>
-<span class="hljs-comment"># 删除代理</span>
-scoop config rm proxy</code></pre></div>
-
-<p>添加<code>buckets</code><br>buckets类似Linux中的源，默认包含<code>main</code>,可手动添加其他bucket</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop bucket add extras
-scoop bucket add versions
-scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
-<p>bucket收录列表</p>
-<p><a href="https://rasa.github.io/scoop-directory/by-score.html" target="_blank" rel="noopener">https://rasa.github.io/scoop-directory/by-score.html</a></p>
-]]></content>
-      <tags>
-        <tag>工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用Logstash同步Mysql数据到Elasticsearch</title>
-    <url>/post/863f4886.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
-<p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
-<a id="more"></a>
-
-
-<h3 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h3><p>首先要编写同步数据的配置文件，从Mysql同步数据到ElasticSearch中，使用jdbc里连接数据库作为input，ouput为ES。</p>
-<div class="hljs"><pre><code class="hljs puppet"><span class="hljs-keyword">input</span> &#123;
- stdin &#123; &#125;
-    <span class="hljs-keyword">jdbc</span> &#123;
-        <span class="hljs-comment">#注意mysql连接地址一定要用ip，不能使用localhost等</span>
-        <span class="hljs-attr">jdbc_connection_string</span> =&gt; <span class="hljs-string">"jdbc:mysql://192.168.1.200:3308/test"</span>
-        <span class="hljs-attr">jdbc_user</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-attr">jdbc_password</span> =&gt; <span class="hljs-string">"test"</span>
-        <span class="hljs-comment">#这个jar包的地址是容器内的地址</span>
-        <span class="hljs-attr">jdbc_driver_library</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/mysql-connector-java-8.0.11.jar"</span>
-        <span class="hljs-attr">jdbc_driver_class</span> =&gt; <span class="hljs-string">"com.mysql.jdbc.Driver"</span>
-        <span class="hljs-attr">jdbc_paging_enabled</span> =&gt; <span class="hljs-string">"true"</span>
-        <span class="hljs-attr">jdbc_page_size</span> =&gt; <span class="hljs-string">"5000"</span>
-        <span class="hljs-attr">statement</span> =&gt; <span class="hljs-string">"SELECT * FROM base_areas where id &gt; :sql_last_value"</span>
-        <span class="hljs-attr">tracking_column</span> =&gt; <span class="hljs-built_in">id</span>
-        <span class="hljs-attr">use_column_value</span> =&gt; <span class="hljs-keyword">true</span>
-        <span class="hljs-attr">last_run_metadata_path</span> =&gt; <span class="hljs-string">"/usr/share/logstash/pipeline/area"</span>
-        <span class="hljs-attr">schedule</span> =&gt; <span class="hljs-string">"* * * * *"</span>
-    &#125;
- &#125;
-  
- <span class="hljs-keyword">output</span> &#123;
-     stdout &#123;
-        <span class="hljs-attr">codec</span> =&gt; json_lines
-    &#125;
-    <span class="hljs-keyword">elasticsearch</span> &#123;
-        <span class="hljs-attr">hosts</span> =&gt; <span class="hljs-string">"192.168.1.200:9200"</span>
-        <span class="hljs-attr">index</span> =&gt; <span class="hljs-string">"area"</span>
-        <span class="hljs-attr">document_type</span> =&gt; <span class="hljs-string">"_doc"</span>
-        <span class="hljs-attr">document_id</span> =&gt; <span class="hljs-string">"%&#123;id&#125;"</span>
-    &#125;
-&#125;</code></pre></div>
-
-
-<p>重点在于 <code>use_column_value</code> 和 <code>tracking_column</code> 这两个参数，当use_column_value为true时，可以用 :sql_last_value 这个变量来获取tracking_column对应的字段的最新值，默认即第一次启动时为 0 。我的示例中tracking_column对应id，即Logstash都会记录每次查询结果id的最大值，供下一次查询使用。</p>
-<p>Logstash将tracking_column的最新值记录到<code>last_run_metadata_path</code>配置的文件，启动时读取该文件</p>
-<div class="hljs"><pre><code class="hljs awk">docker run -it -v  <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipeline/</span>:<span class="hljs-regexp">/usr/</span>share<span class="hljs-regexp">/logstash/</span>pipeline -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/logstash.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>logstash.yml -v <span class="hljs-variable">$PWD</span><span class="hljs-regexp">/pipelines.yml:/u</span>sr<span class="hljs-regexp">/share/</span>logstash<span class="hljs-regexp">/config/</span>pipelines.yml   logstash:<span class="hljs-number">6.4</span>.<span class="hljs-number">3</span>  bash</code></pre></div>
-
-<p>先安装jdbc和es的插件</p>
-<div class="hljs"><pre><code class="hljs sql">bash-4.2$ ~/bin/logstash-plugin <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">input</span>-jdbc
-Validating logstash-<span class="hljs-keyword">input</span>-jdbc
-Installing logstash-<span class="hljs-keyword">input</span>-jdbc
-Installation successful
-
-bash<span class="hljs-number">-4.2</span>$ ~/<span class="hljs-keyword">bin</span>/logstash-<span class="hljs-keyword">plugin</span> <span class="hljs-keyword">install</span> logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Validating logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installing logstash-<span class="hljs-keyword">output</span>-elasticsearch
-Installation successful</code></pre></div>
-
-<p>由于是在容器内部连接服务，所以ES的连接不要使用localhost和127.0.0.1，更改为实际IP地址</p>
-<div class="hljs"><pre><code class="hljs stylus">bash-<span class="hljs-number">4.2</span>$ cat ~/config/logstash<span class="hljs-selector-class">.yml</span> 
-http<span class="hljs-selector-class">.host</span>: <span class="hljs-string">"0.0.0.0"</span>
-xpack<span class="hljs-selector-class">.monitoring</span><span class="hljs-selector-class">.elasticsearch</span><span class="hljs-selector-class">.url</span>: http:<span class="hljs-comment">//192.168.1.200:9200</span></code></pre></div>
-
-<h3 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h3><p>运行同步脚本可手动执行也可以配置调度执行</p>
-<h4 id="手动执行"><a href="#手动执行" class="headerlink" title="手动执行"></a>手动执行</h4><p><code>~/bin/logstash -f ***.config</code></p>
-<h4 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h4><p>调度任务可读取配置文件<code>config/pipelines.yml</code>，默认有一个<code>main</code>，<code>/usr/share/logstash/pipeline</code>为pipeline的存放路径，该文件夹内的pipeline都会被执行。<br>可手动更改该文件，添加<code>id</code>和<code>config</code>即可。</p>
-<div class="hljs"><pre><code class="hljs groovy">bash<span class="hljs-number">-4.2</span>$ cat <span class="hljs-regexp">~/config/</span>pipelines.yml 
-
-- pipeline.<span class="hljs-string">id:</span> main
-  path.<span class="hljs-string">config:</span> <span class="hljs-string">"/usr/share/logstash/pipeline"</span></code></pre></div>
-
-<p>好，配置已完成，运行<code>/usr/local/bin/docker-entrypoint</code>启动调度任务</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>logstash</code>是ES官方提供的工具，支持扩展多，配置灵活，但是只能同步增量数据，对于源数据删除和修改的情况，logstash无能为力，还有基于定时任务同步无法保证实时，对实时性要求高的场景要考虑其他方案。</p>
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.elastic.co/guide/en/logstash/current/docker-config.html#_pipeline_configuration" target="_blank" rel="noopener">Configuring Logstash for Docker</a></p>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html" target="_blank" rel="noopener">Jdbc input plugin</a></p>
-]]></content>
-      <categories>
-        <category>中间件</category>
-      </categories>
-      <tags>
-        <tag>Elasticsearch</tag>
-        <tag>Mysql</tag>
-        <tag>Logstash</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>当我们谈论NIO时我们在谈论什么</title>
     <url>/post/9a133fa7.html</url>
     <content><![CDATA[<p><img src="https://img.yjll.art/img/NIO_HEAD.png" srcset="/img/loading.gif" alt="NIO_HEAD"></p>
@@ -1270,124 +1782,6 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
       </categories>
       <tags>
         <tag>NIO</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>漫谈Guava之Cache（一）</title>
-    <url>/post/96f462f9.html</url>
-    <content><![CDATA[<p>计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，<code>CPU Cache</code>是用于减少<a href="https://zh.wikipedia.org/wiki/中央处理器" target="_blank" rel="noopener">处理器</a>访问内存所需平均时间的部件。在金字塔式<a href="https://zh.wikipedia.org/w/index.php?title=存储体系&action=edit&redlink=1" target="_blank" rel="noopener">存储体系</a>中它位于自顶向下的第二层，仅次于<a href="https://zh.wikipedia.org/wiki/寄存器" target="_blank" rel="noopener">CPU寄存器</a>。其容量远小于<a href="https://zh.wikipedia.org/wiki/内存" target="_blank" rel="noopener">内存</a>，但速度却可以接近处理器的频率。</p>
-<p>当处理器发出内存访问请求时，会先查看缓存内是否有请求数据。如果存在（命中），则不经访问内存直接返回该数据；如果不存在（失效），则要先把内存中的相应数据载入缓存，再将其返回处理器。</p>
-<p>这和我们日常开发中的很多场景相似，例如调用第三方接口取数据，微服务间取数据，甚至从数据库中取数据。这些IO操作所消耗的时间对于CPU来说是很久的。如果这些数据是读多写少，也就是说数据不会轻易改变，那我们可以把这部分数据进行缓存，取数据前先访问缓存，在缓存中查不到时再走原来的逻辑。</p>
-<a id="more"></a>
-
-<p>日常开发中我们可能会使用<code>ConcurrentHashMap</code>存数据，替代缓存使用，简单场景这样使用没什么问题，只是<code>ConcurrentHashMap</code>设计的目的不是做缓存，所以很多Cache应该有的很多功能，<code>ConcurrentHashMap</code>并不直接支持，类如设置key的过期时间，内存不足时释放缓存等。</p>
-<p>本文介绍Guava的Cache使用，为该系列的第一部分。</p>
-<p>我先写一个简单的例子，创建一个缓存，该缓存最多存100个元素，超时时间为10分钟</p>
-<div class="hljs"><pre><code class="hljs java">Cache&lt;String, String&gt; cache = CacheBuilder.newBuilder()
-            .maximumSize(<span class="hljs-number">100</span>)
-            .expireAfterWrite(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
-            .build();
-
-cache.getIfPresent(key)
-
-cache.get(key, () -&gt; defaultValue)</code></pre></div>
-
-<h3 id="CacheLoader"><a href="#CacheLoader" class="headerlink" title="CacheLoader"></a>CacheLoader</h3><p>上文中的<code>cache.get(key, () -&gt; defaultValue)</code>会在<code>cache</code>中没这条数据的情况下，根据我们写的策略重新计算，并将数据保存在缓存中一份。对于这种情况可以使用<code>CacheLoader</code>来统一处理。</p>
-<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
-      .expireAfterAccess(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
-      .maximumSize(<span class="hljs-number">1000</span>)
-      .build(
-          <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
-            <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
-              <span class="hljs-keyword">return</span> createExpensiveGraph(key);
-            &#125;
-          &#125;);
-...
-<span class="hljs-keyword">return</span> graphs.getUnchecked(key);</code></pre></div>
-
-
-
-<h2 id="三种淘汰策略"><a href="#三种淘汰策略" class="headerlink" title="三种淘汰策略"></a>三种淘汰策略</h2><blockquote>
-<p>Guava provides three basic types of eviction: size-based eviction, time-based eviction, and reference-based eviction.</p>
-</blockquote>
-<h3 id="容量大小"><a href="#容量大小" class="headerlink" title="容量大小"></a>容量大小</h3><p>前文使用的<code>CacheBuilder.maximumSize(long)</code> 便可限制最大缓存数量。<br>如缓冲的每条数据有不同的权重的话可自己写<code>Weigher</code>策略，并设置最大<code>重量</code>。</p>
-<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
-       .maximumWeight(<span class="hljs-number">100000</span>)
-       .weigher(<span class="hljs-keyword">new</span> Weigher&lt;Key, Graph&gt;() &#123;
-          <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">weigh</span><span class="hljs-params">(Key k, Graph g)</span> </span>&#123;
-            <span class="hljs-keyword">return</span> g.vertices().size();
-          &#125;
-        &#125;)
-       .build(
-           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
-             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
-               <span class="hljs-keyword">return</span> createExpensiveGraph(key);
-             &#125;
-           &#125;);</code></pre></div>
-
-<h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><p><code>CacheBuilder</code> provides two approaches to timed eviction:</p>
-<ul>
-<li><code>expireAfterAccess(long, TimeUnit)</code> 读或写多长时间后，缓存失效</li>
-<li><code>expireAfterWrite(long, TimeUnit)</code> 值更改后多长时间后，缓存失效</li>
-</ul>
-<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p>使用JVM的垃圾回收，可被动的缓存失效。</p>
-<ul>
-<li><code>CacheBuilder.weakKeys()</code> 对key使用弱引用包装</li>
-<li><code>CacheBuilder.weakValues()</code> 对value使用弱引用包装</li>
-<li><code>CacheBuilder.softValues()</code> 对soft使用软引用包装</li>
-</ul>
-<h2 id="Removal-Listeners"><a href="#Removal-Listeners" class="headerlink" title="Removal Listeners"></a>Removal Listeners</h2><p>如果我们想对淘汰的元素进行处理，我们可以写一个<code>RemovalListener</code>对Cache进行监听。例如我们将DB连接存入cache中，当缓存失效时，我们需要关闭数据库连接，这部分逻辑就可以通过<code>RemovalListener</code>来完成</p>
-<div class="hljs"><pre><code class="hljs java">CacheLoader&lt;Key, DatabaseConnection&gt; loader = <span class="hljs-keyword">new</span> CacheLoader&lt;Key, DatabaseConnection&gt; () &#123;
-  <span class="hljs-function"><span class="hljs-keyword">public</span> DatabaseConnection <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;
-    <span class="hljs-keyword">return</span> openConnection(key);
-  &#125;
-&#125;;
-RemovalListener&lt;Key, DatabaseConnection&gt; removalListener = <span class="hljs-keyword">new</span> RemovalListener&lt;Key, DatabaseConnection&gt;() &#123;
-  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onRemoval</span><span class="hljs-params">(RemovalNotification&lt;Key, DatabaseConnection&gt; removal)</span> </span>&#123;
-    DatabaseConnection conn = removal.getValue();
-    conn.close(); <span class="hljs-comment">// tear down properly</span>
-  &#125;
-&#125;;
-
-CacheBuilder.newBuilder()
-  .expireAfterWrite(<span class="hljs-number">2</span>, TimeUnit.MINUTES)
-  .removalListener(removalListener)
-  .build(loader);</code></pre></div>
-
-<h2 id="Refresh"><a href="#Refresh" class="headerlink" title="Refresh"></a>Refresh</h2><p>对于失效性比较强的元素，我们可以配置刷新的策略。刷新和淘汰不同，刷新元素是可以是异步操作，刷新未完成时返回还是原数据，刷新成功则返回新数据。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// Some keys don't need refreshing, and we want refreshes to be done asynchronously.</span>
-LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
-       .maximumSize(<span class="hljs-number">1000</span>)
-       .refreshAfterWrite(<span class="hljs-number">1</span>, TimeUnit.MINUTES)
-       .build(
-           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
-             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
-               <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
-             &#125;
-
-             <span class="hljs-function"><span class="hljs-keyword">public</span> ListenableFuture&lt;Graph&gt; <span class="hljs-title">reload</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Key key, Graph prevGraph)</span> </span>&#123;
-               <span class="hljs-keyword">if</span> (neverNeedsRefresh(key)) &#123;
-                 <span class="hljs-keyword">return</span> Futures.immediateFuture(prevGraph);
-               &#125; <span class="hljs-keyword">else</span> &#123;
-                 <span class="hljs-comment">// asynchronous!</span>
-                 ListenableFutureTask&lt;Graph&gt; task = ListenableFutureTask.create(<span class="hljs-keyword">new</span> Callable&lt;Graph&gt;() &#123;
-                   <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">call</span><span class="hljs-params">()</span> </span>&#123;
-                     <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
-                   &#125;
-                 &#125;);
-                 executor.execute(task);
-                 <span class="hljs-keyword">return</span> task;
-               &#125;
-             &#125;
-           &#125;);</code></pre></div>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Guava</tag>
-        <tag>Cache</tag>
-        <tag>缓存</tag>
       </tags>
   </entry>
   <entry>
@@ -1534,6 +1928,124 @@ LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
       <tags>
         <tag>Guava</tag>
         <tag>limiter</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>漫谈Guava之Cache（一）</title>
+    <url>/post/96f462f9.html</url>
+    <content><![CDATA[<p>计算机的世界中，缓存无处不在，最常见的如CPU高速缓存，<code>CPU Cache</code>是用于减少<a href="https://zh.wikipedia.org/wiki/中央处理器" target="_blank" rel="noopener">处理器</a>访问内存所需平均时间的部件。在金字塔式<a href="https://zh.wikipedia.org/w/index.php?title=存储体系&action=edit&redlink=1" target="_blank" rel="noopener">存储体系</a>中它位于自顶向下的第二层，仅次于<a href="https://zh.wikipedia.org/wiki/寄存器" target="_blank" rel="noopener">CPU寄存器</a>。其容量远小于<a href="https://zh.wikipedia.org/wiki/内存" target="_blank" rel="noopener">内存</a>，但速度却可以接近处理器的频率。</p>
+<p>当处理器发出内存访问请求时，会先查看缓存内是否有请求数据。如果存在（命中），则不经访问内存直接返回该数据；如果不存在（失效），则要先把内存中的相应数据载入缓存，再将其返回处理器。</p>
+<p>这和我们日常开发中的很多场景相似，例如调用第三方接口取数据，微服务间取数据，甚至从数据库中取数据。这些IO操作所消耗的时间对于CPU来说是很久的。如果这些数据是读多写少，也就是说数据不会轻易改变，那我们可以把这部分数据进行缓存，取数据前先访问缓存，在缓存中查不到时再走原来的逻辑。</p>
+<a id="more"></a>
+
+<p>日常开发中我们可能会使用<code>ConcurrentHashMap</code>存数据，替代缓存使用，简单场景这样使用没什么问题，只是<code>ConcurrentHashMap</code>设计的目的不是做缓存，所以很多Cache应该有的很多功能，<code>ConcurrentHashMap</code>并不直接支持，类如设置key的过期时间，内存不足时释放缓存等。</p>
+<p>本文介绍Guava的Cache使用，为该系列的第一部分。</p>
+<p>我先写一个简单的例子，创建一个缓存，该缓存最多存100个元素，超时时间为10分钟</p>
+<div class="hljs"><pre><code class="hljs java">Cache&lt;String, String&gt; cache = CacheBuilder.newBuilder()
+            .maximumSize(<span class="hljs-number">100</span>)
+            .expireAfterWrite(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
+            .build();
+
+cache.getIfPresent(key)
+
+cache.get(key, () -&gt; defaultValue)</code></pre></div>
+
+<h3 id="CacheLoader"><a href="#CacheLoader" class="headerlink" title="CacheLoader"></a>CacheLoader</h3><p>上文中的<code>cache.get(key, () -&gt; defaultValue)</code>会在<code>cache</code>中没这条数据的情况下，根据我们写的策略重新计算，并将数据保存在缓存中一份。对于这种情况可以使用<code>CacheLoader</code>来统一处理。</p>
+<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+      .expireAfterAccess(<span class="hljs-number">10</span>, TimeUnit.MINUTES)
+      .maximumSize(<span class="hljs-number">1000</span>)
+      .build(
+          <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+            <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+              <span class="hljs-keyword">return</span> createExpensiveGraph(key);
+            &#125;
+          &#125;);
+...
+<span class="hljs-keyword">return</span> graphs.getUnchecked(key);</code></pre></div>
+
+
+
+<h2 id="三种淘汰策略"><a href="#三种淘汰策略" class="headerlink" title="三种淘汰策略"></a>三种淘汰策略</h2><blockquote>
+<p>Guava provides three basic types of eviction: size-based eviction, time-based eviction, and reference-based eviction.</p>
+</blockquote>
+<h3 id="容量大小"><a href="#容量大小" class="headerlink" title="容量大小"></a>容量大小</h3><p>前文使用的<code>CacheBuilder.maximumSize(long)</code> 便可限制最大缓存数量。<br>如缓冲的每条数据有不同的权重的话可自己写<code>Weigher</code>策略，并设置最大<code>重量</code>。</p>
+<div class="hljs"><pre><code class="hljs java">LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+       .maximumWeight(<span class="hljs-number">100000</span>)
+       .weigher(<span class="hljs-keyword">new</span> Weigher&lt;Key, Graph&gt;() &#123;
+          <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">weigh</span><span class="hljs-params">(Key k, Graph g)</span> </span>&#123;
+            <span class="hljs-keyword">return</span> g.vertices().size();
+          &#125;
+        &#125;)
+       .build(
+           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+               <span class="hljs-keyword">return</span> createExpensiveGraph(key);
+             &#125;
+           &#125;);</code></pre></div>
+
+<h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><p><code>CacheBuilder</code> provides two approaches to timed eviction:</p>
+<ul>
+<li><code>expireAfterAccess(long, TimeUnit)</code> 读或写多长时间后，缓存失效</li>
+<li><code>expireAfterWrite(long, TimeUnit)</code> 值更改后多长时间后，缓存失效</li>
+</ul>
+<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p>使用JVM的垃圾回收，可被动的缓存失效。</p>
+<ul>
+<li><code>CacheBuilder.weakKeys()</code> 对key使用弱引用包装</li>
+<li><code>CacheBuilder.weakValues()</code> 对value使用弱引用包装</li>
+<li><code>CacheBuilder.softValues()</code> 对soft使用软引用包装</li>
+</ul>
+<h2 id="Removal-Listeners"><a href="#Removal-Listeners" class="headerlink" title="Removal Listeners"></a>Removal Listeners</h2><p>如果我们想对淘汰的元素进行处理，我们可以写一个<code>RemovalListener</code>对Cache进行监听。例如我们将DB连接存入cache中，当缓存失效时，我们需要关闭数据库连接，这部分逻辑就可以通过<code>RemovalListener</code>来完成</p>
+<div class="hljs"><pre><code class="hljs java">CacheLoader&lt;Key, DatabaseConnection&gt; loader = <span class="hljs-keyword">new</span> CacheLoader&lt;Key, DatabaseConnection&gt; () &#123;
+  <span class="hljs-function"><span class="hljs-keyword">public</span> DatabaseConnection <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;
+    <span class="hljs-keyword">return</span> openConnection(key);
+  &#125;
+&#125;;
+RemovalListener&lt;Key, DatabaseConnection&gt; removalListener = <span class="hljs-keyword">new</span> RemovalListener&lt;Key, DatabaseConnection&gt;() &#123;
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onRemoval</span><span class="hljs-params">(RemovalNotification&lt;Key, DatabaseConnection&gt; removal)</span> </span>&#123;
+    DatabaseConnection conn = removal.getValue();
+    conn.close(); <span class="hljs-comment">// tear down properly</span>
+  &#125;
+&#125;;
+
+CacheBuilder.newBuilder()
+  .expireAfterWrite(<span class="hljs-number">2</span>, TimeUnit.MINUTES)
+  .removalListener(removalListener)
+  .build(loader);</code></pre></div>
+
+<h2 id="Refresh"><a href="#Refresh" class="headerlink" title="Refresh"></a>Refresh</h2><p>对于失效性比较强的元素，我们可以配置刷新的策略。刷新和淘汰不同，刷新元素是可以是异步操作，刷新未完成时返回还是原数据，刷新成功则返回新数据。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// Some keys don't need refreshing, and we want refreshes to be done asynchronously.</span>
+LoadingCache&lt;Key, Graph&gt; graphs = CacheBuilder.newBuilder()
+       .maximumSize(<span class="hljs-number">1000</span>)
+       .refreshAfterWrite(<span class="hljs-number">1</span>, TimeUnit.MINUTES)
+       .build(
+           <span class="hljs-keyword">new</span> CacheLoader&lt;Key, Graph&gt;() &#123;
+             <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">load</span><span class="hljs-params">(Key key)</span> </span>&#123; <span class="hljs-comment">// no checked exception</span>
+               <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
+             &#125;
+
+             <span class="hljs-function"><span class="hljs-keyword">public</span> ListenableFuture&lt;Graph&gt; <span class="hljs-title">reload</span><span class="hljs-params">(<span class="hljs-keyword">final</span> Key key, Graph prevGraph)</span> </span>&#123;
+               <span class="hljs-keyword">if</span> (neverNeedsRefresh(key)) &#123;
+                 <span class="hljs-keyword">return</span> Futures.immediateFuture(prevGraph);
+               &#125; <span class="hljs-keyword">else</span> &#123;
+                 <span class="hljs-comment">// asynchronous!</span>
+                 ListenableFutureTask&lt;Graph&gt; task = ListenableFutureTask.create(<span class="hljs-keyword">new</span> Callable&lt;Graph&gt;() &#123;
+                   <span class="hljs-function"><span class="hljs-keyword">public</span> Graph <span class="hljs-title">call</span><span class="hljs-params">()</span> </span>&#123;
+                     <span class="hljs-keyword">return</span> getGraphFromDatabase(key);
+                   &#125;
+                 &#125;);
+                 executor.execute(task);
+                 <span class="hljs-keyword">return</span> task;
+               &#125;
+             &#125;
+           &#125;);</code></pre></div>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Guava</tag>
+        <tag>Cache</tag>
+        <tag>缓存</tag>
       </tags>
   </entry>
   <entry>
@@ -1798,6 +2310,248 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
         <tag>Spring Cloud</tag>
         <tag>Gateway</tag>
         <tag>limiter</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>漫谈Guava之Cache（二）</title>
+    <url>/post/a6e28e21.html</url>
+    <content><![CDATA[<p>之前的文章介绍了Guava Cache的使用，本文将剖析Cache的源码，对Guava Cache的不太了解的可以移步这里：</p>
+<p><a href="https://blog.yjll.art/post/96f462f9.html">漫谈Guava之Cache（一）</a></p>
+<a id="more"></a>
+
+
+<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>创建Cache需通过CacheBuilder，该处使用了建造者模式，我们来看CacheBuilder的build方法。</p>
+<div class="hljs"><pre><code class="hljs java">
+<span class="hljs-keyword">public</span> &lt;K1 extends K, V1 extends V&gt; <span class="hljs-function">Cache&lt;K1, V1&gt; <span class="hljs-title">build</span><span class="hljs-params">()</span> </span>&#123;
+  checkWeightWithWeigher();
+  checkNonLoadingCache();
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> LocalCache.LocalManualCache&lt;&gt;(<span class="hljs-keyword">this</span>);
+&#125;</code></pre></div>
+
+<div class="hljs"><pre><code class="hljs java">LocalManualCache(CacheBuilder&lt;? <span class="hljs-keyword">super</span> K, ? <span class="hljs-keyword">super</span> V&gt; builder) &#123;
+  <span class="hljs-keyword">this</span>(<span class="hljs-keyword">new</span> LocalCache&lt;K, V&gt;(builder, <span class="hljs-keyword">null</span>));
+&#125;</code></pre></div>
+
+
+<p>LocalManualCache 相当于LocalCache的包装类，大部分方法直接使用LocalCache的实现，部分方法自己实现了一下。我们直接看LocalCache的逻辑，LocalCache的实现参考了<code>ConcurrentHashMap</code>，采用分段锁技术，当一个线程访问一个 <code>Segment</code> 时，不会影响其他的 <code>Segment</code>。</p>
+<p><img src="https://img.yjll.art/img/Segment.png" srcset="/img/loading.gif" alt="Segment"></p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function">Segment&lt;K, V&gt; <span class="hljs-title">segmentFor</span><span class="hljs-params">(<span class="hljs-keyword">int</span> hash)</span> </span>&#123;
+  <span class="hljs-keyword">return</span> segments[(hash &gt;&gt;&gt; segmentShift) &amp; segmentMask];
+&#125;</code></pre></div>
+
+
+<p>Segment中维护了5个队列</p>
+<ul>
+<li>keyReferenceQueue key引用队列</li>
+<li>valueReferenceQueue value引用队列 </li>
+<li>recencyQueue 临时队列，数据刷新清空该队列，队列中数据同步到accessQueue中</li>
+<li>writeQueue 写队列</li>
+<li>accessQueue 访问队列</li>
+</ul>
+<h3 id="存放元素"><a href="#存放元素" class="headerlink" title="存放元素"></a>存放元素</h3><p>segmentFor(hash)根据hash值取到Segment，优化并发操作。<br>加锁，<code>preWriteCleanup</code>删除被GC的数据，判断加入的元素在缓存中是否存在，若存在替换<code>enqueueNotification</code>或者不做更改，不存在新增放入缓存中，若缓存元素超限删除不活跃元素<code>evictEntries</code>(LRU)，最后释放锁并推送删除的元素给监听者<code>postWriteCleanup</code>。</p>
+<div class="hljs"><pre><code class="hljs java">
+<span class="hljs-meta">@Override</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> V <span class="hljs-title">put</span><span class="hljs-params">(K key, V value)</span> </span>&#123;
+  checkNotNull(key);
+  checkNotNull(value);
+  <span class="hljs-keyword">int</span> hash = hash(key);
+  <span class="hljs-keyword">return</span> segmentFor(hash).put(key, hash, value, <span class="hljs-keyword">false</span>);
+&#125;
+
+
+<span class="hljs-function">V <span class="hljs-title">put</span><span class="hljs-params">(K key, <span class="hljs-keyword">int</span> hash, V value, <span class="hljs-keyword">boolean</span> onlyIfAbsent)</span> </span>&#123;
+  lock();
+  <span class="hljs-keyword">try</span> &#123;
+    <span class="hljs-keyword">long</span> now = map.ticker.read();
+    <span class="hljs-comment">// 清理过期数据和被GC回收的数据</span>
+    preWriteCleanup(now);
+	
+    <span class="hljs-keyword">int</span> newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    <span class="hljs-comment">// 扩容</span>
+    <span class="hljs-keyword">if</span> (newCount &gt; <span class="hljs-keyword">this</span>.threshold) &#123; <span class="hljs-comment">// ensure capacity</span>
+      expand();
+      newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    &#125;
+
+    AtomicReferenceArray&lt;ReferenceEntry&lt;K, V&gt;&gt; table = <span class="hljs-keyword">this</span>.table;
+    <span class="hljs-keyword">int</span> index = hash &amp; (table.length() - <span class="hljs-number">1</span>);
+    ReferenceEntry&lt;K, V&gt; first = table.get(index);
+
+    <span class="hljs-comment">// Look for an existing entry.</span>
+    <span class="hljs-keyword">for</span> (ReferenceEntry&lt;K, V&gt; e = first; e != <span class="hljs-keyword">null</span>; e = e.getNext()) &#123;
+      K entryKey = e.getKey();
+      <span class="hljs-keyword">if</span> (e.getHash() == hash
+          &amp;&amp; entryKey != <span class="hljs-keyword">null</span>
+          &amp;&amp; map.keyEquivalence.equivalent(key, entryKey)) &#123;
+        <span class="hljs-comment">// We found an existing entry.</span>
+
+        ValueReference&lt;K, V&gt; valueReference = e.getValueReference();
+        V entryValue = valueReference.get();
+
+        <span class="hljs-comment">// 表示触发GC，值被回收了</span>
+        <span class="hljs-keyword">if</span> (entryValue == <span class="hljs-keyword">null</span>) &#123;
+          ++modCount;
+          <span class="hljs-comment">// 排除CacheLoad加载的数据</span>
+          <span class="hljs-keyword">if</span> (valueReference.isActive()) &#123;
+            <span class="hljs-comment">// 移入删除队列中，由删除队列触发监听</span>
+            enqueueNotification(
+                key, hash, entryValue, valueReference.getWeight(), RemovalCause.COLLECTED);
+            setValue(e, key, value, now);
+            newCount = <span class="hljs-keyword">this</span>.count; <span class="hljs-comment">// count remains unchanged</span>
+          &#125; <span class="hljs-keyword">else</span> &#123;
+            setValue(e, key, value, now);
+            newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+          &#125;
+          <span class="hljs-keyword">this</span>.count = newCount; <span class="hljs-comment">// write-volatile</span>
+          <span class="hljs-comment">// 移除原来元素</span>
+          evictEntries(e);
+          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (onlyIfAbsent) &#123; 
+          <span class="hljs-comment">// Mimic</span>
+          <span class="hljs-comment">// "if (!map.containsKey(key)) ...</span>
+          <span class="hljs-comment">// else return map.get(key);</span>
+          <span class="hljs-comment">// 只更新最后访问时间</span>
+          recordLockedRead(e, now);
+          <span class="hljs-keyword">return</span> entryValue;
+        &#125; <span class="hljs-keyword">else</span> &#123;
+          <span class="hljs-comment">// clobber existing entry, count remains unchanged</span>
+          ++modCount;
+          <span class="hljs-comment">// 与第一个条件分支逻辑类似</span>
+          enqueueNotification(
+              key, hash, entryValue, valueReference.getWeight(), RemovalCause.REPLACED);
+          setValue(e, key, value, now);
+          evictEntries(e);
+          <span class="hljs-keyword">return</span> entryValue;
+        &#125;
+      &#125;
+    &#125;
+
+    <span class="hljs-comment">// Create a new entry.</span>
+    <span class="hljs-comment">// 缓存中没有，创建一个</span>
+    ++modCount;
+    ReferenceEntry&lt;K, V&gt; newEntry = newEntry(key, hash, first);
+    <span class="hljs-comment">// 包装key，value放到newEntry中，并调用recordWrite()方法，更新权重,将entry存入accessQueue，writeQueue队列中</span>
+    setValue(newEntry, key, value, now);
+    table.set(index, newEntry);
+    newCount = <span class="hljs-keyword">this</span>.count + <span class="hljs-number">1</span>;
+    <span class="hljs-comment">// count用volatile修饰，保证内存可见性</span>
+    <span class="hljs-keyword">this</span>.count = newCount; <span class="hljs-comment">// write-volatile</span>
+    <span class="hljs-comment">// 新增元素后有可能导致缓存数据过多，需进行清理，优先删除较少访问的</span>
+    evictEntries(newEntry);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+  &#125; <span class="hljs-keyword">finally</span> &#123;
+    unlock();
+    <span class="hljs-comment">// 移除的元素会放到单独队列中，此时触发监听</span>
+    postWriteCleanup();
+  &#125;
+&#125;</code></pre></div>
+
+<p>添加或替换元素时会触发<code>recordWrite</code>,更新写队列和读队列</p>
+<div class="hljs"><pre><code class="hljs java">
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setValue</span><span class="hljs-params">(ReferenceEntry&lt;K, V&gt; entry, K key, V value, <span class="hljs-keyword">long</span> now)</span> </span>&#123;
+  ValueReference&lt;K, V&gt; previous = entry.getValueReference();
+  <span class="hljs-keyword">int</span> weight = map.weigher.weigh(key, value);
+  checkState(weight &gt;= <span class="hljs-number">0</span>, <span class="hljs-string">"Weights must be non-negative"</span>);
+
+  ValueReference&lt;K, V&gt; valueReference =
+      map.valueStrength.referenceValue(<span class="hljs-keyword">this</span>, entry, value, weight);
+  entry.setValueReference(valueReference);
+  recordWrite(entry, weight, now);
+  previous.notifyNewValue(value);
+&#125;
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">recordWrite</span><span class="hljs-params">(ReferenceEntry&lt;K, V&gt; entry, <span class="hljs-keyword">int</span> weight, <span class="hljs-keyword">long</span> now)</span> </span>&#123;
+  <span class="hljs-comment">// we are already under lock, so drain the recency queue immediately</span>
+  drainRecencyQueue();
+  totalWeight += weight;
+
+  <span class="hljs-keyword">if</span> (map.recordsAccess()) &#123;
+    entry.setAccessTime(now);
+  &#125;
+  <span class="hljs-keyword">if</span> (map.recordsWrite()) &#123;
+    entry.setWriteTime(now);
+  &#125;
+  accessQueue.add(entry);
+  writeQueue.add(entry);
+&#125;</code></pre></div>
+
+<p>缓存元素有变动时会调用<code>drainRecencyQueue</code>方法，将<code>recencyQueue</code>队列数据清空，并按照队列顺序放入访问队列中以备LRU策略删除</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">drainRecencyQueue</span><span class="hljs-params">()</span> </span>&#123;
+    ReferenceEntry&lt;K, V&gt; e;
+    <span class="hljs-keyword">while</span> ((e = recencyQueue.poll()) != <span class="hljs-keyword">null</span>) &#123;
+      <span class="hljs-comment">// An entry may be in the recency queue despite it being removed from</span>
+      <span class="hljs-comment">// the map . This can occur when the entry was concurrently read while a</span>
+      <span class="hljs-comment">// writer is removing it from the segment or after a clear has removed</span>
+      <span class="hljs-comment">// all of the segment's entries.</span>
+      <span class="hljs-keyword">if</span> (accessQueue.contains(e)) &#123;
+        accessQueue.add(e);
+      &#125;
+    &#125;
+  &#125;</code></pre></div>
+
+<h3 id="取元素"><a href="#取元素" class="headerlink" title="取元素"></a>取元素</h3><p>和存放逻辑一样，也要先取对应的Segment。从Segment中取出value，value不为空继续判断是否超过缓存过期时间，若元素可用，更新读队列，最后清除GC和过期数据。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-meta">@Nullable</span> <span class="hljs-function">V <span class="hljs-title">getIfPresent</span><span class="hljs-params">(Object key)</span> </span>&#123;
+  <span class="hljs-keyword">int</span> hash = hash(checkNotNull(key));
+  V value = segmentFor(hash).get(key, hash);
+  <span class="hljs-keyword">if</span> (value == <span class="hljs-keyword">null</span>) &#123;
+    globalStatsCounter.recordMisses(<span class="hljs-number">1</span>);
+  &#125; <span class="hljs-keyword">else</span> &#123;
+    globalStatsCounter.recordHits(<span class="hljs-number">1</span>);
+  &#125;
+  <span class="hljs-keyword">return</span> value;
+&#125;
+
+<span class="hljs-comment">// `getLiveEntry`方法传入当前时间，过期返回空</span>
+
+<span class="hljs-function">V <span class="hljs-title">get</span><span class="hljs-params">(Object key, <span class="hljs-keyword">int</span> hash)</span> </span>&#123;
+  <span class="hljs-keyword">try</span> &#123;
+    <span class="hljs-keyword">if</span> (count != <span class="hljs-number">0</span>) &#123; <span class="hljs-comment">// read-volatile</span>
+      <span class="hljs-keyword">long</span> now = map.ticker.read();
+      ReferenceEntry&lt;K, V&gt; e = getLiveEntry(key, hash, now);
+      <span class="hljs-keyword">if</span> (e == <span class="hljs-keyword">null</span>) &#123;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+      &#125;
+
+      V value = e.getValueReference().get();
+      <span class="hljs-keyword">if</span> (value != <span class="hljs-keyword">null</span>) &#123; <span class="hljs-comment">// 未被GC回收</span>
+        <span class="hljs-comment">// 放入recencyQueue队列中</span>
+        recordRead(e, now);
+        <span class="hljs-comment">// 当前时间和写入的时间超过刷新间隔，重新加载value</span>
+        <span class="hljs-keyword">return</span> scheduleRefresh(e, e.getKey(), hash, value, now, map.defaultLoader);
+      &#125;
+      <span class="hljs-comment">// 垃圾回收</span>
+      tryDrainReferenceQueues();
+    &#125;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+  &#125; <span class="hljs-keyword">finally</span> &#123;
+    <span class="hljs-comment">// 清超时和GC数据</span>
+    postReadCleanup();
+  &#125;
+&#125;
+
+<span class="hljs-function">ReferenceEntry&lt;K, V&gt; <span class="hljs-title">getLiveEntry</span><span class="hljs-params">(Object key, <span class="hljs-keyword">int</span> hash, <span class="hljs-keyword">long</span> now)</span> </span>&#123;
+  ReferenceEntry&lt;K, V&gt; e = getEntry(key, hash);
+  <span class="hljs-keyword">if</span> (e == <span class="hljs-keyword">null</span>) &#123;
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+  &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (map.isExpired(e, now)) &#123; <span class="hljs-comment">// 缓存已过期</span>
+    tryExpireEntries(now);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+  &#125;
+  <span class="hljs-keyword">return</span> e;
+&#125;</code></pre></div>
+
+
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.cnblogs.com/aspirant/p/11734918.html" target="_blank" rel="noopener">Guava cacha 机制及源码分析</a></p>
+<p><a href="https://www.jianshu.com/p/2502e8301ec7" target="_blank" rel="noopener">guava Cache源码分析（二）</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Guava</tag>
+        <tag>Cache</tag>
+        <tag>缓存</tag>
       </tags>
   </entry>
   <entry>

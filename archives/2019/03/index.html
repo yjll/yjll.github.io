@@ -17,20 +17,10 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>page.title - Youj&#39;s blog</title>
+  <title>归档 - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
-
-  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
-
-  
-    
-    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
-  
-
-  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -164,53 +154,22 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
-<div class="page-content">
-  <p>设置动态模板</p>
-<div class="hljs"><pre><code class="hljs ada">PUT _template/hkey_transferbill
-&#123;
-  <span class="hljs-string">"index_patterns"</span>: <span class="hljs-string">"hkey_transferbill"</span>,
-  <span class="hljs-string">"settings"</span>: &#123;
-    <span class="hljs-string">"number_of_shards"</span>: <span class="hljs-number">2</span>,
-    <span class="hljs-string">"number_of_replicas"</span>: <span class="hljs-number">1</span>
-  &#125;,
-  <span class="hljs-string">"mappings"</span>: &#123;
-    <span class="hljs-string">"data"</span>:&#123;
-      <span class="hljs-string">"dynamic_templates"</span> : [ &#123;  
-        <span class="hljs-string">"keyword_field"</span> : &#123;  
-          <span class="hljs-string">"unmatch"</span> : "*<span class="hljs-type">Name</span><span class="hljs-string">",  </span>
-<span class="hljs-string">          "</span>match_mapping_type<span class="hljs-string">" : "</span>string<span class="hljs-string">",  </span>
-<span class="hljs-string">          "</span>mapping<span class="hljs-string">" : &#123;  </span>
-<span class="hljs-string">            "</span><span class="hljs-keyword">type</span><span class="hljs-string">" : "</span>keyword<span class="hljs-string">"</span>
-<span class="hljs-string">          &#125;  </span>
-<span class="hljs-string">        &#125;  </span>
-<span class="hljs-string">      &#125;, &#123;  </span>
-<span class="hljs-string">        "</span>text_fields<span class="hljs-string">" : &#123;  </span>
-<span class="hljs-string">          "</span>match<span class="hljs-string">" : "</span>*Name<span class="hljs-string">",  </span>
-<span class="hljs-string">          "</span>match_mapping_type<span class="hljs-string">" : "</span>string<span class="hljs-string">",  </span>
-<span class="hljs-string">          "</span>mapping<span class="hljs-string">" : &#123;  </span>
-<span class="hljs-string">            "</span><span class="hljs-keyword">type</span><span class="hljs-string">" : "</span>text<span class="hljs-string">",</span>
-<span class="hljs-string">            "</span>fields<span class="hljs-string">": &#123;</span>
-<span class="hljs-string">              "</span>raw<span class="hljs-string">": &#123;</span>
-<span class="hljs-string">                "</span><span class="hljs-keyword">type</span><span class="hljs-string">": "</span>keyword<span class="hljs-string">"</span>
-<span class="hljs-string">              &#125;</span>
-<span class="hljs-string">            &#125;</span>
-<span class="hljs-string">          &#125;  </span>
-<span class="hljs-string">        &#125;  </span>
-<span class="hljs-string">      &#125; ],  </span>
-<span class="hljs-string">      "</span>properties<span class="hljs-string">": &#123;</span>
-<span class="hljs-string">        "</span>rowkey<span class="hljs-string">":</span>
-<span class="hljs-string">        &#123;</span>
-<span class="hljs-string">          "</span><span class="hljs-keyword">type</span><span class="hljs-string">":"</span>keyword<span class="hljs-string">"</span>
-<span class="hljs-string">        &#125;,</span>
-<span class="hljs-string">        "</span>age<span class="hljs-string">":</span>
-<span class="hljs-string">        &#123;</span>
-<span class="hljs-string">          "</span><span class="hljs-keyword">type</span><span class="hljs-string">":"</span>keyword<span class="hljs-string">"</span>
-<span class="hljs-string">        &#125;</span>
-<span class="hljs-string">      &#125;</span>
-<span class="hljs-string">    &#125;</span>
-<span class="hljs-string">  &#125;</span>
-<span class="hljs-string">&#125;</span></code></pre></div>
+<div class="list-group">
+  <p class="h4">共计 25 篇文章</p>
+  <hr>
+  
+    
+      
+      <p class="h5">2019</p>
+    
+    <a href="/post/3a12d43e.html" class="list-group-item list-group-item-action">
+      <span class="archive-post-title">Redis进阶</span>
+      <time style="float: right;">03-28</time>
+    </a>
+  
 </div>
+
+
 
               </div>
             </div>
@@ -301,7 +260,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "page.title&nbsp;",
+        "归档&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
@@ -315,21 +274,6 @@
   </script>
 
 
-
-  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
-  <script>
-    anchors.options = {
-      placement: "right",
-      visible: "hover",
-      
-    };
-    var el = "h1,h2,h3,h4,h5,h6".split(",");
-    var res = [];
-    for (item of el) {
-      res.push(".markdown-body > " + item)
-    }
-    anchors.add(res.join(", "))
-  </script>
 
 
 

@@ -17,7 +17,7 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>MacOS上玩怀旧游戏 - Youj&#39;s blog</title>
+  <title>MacOS上使用OpenEmu玩怀旧游戏 - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      460 字
+      467 字
     </span>
   
 
@@ -199,23 +199,25 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">MacOS上玩怀旧游戏</h1>
+            <h1 style="display: none">MacOS上使用OpenEmu玩怀旧游戏</h1>
             
             <div class="markdown-body" id="post-body">
               <p><img src="https://img.yjll.art/img/OpenEmu.png" srcset="/img/loading.gif" alt="OpenEmu"></p>
 <p>OpenEmu是MacOS上的开源项目模拟器项目，它整合了几乎全部主流的游戏机平台，你可以在mac系统上畅玩FC/NES、SFC/SNES、N64、PlayStation、GameBoy等游戏。</p>
 <h3 id="下载模拟器"><a href="#下载模拟器" class="headerlink" title="下载模拟器"></a>下载模拟器</h3><p>官网：<a href="http://openemu.org" target="_blank" rel="noopener">http://openemu.org</a></p>
 <p>注意一定要下载里面的Experimental版本，正式版不支持Arcade街机游戏。</p>
-<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p><img src="https://img.yjll.art/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
-<p>打开后在核心中下载对应的游戏核心，由于源在国外，访问不是很稳定，可以借助梯子解决。可以去单独下载核心core，放到指定位置<code>/Users/用户名/Library/Application Support/OpenEmu/Cores</code></p>
+<h3 id="下载核心"><a href="#下载核心" class="headerlink" title="下载核心"></a>下载核心</h3><p><img src="https://img.yjll.art/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
+<p>打开后在核心中下载对应的游戏核心，由于源在国外，访问不是很稳定，可以借助梯子解决。可以去单独下载核心core，放到指定位置<code>~/Library/Application Support/OpenEmu/Cores</code></p>
 <p>后边的系统文件，指的是我们常说的BIOS，BIOS 就是从游戏机里 dump 出来的基本 IO 模块。绝大部分模拟器都需要这个模块来启动游戏。为了规避版权问题， BIOS 是要自己找的。因为 BIOS 的版权属于游戏机厂商（而模拟器本身只要不提供 BIOS 一般是不侵权的）。</p>
-<p>BIOS文件放置在mac系统的位置 <code>/Users/用户名/Library/Application Support/OpenEmu/BIOS</code></p>
+<p>BIOS文件放置在mac系统的位置 <code>~/Library/Application Support/OpenEmu/bios</code></p>
 <h3 id="游戏下载"><a href="#游戏下载" class="headerlink" title="游戏下载"></a>游戏下载</h3><p>核心设置好后，我们还缺少对应的游戏，比如小时候常玩的任天堂(Nintendo)红白机，可以在下边的这个网站上下载</p>
 <p><a href="https://www.retrostic.com/roms/nes" target="_blank" rel="noopener">https://www.retrostic.com/roms/nes</a></p>
 <p>我们将下载后的nes文件拖拽到Nintendo(NES)对应的窗口中即可。</p>
-<p>对于如合金弹头和拳皇等街机游戏直接运行的话会提示缺少文件，还需要和游戏配套的游戏BIOS，可通过以下链接下载。</p>
-<p><a href="https://www.mamechannel.it/pages/BIOS.php" target="_blank" rel="noopener">www.mamechannel.it</a></p>
-<p>附街机游戏下载<br><a href="https://ia803104.us.archive.org/view_archive.php?archive=/8/items/MAME217RomsOnlyMerged/MAME%200.217%20ROMs%20%28merged%29.zip" target="_blank" rel="noopener">archive.org</a></p>
+<p><img src="http://openemu.org/img/intro-nes-grid.png" srcset="/img/loading.gif" alt=""></p>
+<p>对于如合金弹头和拳皇等街机游戏直接运行的话会提示缺少文件，还需要和游戏配套的游戏BIOS，可通过以下链接下载。放置在<code>~/Library/Application Support/OpenEmu/Game Library/roms/Arcade</code>即可</p>
+<p><a href="https://www.mamechannel.it/pages/bios.php" target="_blank" rel="noopener">www.mamechannel.it</a></p>
+<p>附街机游戏下载</p>
+<p><a href="https://ia803104.us.archive.org/view_archive.php?archive=/8/items/MAME217RomsOnlyMerged/MAME%200.217%20ROMs%20%28merged%29.zip" target="_blank" rel="noopener">archive.org</a></p>
 <h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.imtrq.com/archives/1629" target="_blank" rel="noopener">MacOS上的MAME街机模拟器，附三国战记+恐龙快打+拳皇97</a></p>
 <p><a href="https://zhuanlan.zhihu.com/p/42108658" target="_blank" rel="noopener">想在Mac上玩红白机吗？OpenEmu了解一下！</a></p>
 <p><a href="https://post.smzdm.com/p/aoo8lr79/" target="_blank" rel="noopener">OpenEmu，mac上最完整的街机和游戏机怀旧全能模拟器</a></p>
@@ -243,6 +245,12 @@
                 <div class="post-prevnext row">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/post/6a3f5dff.html">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">DataX同步全量Mqsql数据到Elasticsearch</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
@@ -388,7 +396,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "MacOS上玩怀旧游戏&nbsp;",
+        "MacOS上使用OpenEmu玩怀旧游戏&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
