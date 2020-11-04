@@ -17,7 +17,7 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>Windows下的包管理工具 - Youj&#39;s blog</title>
+  <title>Mybatis-Spring - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -148,8 +148,8 @@
               
   <div class="mt-3 post-meta">
     <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-    <time datetime="2020-05-29 00:00" pubdate>
-      2020年5月29日 凌晨
+    <time datetime="2020-11-03 00:00" pubdate>
+      2020年11月3日 凌晨
     </time>
   </div>
 
@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      276 字
+      142 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      3
+      2
        分钟
     </span>
   
@@ -199,61 +199,66 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">Windows下的包管理工具</h1>
+            <h1 style="display: none">Mybatis-Spring</h1>
             
             <div class="markdown-body" id="post-body">
-              <p>Centos安装软件可使用yum，Ubuntu上可使用apt，MacOS可使用brew。Windows平台也有开发者开发对应的安装程序——Scoop，Scoop类似MacOS平台的brew，没有brew强大，但常见开发环境都可以轻松搞定。</p>
-<p>使用scoop安装常用软件，可直接敲命令</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install git curl <span class="hljs-number">7</span>zip</code></pre></div>
+              <div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span>
+<span class="hljs-meta">@MapperScan</span>(basePackages = &#123; <span class="hljs-string">"com.xxx.goods.dao"</span> &#125;, sqlSessionFactoryRef = <span class="hljs-string">"goodsSqlSessionFactory"</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GoodsDataSourceConfig</span> </span>&#123;
+    <span class="hljs-meta">@Resource</span>
+    <span class="hljs-keyword">private</span> Environment env;
 
-<a id="more"></a>
+    <span class="hljs-meta">@Bean</span>(name = <span class="hljs-string">"goodsDataSource"</span>)
+    <span class="hljs-meta">@ConfigurationProperties</span>(prefix = <span class="hljs-string">"spring.datasource.goods"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> DataSource <span class="hljs-title">initDataSource</span><span class="hljs-params">()</span> </span>&#123;
+        <span class="hljs-keyword">return</span> DataSourceBuilder.create().build();
+    &#125;
+    
+    <span class="hljs-meta">@Bean</span>(name = <span class="hljs-string">"goodsTransactionManager"</span>)
+    <span class="hljs-meta">@Primary</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> DataSourceTransactionManager <span class="hljs-title">transactionManager</span><span class="hljs-params">(DataSource dataSource)</span> </span>&#123;
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> DataSourceTransactionManager(dataSource);
+    &#125;
 
-<h3 id="安装Scoop"><a href="#安装Scoop" class="headerlink" title="安装Scoop"></a>安装Scoop</h3><p>设置安装目录，非必须，默认安装在用户目录</p>
-<div class="hljs"><pre><code class="hljs elixir"><span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP=<span class="hljs-string">'D:\ProgramFile\scoop'</span></span>
-[environment]::setEnvironmentVariable(<span class="hljs-string">'SCOOP'</span>,<span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP</span>,<span class="hljs-string">'User'</span>)</code></pre></div>
+    <span class="hljs-meta">@Bean</span>(name = <span class="hljs-string">"goodsSqlSessionFactory"</span>)
+    <span class="hljs-meta">@Primary</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> SqlSessionFactory <span class="hljs-title">initSqlSessionFactory</span><span class="hljs-params">(DataSource dataSource)</span> <span class="hljs-keyword">throws</span> Exception </span>&#123;
+        <span class="hljs-keyword">final</span> SqlSessionFactoryBean sessionFactory = <span class="hljs-keyword">new</span> SqlSessionFactoryBean();
+        sessionFactory.setDataSource(dataSource);
+        sessionFactory.setMapperLocations(<span class="hljs-keyword">new</span> PathMatchingResourcePatternResolver()
+                .getResources(env.getProperty(<span class="hljs-string">"mybatis.goods.mapper-locations"</span>)));
+        <span class="hljs-keyword">return</span> sessionFactory.getObject();
+    &#125;
+&#125;</code></pre></div>
 
-<p>在 PowerShell 中输入下面内容，保证允许本地脚本的执行</p>
-<div class="hljs"><pre><code class="hljs dsconfig"><span class="hljs-built_in">set-executionpolicy</span> <span class="hljs-string">remotesigned </span>-<span class="hljs-string">scope </span><span class="hljs-string">currentuser</span></code></pre></div>
 
-<p>安装scoop</p>
-<div class="hljs"><pre><code class="hljs ceylon">iex (<span class="hljs-keyword">new</span>-<span class="hljs-keyword">object</span> net.webclient).downloadstring(<span class="hljs-string">'https://get.scoop.sh'</span>)</code></pre></div>
-
-
-
-<p>Scoop 可以利用<a href="https://github.com/aria2/aria2" target="_blank" rel="noopener"><code>aria2</code></a> 进行多线程下载。</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install aria2</code></pre></div>
-
-<p>可以使用<code>scoop config</code>对aria2进行配置</p>
-<ul>
-<li>aria2-enabled (default: true)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-retry-wait" target="_blank" rel="noopener">aria2-retry-wait</a> (default: 2)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s" target="_blank" rel="noopener">aria2-split</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x" target="_blank" rel="noopener">aria2-max-connection-per-server</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k" target="_blank" rel="noopener">aria2-min-split-size</a> (default: 5M)</li>
-</ul>
-<p>代理设置 </p>
-<div class="hljs"><pre><code class="hljs powershell"><span class="hljs-comment"># 设置代理</span>
-scoop config proxy localhost:<span class="hljs-number">1081</span>
-<span class="hljs-comment"># 删除代理</span>
-scoop config rm proxy</code></pre></div>
-
-<p>添加<code>buckets</code><br>buckets类似Linux中的源，默认包含<code>main</code>,可手动添加其他bucket</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop bucket add extras
-scoop bucket add versions
-scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
-<p>bucket收录列表</p>
-<p><a href="https://rasa.github.io/scoop-directory/by-score.html" target="_blank" rel="noopener">https://rasa.github.io/scoop-directory/by-score.html</a></p>
+<p>org.mybatis.spring.mapper.MapperFactoryBean</p>
+<p><a href="https://www.cnblogs.com/yougewe/p/10072740.html" target="_blank" rel="noopener">spring中的mybatis的sqlSession是如何做到线程隔离的？</a></p>
+<p><a href="https://juejin.im/post/6844903987041271816" target="_blank" rel="noopener">Mybatis源码解析(一) —— mybatis与Spring是如何整合的？</a></p>
+<p><a href="https://blog.csdn.net/qq_26323323/article/details/81357549" target="_blank" rel="noopener">Spring-Mybatis框架使用与源码解析</a></p>
+<p><a href="https://juejin.im/post/6844904033610629128" target="_blank" rel="noopener">Mybatis源码系列3-三种SqlSession的区别</a></p>
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Java/">Java</a>
+                    
+                  </div>
+                
                 
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/%E5%B7%A5%E5%85%B7/">工具</a>
+                      <a class="hover-with-bg" href="/tags/Java/">Java</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Spring/">Spring</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Mybatis/">Mybatis</a>
                     
                   </div>
                 
@@ -266,18 +271,12 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/89a34fac.html">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Docker复现RUN命令</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/9a133fa7.html">
-                        <span class="hidden-mobile">当我们谈论NIO时我们在谈论什么</span>
+                      <a href="/post/2c25ac60.html">
+                        <span class="hidden-mobile">Python logging模块日志流处理流程</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -416,7 +415,7 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "Windows下的包管理工具&nbsp;",
+        "Mybatis-Spring&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,

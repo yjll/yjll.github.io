@@ -17,7 +17,7 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>Windows下的包管理工具 - Youj&#39;s blog</title>
+  <title>Python logging模块日志流处理流程 - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -148,8 +148,8 @@
               
   <div class="mt-3 post-meta">
     <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-    <time datetime="2020-05-29 00:00" pubdate>
-      2020年5月29日 凌晨
+    <time datetime="2020-11-02 00:00" pubdate>
+      2020年11月2日 凌晨
     </time>
   </div>
 
@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      276 字
+      547 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      3
+      6
        分钟
     </span>
   
@@ -199,61 +199,111 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto" id="post">
             <!-- SEO header -->
-            <h1 style="display: none">Windows下的包管理工具</h1>
+            <h1 style="display: none">Python logging模块日志流处理流程</h1>
             
             <div class="markdown-body" id="post-body">
-              <p>Centos安装软件可使用yum，Ubuntu上可使用apt，MacOS可使用brew。Windows平台也有开发者开发对应的安装程序——Scoop，Scoop类似MacOS平台的brew，没有brew强大，但常见开发环境都可以轻松搞定。</p>
-<p>使用scoop安装常用软件，可直接敲命令</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install git curl <span class="hljs-number">7</span>zip</code></pre></div>
+              <h3 id="logging模块的四大组件"><a href="#logging模块的四大组件" class="headerlink" title="logging模块的四大组件"></a>logging模块的四大组件</h3><table>
+<thead>
+<tr>
+<th>组件名称</th>
+<th>对应类名</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>日志器</td>
+<td>Logger</td>
+<td>提供了应用程序可一直使用的接口</td>
+</tr>
+<tr>
+<td>处理器</td>
+<td>Handler</td>
+<td>将logger创建的日志记录发送到合适的目的输出</td>
+</tr>
+<tr>
+<td>过滤器</td>
+<td>Filter</td>
+<td>提供了更细粒度的控制工具来决定输出哪条日志记录，丢弃哪条日志记录</td>
+</tr>
+<tr>
+<td>格式器</td>
+<td>Formatter</td>
+<td>决定日志记录的最终输出格式</td>
+</tr>
+</tbody></table>
+<p>logging模块就是通过这些组件来完成日志处理的，上面所使用的logging模块级别的函数也是通过这些组件对应的类来实现的。</p>
+<p>这些组件之间的关系描述：</p>
+<p>日志器（logger）需要通过处理器（handler）将日志信息输出到目标位置，如：文件、sys.stdout、网络等。不同的处理器（handler）可以将日志输出到不同的位置。日志器（logger）可以设置多个处理器（handler）将同一条日志记录输出到不同的位置。每个处理器（handler）都可以设置自己的过滤器（filter）实现日志过滤，从而只保留感兴趣的日志。每个处理器（handler）都可以设置自己的格式器（formatter）实现同一条日志以不同的格式输出到不同的地方。</p>
+<p>简单点说就是：日志器（logger）是入口，真正干活儿的是处理器（handler），处理器（handler）还可以通过过滤器（filter）和格式器（formatter）对要输出的日志内容做过滤和格式化等处理操作。</p>
+<h3 id="使用yaml进行日志配置"><a href="#使用yaml进行日志配置" class="headerlink" title="使用yaml进行日志配置"></a>使用yaml进行日志配置</h3><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-number">1</span>
+<span class="hljs-attr">formatters:</span>
+  <span class="hljs-attr">simple:</span>
+    <span class="hljs-attr">format:</span> <span class="hljs-string">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span>
+<span class="hljs-attr">handlers:</span>
+  <span class="hljs-attr">console:</span>
+    <span class="hljs-attr">class:</span> <span class="hljs-string">logging.StreamHandler</span>
+    <span class="hljs-attr">level:</span> <span class="hljs-string">DEBUG</span>
+    <span class="hljs-attr">formatter:</span> <span class="hljs-string">simple</span>
+  <span class="hljs-attr">file:</span>
+    <span class="hljs-attr">class:</span> <span class="hljs-string">logging.FileHandler</span>
+    <span class="hljs-attr">filename:</span> <span class="hljs-string">logging.log</span>
+    <span class="hljs-attr">encoding:</span> <span class="hljs-string">utf-8</span>
+    <span class="hljs-attr">level:</span> <span class="hljs-string">INFO</span>
+    <span class="hljs-attr">formatter:</span> <span class="hljs-string">simple</span>
+  
+<span class="hljs-attr">loggers:</span>
+  <span class="hljs-attr">simpleLogger:</span>
+    <span class="hljs-attr">level:</span> <span class="hljs-string">INFO</span>
+    <span class="hljs-attr">handlers:</span> <span class="hljs-string">[console,file]</span>
+    <span class="hljs-attr">propagate:</span> <span class="hljs-literal">no</span>
+<span class="hljs-attr">root:</span>
+  <span class="hljs-attr">level:</span> <span class="hljs-string">INFO</span>
+  <span class="hljs-attr">handlers:</span> <span class="hljs-string">[console]</span></code></pre></div>
 
-<a id="more"></a>
+<div class="hljs"><pre><code class="hljs python"><span class="hljs-keyword">import</span> logging.config
+<span class="hljs-keyword">import</span> yaml
 
-<h3 id="安装Scoop"><a href="#安装Scoop" class="headerlink" title="安装Scoop"></a>安装Scoop</h3><p>设置安装目录，非必须，默认安装在用户目录</p>
-<div class="hljs"><pre><code class="hljs elixir"><span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP=<span class="hljs-string">'D:\ProgramFile\scoop'</span></span>
-[environment]::setEnvironmentVariable(<span class="hljs-string">'SCOOP'</span>,<span class="hljs-variable">$env</span><span class="hljs-symbol">:SCOOP</span>,<span class="hljs-string">'User'</span>)</code></pre></div>
+config = <span class="hljs-literal">None</span>
+<span class="hljs-keyword">with</span> open(<span class="hljs-string">'log.yaml'</span>, <span class="hljs-string">'r'</span>) <span class="hljs-keyword">as</span> f:
+    config = yaml.safe_load(f.read())
+    logging.config.dictConfig(config)
 
-<p>在 PowerShell 中输入下面内容，保证允许本地脚本的执行</p>
-<div class="hljs"><pre><code class="hljs dsconfig"><span class="hljs-built_in">set-executionpolicy</span> <span class="hljs-string">remotesigned </span>-<span class="hljs-string">scope </span><span class="hljs-string">currentuser</span></code></pre></div>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">getLogger</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-keyword">return</span> logging.getLogger(<span class="hljs-string">'simpleLogger'</span>)
 
-<p>安装scoop</p>
-<div class="hljs"><pre><code class="hljs ceylon">iex (<span class="hljs-keyword">new</span>-<span class="hljs-keyword">object</span> net.webclient).downloadstring(<span class="hljs-string">'https://get.scoop.sh'</span>)</code></pre></div>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    logger = getLogger()
+    
+    logger.debug(<span class="hljs-string">'debug'</span>)
+    logger.info(<span class="hljs-string">'info:%s'</span>,<span class="hljs-string">'message'</span>)
+    logger.error(<span class="hljs-string">'error'</span>)</code></pre></div>
+
+<p><code>simpleLogger</code>配置的日志级别为INFO，debug的日志没有打印</p>
+<div class="hljs"><pre><code class="hljs angelscript"><span class="hljs-number">2020</span><span class="hljs-number">-11</span><span class="hljs-number">-02</span> <span class="hljs-number">16</span>:<span class="hljs-number">22</span>:<span class="hljs-number">09</span>,<span class="hljs-number">194</span> - simpleLogger - INFO - info:message
+<span class="hljs-number">2020</span><span class="hljs-number">-11</span><span class="hljs-number">-02</span> <span class="hljs-number">16</span>:<span class="hljs-number">22</span>:<span class="hljs-number">09</span>,<span class="hljs-number">195</span> - simpleLogger - ERROR - error</code></pre></div>
 
 
-
-<p>Scoop 可以利用<a href="https://github.com/aria2/aria2" target="_blank" rel="noopener"><code>aria2</code></a> 进行多线程下载。</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop install aria2</code></pre></div>
-
-<p>可以使用<code>scoop config</code>对aria2进行配置</p>
-<ul>
-<li>aria2-enabled (default: true)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-retry-wait" target="_blank" rel="noopener">aria2-retry-wait</a> (default: 2)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-s" target="_blank" rel="noopener">aria2-split</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-x" target="_blank" rel="noopener">aria2-max-connection-per-server</a> (default: 5)</li>
-<li><a href="https://aria2.github.io/manual/en/html/aria2c.html#cmdoption-k" target="_blank" rel="noopener">aria2-min-split-size</a> (default: 5M)</li>
-</ul>
-<p>代理设置 </p>
-<div class="hljs"><pre><code class="hljs powershell"><span class="hljs-comment"># 设置代理</span>
-scoop config proxy localhost:<span class="hljs-number">1081</span>
-<span class="hljs-comment"># 删除代理</span>
-scoop config rm proxy</code></pre></div>
-
-<p>添加<code>buckets</code><br>buckets类似Linux中的源，默认包含<code>main</code>,可手动添加其他bucket</p>
-<div class="hljs"><pre><code class="hljs powershell">scoop bucket add extras
-scoop bucket add versions
-scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
-<p>bucket收录列表</p>
-<p><a href="https://rasa.github.io/scoop-directory/by-score.html" target="_blank" rel="noopener">https://rasa.github.io/scoop-directory/by-score.html</a></p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.cnblogs.com/yyds/p/6901864.html" target="_blank" rel="noopener">Python之日志处理（logging模块）</a></p>
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Python/">Python</a>
+                    
+                  </div>
+                
                 
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/%E5%B7%A5%E5%85%B7/">工具</a>
+                      <a class="hover-with-bg" href="/tags/Python/">Python</a>
+                    
+                      <a class="hover-with-bg" href="/tags/log/">log</a>
                     
                   </div>
                 
@@ -266,9 +316,9 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/89a34fac.html">
+                      <a href="/post/112d5fa0.html">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Docker复现RUN命令</span>
+                        <span class="hidden-mobile">Mybatis-Spring</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -276,8 +326,8 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/9a133fa7.html">
-                        <span class="hidden-mobile">当我们谈论NIO时我们在谈论什么</span>
+                      <a href="/post/6a3f5dff.html">
+                        <span class="hidden-mobile">DataX同步全量Mqsql数据到Elasticsearch</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
@@ -416,7 +466,7 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "Windows下的包管理工具&nbsp;",
+        "Python logging模块日志流处理流程&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,

@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      684 字
+      704 字
     </span>
   
 
@@ -288,11 +288,13 @@ bin		conf		job		<span class="hljs-class"><span class="hljs-keyword">lib</span>		
 <h3 id="编写同步配置文件"><a href="#编写同步配置文件" class="headerlink" title="编写同步配置文件"></a>编写同步配置文件</h3><p><a href="https://github.com/alibaba/DataX/blob/master/mysqlreader/doc/mysqlreader.md" target="_blank" rel="noopener">MysqlReader 插件文档</a></p>
 <p><a href="https://github.com/alibaba/DataX/blob/master/elasticsearchwriter/doc/elasticsearchwriter.md" target="_blank" rel="noopener">ElasticSearchWriter 插件文档</a></p>
 <p>同步时间类型问题，部分mysql中时间字段为空，导入到ES中时间变成了系统时间，我在导入时将ES中column的type更改为<code>text</code>解决了这个问题。</p>
+<p><code>setting.speed.channel</code>为并发数，<code>setting.speed.byte</code>是最大同步字节数</p>
 <div class="hljs"><pre><code class="hljs json">&#123;
     <span class="hljs-attr">"job"</span>:&#123;
         <span class="hljs-attr">"setting"</span>:&#123;
             <span class="hljs-attr">"speed"</span>:&#123;
-                <span class="hljs-attr">"channel"</span>:<span class="hljs-number">4</span>
+                <span class="hljs-attr">"channel"</span>:<span class="hljs-number">4</span>,
+                <span class="hljs-attr">"byte"</span>: <span class="hljs-number">104857600</span>
             &#125;
         &#125;,
         <span class="hljs-attr">"content"</span>:[
@@ -390,6 +392,12 @@ bin		conf		job		<span class="hljs-class"><span class="hljs-keyword">lib</span>		
                 <div class="post-prevnext row">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/post/2c25ac60.html">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Python logging模块日志流处理流程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
