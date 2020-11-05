@@ -265,7 +265,7 @@ Let’s Encrypt 是 一个叫 ISRG （ Internet Secur
     
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
-        <a href="/post/112d5fa0.html">Mybatis-Spring</a>
+        <a href="/post/112d5fa0.html">聊一聊Mybatis-Spring都帮我们做了什么</a>
       </h1>
 
       <p class="index-excerpt">
@@ -274,11 +274,7 @@ Let’s Encrypt 是 一个叫 ISRG （ Internet Secur
           
             
           
-          @Configuration
-@MapperScan(basePackages = &#123; "com.xxx.goods.dao" &#125;, sqlSessionFactoryRef = "goodsSqlSessionFactory")
-public class GoodsDataSourceConfig &#123;
-    @Resource
-    private Enviro
+          MyBatis-Spring 会帮助我们将 MyBatis 代码无缝地整合到 Spring 中。它将允许 MyBatis 参与到 Spring 的事务管理之中，创建映射器 mapper 和 SqlSession 并注入到 bean 中，本文将跟随Mybatis-Spring 的源码，一步步探究是它是如何实现的。
         </a>
       </p>
 

@@ -232,6 +232,8 @@
 </tr>
 </tbody></table>
 <p>logging模块就是通过这些组件来完成日志处理的，上面所使用的logging模块级别的函数也是通过这些组件对应的类来实现的。</p>
+<a id="more"></a>
+
 <p>这些组件之间的关系描述：</p>
 <p>日志器（logger）需要通过处理器（handler）将日志信息输出到目标位置，如：文件、sys.stdout、网络等。不同的处理器（handler）可以将日志输出到不同的位置。日志器（logger）可以设置多个处理器（handler）将同一条日志记录输出到不同的位置。每个处理器（handler）都可以设置自己的过滤器（filter）实现日志过滤，从而只保留感兴趣的日志。每个处理器（handler）都可以设置自己的格式器（formatter）实现同一条日志以不同的格式输出到不同的地方。</p>
 <p>简单点说就是：日志器（logger）是入口，真正干活儿的是处理器（handler），处理器（handler）还可以通过过滤器（filter）和格式器（formatter）对要输出的日志内容做过滤和格式化等处理操作。</p>
@@ -318,7 +320,7 @@ config = <span class="hljs-literal">None</span>
                     
                       <a href="/post/112d5fa0.html">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Mybatis-Spring</span>
+                        <span class="hidden-mobile">聊一聊Mybatis-Spring都帮我们做了什么</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
