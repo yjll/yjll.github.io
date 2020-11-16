@@ -152,6 +152,273 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
       </tags>
   </entry>
   <entry>
+    <title>Spring编程式事务</title>
+    <url>/post/65703737.html</url>
+    <content><![CDATA[<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PROPAGATION_REQUIRED</td>
+<td>支持当前事务 如果不存，就建一个（默认的）</td>
+<td>A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）</td>
+</tr>
+<tr>
+<td>PROPAGATION_SUPPORTS</td>
+<td>支持当前事务 如果不存在，就不使用事务</td>
+<td>A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务</td>
+</tr>
+<tr>
+<td>PROPAGATION_MANDATORY</td>
+<td>支持当前事务 如果不存在，抛出异常</td>
+<td>A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B抛出异常</td>
+</tr>
+<tr>
+<td>PROPAGATION_REQUIRES_NEW</td>
+<td>如果有事务存在 挂起当前事务，创建一个新的事务</td>
+<td>A,B，如果A有事务，B将A的事务挂起，并重新创建一个事务（A，B不在一个事务中，两个事务互不影响）</td>
+</tr>
+<tr>
+<td>PROPAGATION_NOT_SUPPORTED</td>
+<td>以非事务方式运行 如果有事务存在，挂起当前事务</td>
+<td>A,B，非事务方式运行，A有事务就挂起事务</td>
+</tr>
+<tr>
+<td>PROPAGATION_NEVER</td>
+<td>以非事务方式运行 如果有事务存在，抛出异常</td>
+<td>总是以非事务运行</td>
+</tr>
+<tr>
+<td>PROPAGATION_NESTED</td>
+<td>如果当前事务存在，则嵌套事务执行</td>
+<td>基于SavePonit技术。（保存点） A,B，A有事务，A执行之后，将A事务执行之后的内容保存到SavePonit。B事务有异常的情况，用户需要自己设置事务是提交还是回滚到保存点</td>
+</tr>
+</tbody></table>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span>
+<span class="hljs-keyword">private</span> DataSourceTransactionManager dstManager;
+<span class="hljs-meta">@Autowired</span>
+<span class="hljs-keyword">private</span> UserDao userDao;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateTest</span><span class="hljs-params">()</span></span>&#123;
+  DefaultTransactionDefinition def = <span class="hljs-keyword">new</span> DefaultTransactionDefinition();
+  def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  TransactionStatus transaction= dstManager.getTransaction(def);
+  <span class="hljs-keyword">try</span>&#123;
+    userDao.updateTest();
+  &#125;<span class="hljs-keyword">catch</span>(Exception e)&#123;
+    log.error(e.toString(),e);
+    dstManager.rollback(transaction);
+  &#125;
+  dstManager.commit(transaction);
+&#125;</code></pre></div>
+
+<p><code>DataSourceTransactionManager</code>是<code>PlatformTransactionManager</code>的一个实现。<code>PlatformTransactionManager</code>是Spring事务处理抽象层中的管理器。</p>
+<p>统一一致的事务抽象是Spring框架的一大优势，无论是全局事务还是本地事务，JTA、JDBC、Hibernate还是JPA，Spring都使用统一的编程模型，使得应用程序可以很容易地在全局事务与本地事务，或者不同的事务框架之间进行切换。下图是Spring事务抽象的核心类图：</p>
+<p><img src="https://img.yjll.art/img/PlatformTransactionManager.png" srcset="/img/loading.gif" alt="PlatformTransactionManager"></p>
+<p>PlatformTransactionManager：事务管理器<br>getTransaction方法：事务获取操作，根据事务属性定义，获取当前事务或者创建新事物；<br>commit方法：事务提交操作，注意这里所说的提交并非直接提交事务，而是根据当前事务状态执行提交或者回滚操作；<br>rollback方法：事务回滚操作，同样，也并非一定直接回滚事务，也有可能只是标记事务为只读，等待其他调用方执行回滚。</p>
+<p>TransactionDefinition：事务属性定义<br>getPropagationBehavior方法：返回事务的传播属性，默认是PROPAGATION_REQUIRED；<br>getIsolationLevel方法：返回事务隔离级别，事务隔离级别只有在创建新事务时才有效，也就是说只对应传播属性PROPAGATION_REQUIRED和PROPAGATION_REQUIRES_NEW；<br>getTimeout方法：返回事务超时时间，以秒为单位，同样只有在创建新事务时才有效；<br>isReadOnly方法：是否优化为只读事务，支持这项属性的事务管理器会将事务标记为只读，只读事务不允许有写操作，不支持只读属性的事务管理器需要忽略这项设置，这一点跟其他事务属性定义不同，针对其他不支持的属性设置，事务管理器应该抛出异常。<br>getName方法：返回事务名称，声明式事务中默认值为“类的完全限定名.方法名”。</p>
+<p>TransactionStatus：当前事务状态<br>isNewTransaction方法：当前方法是否创建了新事务（区别于使用现有事务以及没有事务）；<br>hasSavepoint方法：在嵌套事务场景中，判断当前事务是否包含保存点；<br>setRollbackOnly和isRollbackOnly方法：只读属性设置（主要用于标记事务，等待回滚）和查询；<br>flush方法：刷新底层会话中的修改到数据库，一般用于刷新如Hibernate/JPA的会话，是否生效由具体事务资源实现决定；<br>isCompleted方法：判断当前事务是否已完成（已提交或者已回滚）。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> TransactionStatus <span class="hljs-title">getTransaction</span><span class="hljs-params">(@Nullable TransactionDefinition definition)</span> <span class="hljs-keyword">throws</span> TransactionException </span>&#123;
+    <span class="hljs-comment">// 创建DataSourceTransactionObject</span>
+		Object transaction = doGetTransaction();
+
+		<span class="hljs-comment">// Cache debug flag to avoid repeated checks.</span>
+		<span class="hljs-keyword">boolean</span> debugEnabled = logger.isDebugEnabled();
+
+		<span class="hljs-keyword">if</span> (definition == <span class="hljs-keyword">null</span>) &#123;
+			<span class="hljs-comment">// Use defaults if no transaction definition given.</span>
+			definition = <span class="hljs-keyword">new</span> DefaultTransactionDefinition();
+		&#125;
+
+    <span class="hljs-comment">// 已有事务逻辑，通过handleExistingTransaction方法处理</span>
+		<span class="hljs-keyword">if</span> (isExistingTransaction(transaction)) &#123;
+			<span class="hljs-comment">// Existing transaction found -&gt; check propagation behavior to find out how to behave.</span>
+			<span class="hljs-keyword">return</span> handleExistingTransaction(definition, transaction, debugEnabled);
+		&#125;
+
+		<span class="hljs-comment">// Check definition settings for new transaction.</span>
+		<span class="hljs-keyword">if</span> (definition.getTimeout() &lt; TransactionDefinition.TIMEOUT_DEFAULT) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidTimeoutException(<span class="hljs-string">"Invalid transaction timeout"</span>, definition.getTimeout());
+		&#125;
+
+    <span class="hljs-comment">// 以下是当前无事务的情况</span>
+    <span class="hljs-comment">// - PROPAGATION_MANDATORY：当前事务不存在，抛出异常</span>
+		<span class="hljs-comment">// No existing transaction found -&gt; check propagation behavior to find out how to proceed.</span>
+		<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(
+					<span class="hljs-string">"No existing transaction found for transaction marked with propagation 'mandatory'"</span>);
+		&#125;
+    <span class="hljs-comment">// 无事务便创建事务</span>
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) &#123;
+			SuspendedResourcesHolder suspendedResources = suspend(<span class="hljs-keyword">null</span>);
+			<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+				logger.debug(<span class="hljs-string">"Creating new transaction with name ["</span> + definition.getName() + <span class="hljs-string">"]: "</span> + definition);
+			&#125;
+			<span class="hljs-keyword">try</span> &#123;
+				<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+				DefaultTransactionStatus status = newTransactionStatus(
+						definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, suspendedResources);
+				doBegin(transaction, definition);
+				prepareSynchronization(status, definition);
+				<span class="hljs-keyword">return</span> status;
+			&#125;
+			<span class="hljs-keyword">catch</span> (RuntimeException | Error ex) &#123;
+				resume(<span class="hljs-keyword">null</span>, suspendedResources);
+				<span class="hljs-keyword">throw</span> ex;
+			&#125;
+		&#125;
+    <span class="hljs-comment">// 无事务不需创建</span>
+		<span class="hljs-keyword">else</span> &#123;
+			<span class="hljs-comment">// Create "empty" transaction: no actual transaction, but potentially synchronization.</span>
+			<span class="hljs-keyword">if</span> (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT &amp;&amp; logger.isWarnEnabled()) &#123;
+				logger.warn(<span class="hljs-string">"Custom isolation level specified but no actual transaction initiated; "</span> +
+						<span class="hljs-string">"isolation level will effectively be ignored: "</span> + definition);
+			&#125;
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+			<span class="hljs-keyword">return</span> prepareTransactionStatus(definition, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+		&#125;
+	&#125;</code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs java">org.springframework.jdbc.datasource.DataSourceTransactionManager#doGetTransaction
+
+	<span class="hljs-function"><span class="hljs-keyword">protected</span> Object <span class="hljs-title">doGetTransaction</span><span class="hljs-params">()</span> </span>&#123;
+		DataSourceTransactionObject txObject = <span class="hljs-keyword">new</span> DataSourceTransactionObject();
+		txObject.setSavepointAllowed(isNestedTransactionAllowed());
+		ConnectionHolder conHolder =
+				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
+		txObject.setConnectionHolder(conHolder, <span class="hljs-keyword">false</span>);
+		<span class="hljs-keyword">return</span> txObject;
+	&#125;
+
+org.springframework.jdbc.datasource.DataSourceTransactionManager#isExistingTransaction
+
+	<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isExistingTransaction</span><span class="hljs-params">(Object transaction)</span> </span>&#123;
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		<span class="hljs-keyword">return</span> (txObject.hasConnectionHolder() &amp;&amp; txObject.getConnectionHolder().isTransactionActive());
+	&#125;</code></pre></div>
+
+<p><code>TransactionSynchronizationManager</code> 是事务同步管理器，TransactionSynchronizationManager通过ThreadLocal对象在当前线程记录了resources和synchronizations属性。resources是一个HashMap，用于记录当前参与事务的事务资源，方便进行事务同步，在DataSourceTransactionManager的例子中就是以dataSource作为key，保存了数据库连接，这样在同一个线程中，不同的方法调用就可以通过dataSource获取相同的数据库连接，从而保证所有操作在一个事务中进行。</p>
+<p>org.springframework.transaction.support.AbstractPlatformTransactionManager#handleExistingTransaction</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">private</span> TransactionStatus <span class="hljs-title">handleExistingTransaction</span><span class="hljs-params">(</span></span>
+<span class="hljs-function"><span class="hljs-params">		TransactionDefinition definition, Object transaction, <span class="hljs-keyword">boolean</span> debugEnabled)</span></span>
+<span class="hljs-function">		<span class="hljs-keyword">throws</span> TransactionException </span>&#123;
+   <span class="hljs-comment">// PROPAGATION_NEVER 直接抛出异常</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) &#123;
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(
+				<span class="hljs-string">"Existing transaction found for transaction marked with propagation 'never'"</span>);
+	&#125;
+  	<span class="hljs-comment">// PROPAGATION_NOT_SUPPORTED suspend挂起当前事务，当前方法不使用事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) &#123;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Suspending current transaction"</span>);
+		&#125;
+		Object suspendedResources = suspend(transaction);
+		<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+		<span class="hljs-keyword">return</span> prepareTransactionStatus(
+				definition, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">false</span>, newSynchronization, debugEnabled, suspendedResources);
+	&#125;
+  <span class="hljs-comment">// PROPAGATION_REQUIRES_NEW suspend挂起当前事务，doBegin创建一个新事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) &#123;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Suspending current transaction, creating new transaction with name ["</span> +
+					definition.getName() + <span class="hljs-string">"]"</span>);
+		&#125;
+		SuspendedResourcesHolder suspendedResources = suspend(transaction);
+		<span class="hljs-keyword">try</span> &#123;
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+			DefaultTransactionStatus status = newTransactionStatus(
+					definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, suspendedResources);
+			doBegin(transaction, definition);
+			prepareSynchronization(status, definition);
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+		<span class="hljs-keyword">catch</span> (RuntimeException | Error beginEx) &#123;
+			resumeAfterBeginException(transaction, suspendedResources, beginEx);
+			<span class="hljs-keyword">throw</span> beginEx;
+		&#125;
+	&#125;
+  <span class="hljs-comment">// PROPAGATION_NESTED 嵌套事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) &#123;
+		<span class="hljs-keyword">if</span> (!isNestedTransactionAllowed()) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NestedTransactionNotSupportedException(
+					<span class="hljs-string">"Transaction manager does not allow nested transactions by default - "</span> +
+					<span class="hljs-string">"specify 'nestedTransactionAllowed' property with value 'true'"</span>);
+		&#125;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Creating nested transaction with name ["</span> + definition.getName() + <span class="hljs-string">"]"</span>);
+		&#125;
+		<span class="hljs-keyword">if</span> (useSavepointForNestedTransaction()) &#123;
+			<span class="hljs-comment">// Create savepoint within existing Spring-managed transaction,</span>
+			<span class="hljs-comment">// through the SavepointManager API implemented by TransactionStatus.</span>
+			<span class="hljs-comment">// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.</span>
+			DefaultTransactionStatus status =
+					prepareTransactionStatus(definition, transaction, <span class="hljs-keyword">false</span>, <span class="hljs-keyword">false</span>, debugEnabled, <span class="hljs-keyword">null</span>);
+			status.createAndHoldSavepoint();
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+     <span class="hljs-comment">// PROPAGATION_REQUIRED、PROPAGATION_SUPPORTS、PROPAGATION_MANDATORY 使用当前事务</span>
+		<span class="hljs-keyword">else</span> &#123;
+			<span class="hljs-comment">// Nested transaction through nested begin and commit/rollback calls.</span>
+			<span class="hljs-comment">// Usually only for JTA: Spring synchronization might get activated here</span>
+			<span class="hljs-comment">// in case of a pre-existing JTA transaction.</span>
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+			DefaultTransactionStatus status = newTransactionStatus(
+					definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+			doBegin(transaction, definition);
+			prepareSynchronization(status, definition);
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+	&#125;
+
+	<span class="hljs-comment">// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.</span>
+	<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+		logger.debug(<span class="hljs-string">"Participating in existing transaction"</span>);
+	&#125;
+	<span class="hljs-keyword">if</span> (isValidateExistingTransaction()) &#123;
+		<span class="hljs-keyword">if</span> (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) &#123;
+			Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+			<span class="hljs-keyword">if</span> (currentIsolationLevel == <span class="hljs-keyword">null</span> || currentIsolationLevel != definition.getIsolationLevel()) &#123;
+				Constants isoConstants = DefaultTransactionDefinition.constants;
+				<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(<span class="hljs-string">"Participating transaction with definition ["</span> +
+						definition + <span class="hljs-string">"] specifies isolation level which is incompatible with existing transaction: "</span> +
+						(currentIsolationLevel != <span class="hljs-keyword">null</span> ?
+								isoConstants.toCode(currentIsolationLevel, DefaultTransactionDefinition.PREFIX_ISOLATION) :
+								<span class="hljs-string">"(unknown)"</span>));
+			&#125;
+		&#125;
+		<span class="hljs-keyword">if</span> (!definition.isReadOnly()) &#123;
+			<span class="hljs-keyword">if</span> (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) &#123;
+				<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(<span class="hljs-string">"Participating transaction with definition ["</span> +
+						definition + <span class="hljs-string">"] is not marked as read-only but existing transaction is"</span>);
+			&#125;
+		&#125;
+	&#125;
+	<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+	<span class="hljs-keyword">return</span> prepareTransactionStatus(definition, transaction, <span class="hljs-keyword">false</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+&#125;</code></pre></div>
+
+
+
+<p><a href="https://zhuanlan.zhihu.com/p/54067384" target="_blank" rel="noopener">【技术干货】Spring事务原理一探</a></p>
+<p><a href="https://blog.csdn.net/oDeviloo/article/details/101757711" target="_blank" rel="noopener">spring事务传播性源码解析</a></p>
+<p><a href="https://my.oschina.net/marvelcode/blog/3195379" target="_blank" rel="noopener">Spring事务源码解析</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
+        <tag>Transaction</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>聊一聊Mybatis-Spring都帮我们做了什么</title>
     <url>/post/112d5fa0.html</url>
     <content><![CDATA[<p>MyBatis-Spring 会帮助我们将 MyBatis 代码无缝地整合到 Spring 中。它将允许 MyBatis 参与到 Spring 的事务管理之中，创建映射器 mapper 和 SqlSession 并注入到 bean 中，本文将跟随Mybatis-Spring 的源码，一步步探究是它是如何实现的。</p>
@@ -438,6 +705,195 @@ config = <span class="hljs-literal">None</span>
       <tags>
         <tag>Python</tag>
         <tag>log</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Elasticsearch使用JSON字符串的原生DSL查询</title>
+    <url>/post/3b7237cd.html</url>
+    <content><![CDATA[<blockquote>
+<p>注：本文的<code>spring-boot-starter-data-elasticsearch</code>的版本为<code>2.2.10.RELEASE</code><br>Elasticsearch版本为<code>6.8.12</code></p>
+</blockquote>
+<p><code>RestHighLevelClient</code>是ES官方推荐使用的客户端，新版本的<code>spring-data-elasticsearch</code>也对<code>RestHighLevelClient</code>进行了支持，使用<code>ElasticsearchRestTemplate</code>对<code>RestHighLevelClient</code>进行封装，我们直接使用<code>ElasticsearchRestTemplate</code>即可，但是对于参数较多特别是有嵌套聚合的查询，使用Spring提供的API过于繁琐，我们想使用原生的DSL进行查询，但是<code>ElasticsearchRestTemplate</code>并不支持这种写法。我们知道<code>ElasticsearchRestTemplate</code>底层一定通过JSON传输，分析内部实现，看看实现方式。</p>
+<h3 id="ElasticsearchRestTemplate底层"><a href="#ElasticsearchRestTemplate底层" class="headerlink" title="ElasticsearchRestTemplate底层"></a>ElasticsearchRestTemplate底层</h3><p>拿ElasticsearchRestTemplate#query这个方法举例，<code>query</code>调用<code>client.search()</code>，这个client就是<code>RestHighLevelClient</code>，Spring对其进行了二次封装。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Override</span>
+<span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">query</span><span class="hljs-params">(SearchQuery query, ResultsExtractor&lt;T&gt; resultsExtractor)</span> </span>&#123;
+	SearchResponse response = doSearch(prepareSearch(query, Optional.ofNullable(query.getQuery()), <span class="hljs-keyword">null</span>), query);
+	<span class="hljs-keyword">return</span> resultsExtractor.extract(response);
+&#125;
+
+   <span class="hljs-function"><span class="hljs-keyword">private</span> SearchResponse <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest, SearchQuery searchQuery)</span> </span>&#123;
+	prepareSearch(searchRequest, searchQuery);
+
+	<span class="hljs-keyword">try</span> &#123;
+		<span class="hljs-keyword">return</span> client.search(searchRequest, RequestOptions.DEFAULT);
+	&#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ElasticsearchException(<span class="hljs-string">"Error for search request with scroll: "</span> + searchRequest.toString(), e);
+	&#125;
+&#125;</code></pre></div>
+
+<p>继续看<code>RestHighLevelClient#search</code>方法，主要是对参数和返回值进行封装，层层跟进该方法会调用<code>client.performRequest</code>，此处的<code>client</code>并非指<code>RestHighLevelClient</code>，而是更底层的客户端<code>RestClient</code>。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> SearchResponse <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest, RequestOptions options)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    <span class="hljs-keyword">return</span> performRequestAndParseEntity(
+            searchRequest,
+            r -&gt; RequestConverters.search(r, <span class="hljs-string">"_search"</span>),
+            options,
+            SearchResponse::fromXContent,
+            emptySet());
+&#125;
+
+<span class="hljs-keyword">private</span> &lt;Req, Resp&gt; <span class="hljs-function">Resp <span class="hljs-title">internalPerformRequest</span><span class="hljs-params">(Req request,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Req, Request, IOException&gt; requestConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        RequestOptions options,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Response, Resp, IOException&gt; responseConverter,</span></span>
+<span class="hljs-function"><span class="hljs-params">                                        Set&lt;Integer&gt; ignores)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    Request req = requestConverter.apply(request);
+    req.setOptions(options);
+    Response response;
+    <span class="hljs-keyword">try</span> &#123;
+        response = client.performRequest(req);
+    &#125; <span class="hljs-keyword">catch</span> (ResponseException e) &#123;
+        <span class="hljs-keyword">if</span> (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) &#123;
+            <span class="hljs-keyword">try</span> &#123;
+                <span class="hljs-keyword">return</span> responseConverter.apply(e.getResponse());
+            &#125; <span class="hljs-keyword">catch</span> (Exception innerException) &#123;
+                <span class="hljs-comment">// the exception is ignored as we now try to parse the response as an error.</span>
+                <span class="hljs-comment">// this covers cases like get where 404 can either be a valid document not found response,</span>
+                <span class="hljs-comment">// or an error for which parsing is completely different. We try to consider the 404 response as a valid one</span>
+                <span class="hljs-comment">// first. If parsing of the response breaks, we fall back to parsing it as an error.</span>
+                <span class="hljs-keyword">throw</span> parseResponseException(e);
+            &#125;
+        &#125;
+        <span class="hljs-keyword">throw</span> parseResponseException(e);
+    &#125;
+
+    <span class="hljs-keyword">try</span> &#123;
+        <span class="hljs-keyword">return</span> responseConverter.apply(response);
+    &#125; <span class="hljs-keyword">catch</span>(Exception e) &#123;
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Unable to parse response body for "</span> + response, e);
+    &#125;
+&#125;</code></pre></div>
+
+<p><code>RestClient#performRequest</code>接受的参数为<code>org.elasticsearch.client.Request</code>，其中重要的参数有一下几个:<br><code>method</code>:Http的方法<code>GET</code>,<code>POST</code>等<br><code>endpoint</code>:包含<code>index</code>,<code>type</code>,查询类别等,如<code>code/data/_search</code><br><code>entity</code>:包好JSON的实体</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">performRequest</span><span class="hljs-params">(Request request)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
+    SyncResponseListener listener = <span class="hljs-keyword">new</span> SyncResponseListener(maxRetryTimeoutMillis);
+    performRequestAsyncNoCatch(request, listener);
+    <span class="hljs-keyword">return</span> listener.get();
+&#125;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Request</span> </span>&#123;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String method;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String endpoint;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, String&gt; parameters = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
+
+    <span class="hljs-keyword">private</span> HttpEntity entity;
+    <span class="hljs-keyword">private</span> RequestOptions options = RequestOptions.DEFAULT;
+&#125;</code></pre></div>
+
+<h3 id="使用RestClient进行请求"><a href="#使用RestClient进行请求" class="headerlink" title="使用RestClient进行请求"></a>使用RestClient进行请求</h3><p>知道底层的运行方式，我们构建一个Request再调用<code>RestClient#performRequest</code>即可。因为涉及到字符串拼接和json序列化，用Java不太方便，我这里使用Groovy语法编写。</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">"""</span>
+<span class="hljs-string">        &#123;</span>
+<span class="hljs-string">          "size": 0,</span>
+<span class="hljs-string">          "query": &#123;</span>
+<span class="hljs-string">            "terms": &#123;</span>
+<span class="hljs-string">              "xxx": [</span>
+<span class="hljs-string">                $&#123;xxx&#125;</span>
+<span class="hljs-string">              ]</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;,</span>
+<span class="hljs-string">          "aggs": &#123;</span>
+<span class="hljs-string">            "first": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "first_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;,</span>
+<span class="hljs-string">            "second": &#123;</span>
+<span class="hljs-string">              "value_count": &#123;</span>
+<span class="hljs-string">                "field": "second_id"</span>
+<span class="hljs-string">              &#125;</span>
+<span class="hljs-string">            &#125;</span>
+<span class="hljs-string">          &#125;</span>
+<span class="hljs-string">        &#125;</span>
+<span class="hljs-string">        """</span>
+String endpoint = <span class="hljs-string">'code/data/_search'</span>
+Request request = <span class="hljs-keyword">new</span> Request(HttpPost.METHOD_NAME, endpoint);
+request.setJsonEntity(dsl)
+
+Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().performRequest(request)
+
+<span class="hljs-keyword">def</span> respJson = <span class="hljs-keyword">new</span> JsonSlurper().parse(response.getEntity().getContent())
+
+CodeTerms codeTerms = <span class="hljs-keyword">new</span> CodeTerms().with &#123;
+    firstCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'first'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    secondCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'second'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
+    it
+&#125;</code></pre></div>
+
+<h3 id="使用RestHighLevelClient直接进行简单查询"><a href="#使用RestHighLevelClient直接进行简单查询" class="headerlink" title="使用RestHighLevelClient直接进行简单查询"></a>使用RestHighLevelClient直接进行简单查询</h3><p>简单查询，使用QueryBuilders组装SearchRequest</p>
+<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">'''</span>
+<span class="hljs-string">&#123;</span>
+<span class="hljs-string">  "range": &#123;</span>
+<span class="hljs-string">      "second_upload_time": &#123;</span>
+<span class="hljs-string">      "gte": "2020-06-01 00:00:00",</span>
+<span class="hljs-string">      "lte": "2020-06-02 00:00:00"</span>
+<span class="hljs-string">      &#125;</span>
+<span class="hljs-string">  &#125;</span>
+<span class="hljs-string">&#125;</span>
+<span class="hljs-string">'''</span>
+SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
+SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"code"</span>)
+        .types(<span class="hljs-string">"data"</span>)
+        .source(ssb)
+<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
+
+<h3 id="使用ElasticsearchRestTemplate直接进行简单查询"><a href="#使用ElasticsearchRestTemplate直接进行简单查询" class="headerlink" title="使用ElasticsearchRestTemplate直接进行简单查询"></a>使用ElasticsearchRestTemplate直接进行简单查询</h3><p>使用StringQuery基于DSL定义的JSON的查询，底层使用<code>SearchRequest</code></p>
+<div class="hljs"><pre><code class="hljs Java">StringQuery stringQuery = <span class="hljs-keyword">new</span> StringQuery(
+		<span class="hljs-string">"&#123;\"query\":&#123;\"bool\":&#123;\"must\":[&#123;\"term\":&#123;\"id\":\"1\"&#125;&#125;],\"must_not\":[],</span>
+<span class="hljs-string">		\"should\":[]&#125;&#125;,\"from\":0,\"size\":10,\"sort\":[],\"aggs\":&#123;&#125;&#125;"</span>);
+    searchQuery.addIndices(<span class="hljs-string">"test"</span>);
+    searchQuery.addTypes(<span class="hljs-string">"test"</span>);
+					
+List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;</code></pre></div>
+
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
+<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
+<p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
+<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
+]]></content>
+      <tags>
+        <tag>Elasticsearch</tag>
+        <tag>Java</tag>
+        <tag>Groovy</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python通过跳板机连接远程MySQL</title>
+    <url>/post/adfcf5ef.html</url>
+    <content><![CDATA[<p>一般公司的数据库在一个远程服务器里，而这个服务器需要链接跳板机才可以访问，常用的数据库客户端工具都支持配置SSH隧道，可以通过SSH隧道连接远程服务。但python脚本如何访问数据库呢，我们可以借助<code>sshtunnel</code>这个库来实现。</p>
+<a id="more"></a>
+
+<div class="hljs"><pre><code class="hljs python">
+<span class="hljs-keyword">from</span> sshtunnel <span class="hljs-keyword">import</span> SSHTunnelForwarder
+<span class="hljs-keyword">import</span> records
+
+<span class="hljs-keyword">with</span> SSHTunnelForwarder(
+        (<span class="hljs-string">'jump-server'</span>, <span class="hljs-number">22</span>),
+        ssh_username=<span class="hljs-string">"root"</span>,
+        ssh_pkey=<span class="hljs-string">r"C:\Users\LH\.ssh\id_rsa"</span>,
+        remote_bind_address=(<span class="hljs-string">'target-server'</span>, <span class="hljs-number">3306</span>),
+        local_bind_address=(<span class="hljs-string">'127.0.0.1'</span>, <span class="hljs-number">3306</span>)
+        ) <span class="hljs-keyword">as</span> server:
+    
+    db = records.Database(<span class="hljs-string">f'mysql+pymysql://root:pwd@<span class="hljs-subst">&#123;server.local_bind_address[<span class="hljs-number">0</span>]&#125;</span>:<span class="hljs-subst">&#123;server.local_bind_address[<span class="hljs-number">1</span>]&#125;</span>/code'</span>)
+
+    result = db.query(<span class="hljs-string">'select name from base_areas limit 3'</span>)
+
+    print(result.as_dict())</code></pre></div>]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+        <tag>sshtunnel</tag>
       </tags>
   </entry>
   <entry>
@@ -752,164 +1208,6 @@ log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.get
       <tags>
         <tag>Java</tag>
         <tag>Zip</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Elasticsearch使用JSON字符串的原生DSL查询</title>
-    <url>/post/3b7237cd.html</url>
-    <content><![CDATA[<blockquote>
-<p>注：本文的<code>spring-boot-starter-data-elasticsearch</code>的版本为<code>2.2.10.RELEASE</code><br>Elasticsearch版本为<code>6.8.12</code></p>
-</blockquote>
-<p><code>RestHighLevelClient</code>是ES官方推荐使用的客户端，新版本的<code>spring-data-elasticsearch</code>也对<code>RestHighLevelClient</code>进行了支持，使用<code>ElasticsearchRestTemplate</code>对<code>RestHighLevelClient</code>进行封装，我们直接使用<code>ElasticsearchRestTemplate</code>即可，但是对于参数较多特别是有嵌套聚合的查询，使用Spring提供的API过于繁琐，我们想使用原生的DSL进行查询，但是<code>ElasticsearchRestTemplate</code>并不支持这种写法。我们知道<code>ElasticsearchRestTemplate</code>底层一定通过JSON传输，分析内部实现，看看实现方式。</p>
-<h3 id="ElasticsearchRestTemplate底层"><a href="#ElasticsearchRestTemplate底层" class="headerlink" title="ElasticsearchRestTemplate底层"></a>ElasticsearchRestTemplate底层</h3><p>拿ElasticsearchRestTemplate#query这个方法举例，<code>query</code>调用<code>client.search()</code>，这个client就是<code>RestHighLevelClient</code>，Spring对其进行了二次封装。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Override</span>
-<span class="hljs-keyword">public</span> &lt;T&gt; <span class="hljs-function">T <span class="hljs-title">query</span><span class="hljs-params">(SearchQuery query, ResultsExtractor&lt;T&gt; resultsExtractor)</span> </span>&#123;
-	SearchResponse response = doSearch(prepareSearch(query, Optional.ofNullable(query.getQuery()), <span class="hljs-keyword">null</span>), query);
-	<span class="hljs-keyword">return</span> resultsExtractor.extract(response);
-&#125;
-
-   <span class="hljs-function"><span class="hljs-keyword">private</span> SearchResponse <span class="hljs-title">doSearch</span><span class="hljs-params">(SearchRequest searchRequest, SearchQuery searchQuery)</span> </span>&#123;
-	prepareSearch(searchRequest, searchQuery);
-
-	<span class="hljs-keyword">try</span> &#123;
-		<span class="hljs-keyword">return</span> client.search(searchRequest, RequestOptions.DEFAULT);
-	&#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;
-		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> ElasticsearchException(<span class="hljs-string">"Error for search request with scroll: "</span> + searchRequest.toString(), e);
-	&#125;
-&#125;</code></pre></div>
-
-<p>继续看<code>RestHighLevelClient#search</code>方法，主要是对参数和返回值进行封装，层层跟进该方法会调用<code>client.performRequest</code>，此处的<code>client</code>并非指<code>RestHighLevelClient</code>，而是更底层的客户端<code>RestClient</code>。</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> SearchResponse <span class="hljs-title">search</span><span class="hljs-params">(SearchRequest searchRequest, RequestOptions options)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    <span class="hljs-keyword">return</span> performRequestAndParseEntity(
-            searchRequest,
-            r -&gt; RequestConverters.search(r, <span class="hljs-string">"_search"</span>),
-            options,
-            SearchResponse::fromXContent,
-            emptySet());
-&#125;
-
-<span class="hljs-keyword">private</span> &lt;Req, Resp&gt; <span class="hljs-function">Resp <span class="hljs-title">internalPerformRequest</span><span class="hljs-params">(Req request,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Req, Request, IOException&gt; requestConverter,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        RequestOptions options,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        CheckedFunction&lt;Response, Resp, IOException&gt; responseConverter,</span></span>
-<span class="hljs-function"><span class="hljs-params">                                        Set&lt;Integer&gt; ignores)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    Request req = requestConverter.apply(request);
-    req.setOptions(options);
-    Response response;
-    <span class="hljs-keyword">try</span> &#123;
-        response = client.performRequest(req);
-    &#125; <span class="hljs-keyword">catch</span> (ResponseException e) &#123;
-        <span class="hljs-keyword">if</span> (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) &#123;
-            <span class="hljs-keyword">try</span> &#123;
-                <span class="hljs-keyword">return</span> responseConverter.apply(e.getResponse());
-            &#125; <span class="hljs-keyword">catch</span> (Exception innerException) &#123;
-                <span class="hljs-comment">// the exception is ignored as we now try to parse the response as an error.</span>
-                <span class="hljs-comment">// this covers cases like get where 404 can either be a valid document not found response,</span>
-                <span class="hljs-comment">// or an error for which parsing is completely different. We try to consider the 404 response as a valid one</span>
-                <span class="hljs-comment">// first. If parsing of the response breaks, we fall back to parsing it as an error.</span>
-                <span class="hljs-keyword">throw</span> parseResponseException(e);
-            &#125;
-        &#125;
-        <span class="hljs-keyword">throw</span> parseResponseException(e);
-    &#125;
-
-    <span class="hljs-keyword">try</span> &#123;
-        <span class="hljs-keyword">return</span> responseConverter.apply(response);
-    &#125; <span class="hljs-keyword">catch</span>(Exception e) &#123;
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Unable to parse response body for "</span> + response, e);
-    &#125;
-&#125;</code></pre></div>
-
-<p><code>RestClient#performRequest</code>接受的参数为<code>org.elasticsearch.client.Request</code>，其中重要的参数有一下几个:<br><code>method</code>:Http的方法<code>GET</code>,<code>POST</code>等<br><code>endpoint</code>:包含<code>index</code>,<code>type</code>,查询类别等,如<code>code/data/_search</code><br><code>entity</code>:包好JSON的实体</p>
-<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> Response <span class="hljs-title">performRequest</span><span class="hljs-params">(Request request)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
-    SyncResponseListener listener = <span class="hljs-keyword">new</span> SyncResponseListener(maxRetryTimeoutMillis);
-    performRequestAsyncNoCatch(request, listener);
-    <span class="hljs-keyword">return</span> listener.get();
-&#125;
-
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Request</span> </span>&#123;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String method;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String endpoint;
-    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, String&gt; parameters = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();
-
-    <span class="hljs-keyword">private</span> HttpEntity entity;
-    <span class="hljs-keyword">private</span> RequestOptions options = RequestOptions.DEFAULT;
-&#125;</code></pre></div>
-
-<h3 id="使用RestClient进行请求"><a href="#使用RestClient进行请求" class="headerlink" title="使用RestClient进行请求"></a>使用RestClient进行请求</h3><p>知道底层的运行方式，我们构建一个Request再调用<code>RestClient#performRequest</code>即可。因为涉及到字符串拼接和json序列化，用Java不太方便，我这里使用Groovy语法编写。</p>
-<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">"""</span>
-<span class="hljs-string">        &#123;</span>
-<span class="hljs-string">          "size": 0,</span>
-<span class="hljs-string">          "query": &#123;</span>
-<span class="hljs-string">            "terms": &#123;</span>
-<span class="hljs-string">              "xxx": [</span>
-<span class="hljs-string">                $&#123;xxx&#125;</span>
-<span class="hljs-string">              ]</span>
-<span class="hljs-string">            &#125;</span>
-<span class="hljs-string">          &#125;,</span>
-<span class="hljs-string">          "aggs": &#123;</span>
-<span class="hljs-string">            "first": &#123;</span>
-<span class="hljs-string">              "value_count": &#123;</span>
-<span class="hljs-string">                "field": "first_id"</span>
-<span class="hljs-string">              &#125;</span>
-<span class="hljs-string">            &#125;,</span>
-<span class="hljs-string">            "second": &#123;</span>
-<span class="hljs-string">              "value_count": &#123;</span>
-<span class="hljs-string">                "field": "second_id"</span>
-<span class="hljs-string">              &#125;</span>
-<span class="hljs-string">            &#125;</span>
-<span class="hljs-string">          &#125;</span>
-<span class="hljs-string">        &#125;</span>
-<span class="hljs-string">        """</span>
-String endpoint = <span class="hljs-string">'code/data/_search'</span>
-Request request = <span class="hljs-keyword">new</span> Request(HttpPost.METHOD_NAME, endpoint);
-request.setJsonEntity(dsl)
-
-Response response = elasticsearchRestTemplate.getClient().getLowLevelClient().performRequest(request)
-
-<span class="hljs-keyword">def</span> respJson = <span class="hljs-keyword">new</span> JsonSlurper().parse(response.getEntity().getContent())
-
-CodeTerms codeTerms = <span class="hljs-keyword">new</span> CodeTerms().with &#123;
-    firstCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'first'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
-    secondCount = respJson[<span class="hljs-string">'aggregations'</span>][<span class="hljs-string">'second'</span>][<span class="hljs-string">'value'</span>] <span class="hljs-keyword">as</span> Long
-    it
-&#125;</code></pre></div>
-
-<h3 id="使用RestHighLevelClient直接进行简单查询"><a href="#使用RestHighLevelClient直接进行简单查询" class="headerlink" title="使用RestHighLevelClient直接进行简单查询"></a>使用RestHighLevelClient直接进行简单查询</h3><p>简单查询，使用QueryBuilders组装SearchRequest</p>
-<div class="hljs"><pre><code class="hljs groovy">String dsl = <span class="hljs-string">'''</span>
-<span class="hljs-string">&#123;</span>
-<span class="hljs-string">  "range": &#123;</span>
-<span class="hljs-string">      "second_upload_time": &#123;</span>
-<span class="hljs-string">      "gte": "2020-06-01 00:00:00",</span>
-<span class="hljs-string">      "lte": "2020-06-02 00:00:00"</span>
-<span class="hljs-string">      &#125;</span>
-<span class="hljs-string">  &#125;</span>
-<span class="hljs-string">&#125;</span>
-<span class="hljs-string">'''</span>
-SearchSourceBuilder ssb = <span class="hljs-keyword">new</span> SearchSourceBuilder().query(QueryBuilders.wrapperQuery(dsl))
-SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">"code"</span>)
-        .types(<span class="hljs-string">"data"</span>)
-        .source(ssb)
-<span class="hljs-keyword">def</span> response = elasticsearchRestTemplate.getClient().search(searchRequest, RequestOptions.DEFAULT)</code></pre></div>
-
-<h3 id="使用ElasticsearchRestTemplate直接进行简单查询"><a href="#使用ElasticsearchRestTemplate直接进行简单查询" class="headerlink" title="使用ElasticsearchRestTemplate直接进行简单查询"></a>使用ElasticsearchRestTemplate直接进行简单查询</h3><p>使用StringQuery基于DSL定义的JSON的查询，底层使用<code>SearchRequest</code></p>
-<div class="hljs"><pre><code class="hljs Java">StringQuery stringQuery = <span class="hljs-keyword">new</span> StringQuery(
-		<span class="hljs-string">"&#123;\"query\":&#123;\"bool\":&#123;\"must\":[&#123;\"term\":&#123;\"id\":\"1\"&#125;&#125;],\"must_not\":[],</span>
-<span class="hljs-string">		\"should\":[]&#125;&#125;,\"from\":0,\"size\":10,\"sort\":[],\"aggs\":&#123;&#125;&#125;"</span>);
-    searchQuery.addIndices(<span class="hljs-string">"test"</span>);
-    searchQuery.addTypes(<span class="hljs-string">"test"</span>);
-					
-List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span class="hljs-class">.<span class="hljs-keyword">class</span>)</span>;</code></pre></div>
-
-<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://my.oschina.net/xiaopei/blog/4302389" target="_blank" rel="noopener">Elasticsearch如何查询使用JSON字符串的DSL</a></p>
-<p><a href="https://blog.csdn.net/Qensq/article/details/103081923?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf" target="_blank" rel="noopener">Elasticsearch 常用聚合(group by || sum || count)分组查询</a></p>
-<p><a href="https://tuwaner.com/2019/01/17/%E5%9F%BA%E4%BA%8ESpring-Data-Elasticsearch%E4%B8%89%E7%A7%8D%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" target="_blank" rel="noopener">基于Spring-Data-Elasticsearch三种查询的使用示例</a></p>
-<p><a href="https://blog.csdn.net/qq_38966984/article/details/91049878" target="_blank" rel="noopener">Spring-data-Elasticsearch聚合查询</a></p>
-]]></content>
-      <tags>
-        <tag>Elasticsearch</tag>
-        <tag>Java</tag>
-        <tag>Groovy</tag>
       </tags>
   </entry>
   <entry>
@@ -1924,8 +2222,8 @@ mysql&gt;</code></pre></div>
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Docker</tag>
         <tag>Mysql</tag>
+        <tag>Docker</tag>
         <tag>Aliyun</tag>
       </tags>
   </entry>

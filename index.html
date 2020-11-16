@@ -265,6 +265,74 @@ Let’s Encrypt 是 一个叫 ISRG （ Internet Secur
     
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
+        <a href="/post/65703737.html">Spring编程式事务</a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/post/65703737.html">
+          
+          
+            
+          
+          
+
+
+类型
+说明
+举例
+
+
+
+PROPAGATION_REQUIRED
+支持当前事务 如果不存，就建一个（默认的）
+A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）
+
+
+PROPAGATION_SUPPORTS
+支持当前事务 如果不存在，就不使用事务
+A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务
+
+
+PROPAGAT
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-11-06 00:00" pubdate>
+              2020-11-06
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/Java/">Java</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Spring/">Spring</a>
+            
+              <a href="/tags/Transaction/">Transaction</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
         <a href="/post/112d5fa0.html">聊一聊Mybatis-Spring都帮我们做了什么</a>
       </h1>
 
@@ -382,6 +450,102 @@ logging模块就是通过这些组件来完成日
               <a href="/tags/Python/">Python</a>
             
               <a href="/tags/log/">log</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        <a href="/post/3b7237cd.html">Elasticsearch使用JSON字符串的原生DSL查询</a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/post/3b7237cd.html">
+          
+          
+            
+          
+          
+注：本文的spring-boot-starter-data-elasticsearch的版本为2.2.10.RELEASEElasticsearch版本为6.8.12
+
+RestHighLevelClient是ES官方推荐使用的客户端，新版本的spring-data-elasticsearch也对RestHighLevelClient进行了支持，使用ElasticsearchRestTempla
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-10-22 00:00" pubdate>
+              2020-10-22
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Elasticsearch/">Elasticsearch</a>
+            
+              <a href="/tags/Java/">Java</a>
+            
+              <a href="/tags/Groovy/">Groovy</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        <a href="/post/adfcf5ef.html">Python通过跳板机连接远程MySQL</a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/post/adfcf5ef.html">
+          
+          
+            
+          
+          一般公司的数据库在一个远程服务器里，而这个服务器需要链接跳板机才可以访问，常用的数据库客户端工具都支持配置SSH隧道，可以通过SSH隧道连接远程服务。但python脚本如何访问数据库呢，我们可以借助sshtunnel这个库来实现。
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-11-06 00:00" pubdate>
+              2020-11-06
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/Python/">Python</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/sshtunnel/">sshtunnel</a>
             
           </div>
         
@@ -533,147 +697,6 @@ List&lt;dependency&gt;
               <a href="/tags/Java/">Java</a>
             
               <a href="/tags/Spring/">Spring</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        <a href="/post/45e649c7.html">Java加密压缩Zip</a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/post/45e649c7.html">
-          
-          
-            
-          
-          JDK自带的ZIP操作接口（java.util.zip包）不直接支持加密压缩，项目中需要用到加密压缩，在网上查了查，已经有人封装好了。Zip4j功能比较强大，支持加密、解密压缩，支持文件的添加、删除等。
-使用Zip4j进行加密压缩&lt;dependency&gt;
-    &lt;groupId&gt;net.lingala.zip4j&lt;/groupId&gt;
-    &lt;artif
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-10-26 00:00" pubdate>
-              2020-10-26
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-category"></i>
-            
-              <a href="/categories/Java/">Java</a>
-            
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Java/">Java</a>
-            
-              <a href="/tags/Zip/">Zip</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        <a href="/post/3b7237cd.html">Elasticsearch使用JSON字符串的原生DSL查询</a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/post/3b7237cd.html">
-          
-          
-            
-          
-          
-注：本文的spring-boot-starter-data-elasticsearch的版本为2.2.10.RELEASEElasticsearch版本为6.8.12
-
-RestHighLevelClient是ES官方推荐使用的客户端，新版本的spring-data-elasticsearch也对RestHighLevelClient进行了支持，使用ElasticsearchRestTempla
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-10-22 00:00" pubdate>
-              2020-10-22
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Elasticsearch/">Elasticsearch</a>
-            
-              <a href="/tags/Java/">Java</a>
-            
-              <a href="/tags/Groovy/">Groovy</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        <a href="/post/bee47fed.html">IDEA部署应用到远程Docker</a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/post/bee47fed.html">
-          
-          
-            
-          
-          Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-09-27 19:23" pubdate>
-              2020-09-27
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Docker/">Docker</a>
-            
-              <a href="/tags/IDEA/">IDEA</a>
             
           </div>
         

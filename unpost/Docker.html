@@ -235,6 +235,9 @@ docker <span class="hljs-builtin-name">run</span> -d --name elasticsearch --net 
 
 docker <span class="hljs-builtin-name">run</span> -it -d -v  <span class="hljs-variable">$PWD</span>/pipeline/:/etc/logstash/pipeline/ logstash:6.4.3 bash</code></pre></div>
 
+<h3 id="emby"><a href="#emby" class="headerlink" title="emby"></a>emby</h3><div class="hljs"><pre><code class="hljs routeros">docker <span class="hljs-builtin-name">run</span> -d -v <span class="hljs-variable">$PWD</span>/config:<span class="hljs-built_in">/config </span>-v /share:/share <span class="hljs-attribute">--network</span>=host <span class="hljs-attribute">--restart</span>=always emby/embyserver:latest
+
+docker <span class="hljs-builtin-name">run</span> -d  -v /share:/share <span class="hljs-attribute">--network</span>=host emby/embyserver:latest</code></pre></div>
 <h3 id="删除所有none镜像"><a href="#删除所有none镜像" class="headerlink" title="删除所有none镜像"></a>删除所有none镜像</h3><div class="hljs"><pre><code class="hljs nginx"><span class="hljs-attribute">docker</span> rmi `docker images | grep  <span class="hljs-string">"&lt;none&gt;"</span> | awk <span class="hljs-string">'&#123;print <span class="hljs-variable">$3</span>&#125;'</span>`</code></pre></div>
 
 </div>
