@@ -1,0 +1,720 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="test">
+  <meta name="author" content="Youj">
+  <meta name="keywords" content="">
+  <title>Spring编程式事务 - Youj&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
+  
+
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Youj's blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+  <div class="mt-3 post-meta">
+    <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+    <time datetime="2020-11-06 00:00" pubdate>
+      2020年11月6日 凌晨
+    </time>
+  </div>
+
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      2k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      27
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto" id="post">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring编程式事务</h1>
+            
+            <div class="markdown-body" id="post-body">
+              <table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PROPAGATION_REQUIRED</td>
+<td>支持当前事务 如果不存，就建一个（默认的）</td>
+<td>A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）</td>
+</tr>
+<tr>
+<td>PROPAGATION_SUPPORTS</td>
+<td>支持当前事务 如果不存在，就不使用事务</td>
+<td>A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务</td>
+</tr>
+<tr>
+<td>PROPAGATION_MANDATORY</td>
+<td>支持当前事务 如果不存在，抛出异常</td>
+<td>A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B抛出异常</td>
+</tr>
+<tr>
+<td>PROPAGATION_REQUIRES_NEW</td>
+<td>如果有事务存在 挂起当前事务，创建一个新的事务</td>
+<td>A,B，如果A有事务，B将A的事务挂起，并重新创建一个事务（A，B不在一个事务中，两个事务互不影响）</td>
+</tr>
+<tr>
+<td>PROPAGATION_NOT_SUPPORTED</td>
+<td>以非事务方式运行 如果有事务存在，挂起当前事务</td>
+<td>A,B，非事务方式运行，A有事务就挂起事务</td>
+</tr>
+<tr>
+<td>PROPAGATION_NEVER</td>
+<td>以非事务方式运行 如果有事务存在，抛出异常</td>
+<td>总是以非事务运行</td>
+</tr>
+<tr>
+<td>PROPAGATION_NESTED</td>
+<td>如果当前事务存在，则嵌套事务执行</td>
+<td>基于SavePonit技术。（保存点） A,B，A有事务，A执行之后，将A事务执行之后的内容保存到SavePonit。B事务有异常的情况，用户需要自己设置事务是提交还是回滚到保存点</td>
+</tr>
+</tbody></table>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span>
+<span class="hljs-keyword">private</span> DataSourceTransactionManager dstManager;
+<span class="hljs-meta">@Autowired</span>
+<span class="hljs-keyword">private</span> UserDao userDao;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateTest</span><span class="hljs-params">()</span></span>&#123;
+  DefaultTransactionDefinition def = <span class="hljs-keyword">new</span> DefaultTransactionDefinition();
+  def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+  TransactionStatus transaction= dstManager.getTransaction(def);
+  <span class="hljs-keyword">try</span>&#123;
+    userDao.updateTest();
+  &#125;<span class="hljs-keyword">catch</span>(Exception e)&#123;
+    log.error(e.toString(),e);
+    dstManager.rollback(transaction);
+  &#125;
+  dstManager.commit(transaction);
+&#125;</code></pre></div>
+
+<p><code>DataSourceTransactionManager</code>是<code>PlatformTransactionManager</code>的一个实现。<code>PlatformTransactionManager</code>是Spring事务处理抽象层中的管理器。</p>
+<p>统一一致的事务抽象是Spring框架的一大优势，无论是全局事务还是本地事务，JTA、JDBC、Hibernate还是JPA，Spring都使用统一的编程模型，使得应用程序可以很容易地在全局事务与本地事务，或者不同的事务框架之间进行切换。下图是Spring事务抽象的核心类图：</p>
+<p><img src="https://img.yjll.art/img/PlatformTransactionManager.png" srcset="/img/loading.gif" alt="PlatformTransactionManager"></p>
+<p>PlatformTransactionManager：事务管理器<br>getTransaction方法：事务获取操作，根据事务属性定义，获取当前事务或者创建新事物；<br>commit方法：事务提交操作，注意这里所说的提交并非直接提交事务，而是根据当前事务状态执行提交或者回滚操作；<br>rollback方法：事务回滚操作，同样，也并非一定直接回滚事务，也有可能只是标记事务为只读，等待其他调用方执行回滚。</p>
+<p>TransactionDefinition：事务属性定义<br>getPropagationBehavior方法：返回事务的传播属性，默认是PROPAGATION_REQUIRED；<br>getIsolationLevel方法：返回事务隔离级别，事务隔离级别只有在创建新事务时才有效，也就是说只对应传播属性PROPAGATION_REQUIRED和PROPAGATION_REQUIRES_NEW；<br>getTimeout方法：返回事务超时时间，以秒为单位，同样只有在创建新事务时才有效；<br>isReadOnly方法：是否优化为只读事务，支持这项属性的事务管理器会将事务标记为只读，只读事务不允许有写操作，不支持只读属性的事务管理器需要忽略这项设置，这一点跟其他事务属性定义不同，针对其他不支持的属性设置，事务管理器应该抛出异常。<br>getName方法：返回事务名称，声明式事务中默认值为“类的完全限定名.方法名”。</p>
+<p>TransactionStatus：当前事务状态<br>isNewTransaction方法：当前方法是否创建了新事务（区别于使用现有事务以及没有事务）；<br>hasSavepoint方法：在嵌套事务场景中，判断当前事务是否包含保存点；<br>setRollbackOnly和isRollbackOnly方法：只读属性设置（主要用于标记事务，等待回滚）和查询；<br>flush方法：刷新底层会话中的修改到数据库，一般用于刷新如Hibernate/JPA的会话，是否生效由具体事务资源实现决定；<br>isCompleted方法：判断当前事务是否已完成（已提交或者已回滚）。</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> TransactionStatus <span class="hljs-title">getTransaction</span><span class="hljs-params">(@Nullable TransactionDefinition definition)</span> <span class="hljs-keyword">throws</span> TransactionException </span>&#123;
+    <span class="hljs-comment">// 创建DataSourceTransactionObject</span>
+		Object transaction = doGetTransaction();
+
+		<span class="hljs-comment">// Cache debug flag to avoid repeated checks.</span>
+		<span class="hljs-keyword">boolean</span> debugEnabled = logger.isDebugEnabled();
+
+		<span class="hljs-keyword">if</span> (definition == <span class="hljs-keyword">null</span>) &#123;
+			<span class="hljs-comment">// Use defaults if no transaction definition given.</span>
+			definition = <span class="hljs-keyword">new</span> DefaultTransactionDefinition();
+		&#125;
+
+    <span class="hljs-comment">// 已有事务逻辑，通过handleExistingTransaction方法处理</span>
+		<span class="hljs-keyword">if</span> (isExistingTransaction(transaction)) &#123;
+			<span class="hljs-comment">// Existing transaction found -&gt; check propagation behavior to find out how to behave.</span>
+			<span class="hljs-keyword">return</span> handleExistingTransaction(definition, transaction, debugEnabled);
+		&#125;
+
+		<span class="hljs-comment">// Check definition settings for new transaction.</span>
+		<span class="hljs-keyword">if</span> (definition.getTimeout() &lt; TransactionDefinition.TIMEOUT_DEFAULT) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> InvalidTimeoutException(<span class="hljs-string">"Invalid transaction timeout"</span>, definition.getTimeout());
+		&#125;
+
+    <span class="hljs-comment">// 以下是当前无事务的情况</span>
+    <span class="hljs-comment">// - PROPAGATION_MANDATORY：当前事务不存在，抛出异常</span>
+		<span class="hljs-comment">// No existing transaction found -&gt; check propagation behavior to find out how to proceed.</span>
+		<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(
+					<span class="hljs-string">"No existing transaction found for transaction marked with propagation 'mandatory'"</span>);
+		&#125;
+    <span class="hljs-comment">// 无事务便创建事务</span>
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
+				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) &#123;
+			SuspendedResourcesHolder suspendedResources = suspend(<span class="hljs-keyword">null</span>);
+			<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+				logger.debug(<span class="hljs-string">"Creating new transaction with name ["</span> + definition.getName() + <span class="hljs-string">"]: "</span> + definition);
+			&#125;
+			<span class="hljs-keyword">try</span> &#123;
+				<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+				DefaultTransactionStatus status = newTransactionStatus(
+						definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, suspendedResources);
+				doBegin(transaction, definition);
+				prepareSynchronization(status, definition);
+				<span class="hljs-keyword">return</span> status;
+			&#125;
+			<span class="hljs-keyword">catch</span> (RuntimeException | Error ex) &#123;
+				resume(<span class="hljs-keyword">null</span>, suspendedResources);
+				<span class="hljs-keyword">throw</span> ex;
+			&#125;
+		&#125;
+    <span class="hljs-comment">// 无事务不需创建</span>
+		<span class="hljs-keyword">else</span> &#123;
+			<span class="hljs-comment">// Create "empty" transaction: no actual transaction, but potentially synchronization.</span>
+			<span class="hljs-keyword">if</span> (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT &amp;&amp; logger.isWarnEnabled()) &#123;
+				logger.warn(<span class="hljs-string">"Custom isolation level specified but no actual transaction initiated; "</span> +
+						<span class="hljs-string">"isolation level will effectively be ignored: "</span> + definition);
+			&#125;
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+			<span class="hljs-keyword">return</span> prepareTransactionStatus(definition, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+		&#125;
+	&#125;</code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs java">org.springframework.jdbc.datasource.DataSourceTransactionManager#doGetTransaction
+
+	<span class="hljs-function"><span class="hljs-keyword">protected</span> Object <span class="hljs-title">doGetTransaction</span><span class="hljs-params">()</span> </span>&#123;
+		DataSourceTransactionObject txObject = <span class="hljs-keyword">new</span> DataSourceTransactionObject();
+		txObject.setSavepointAllowed(isNestedTransactionAllowed());
+		ConnectionHolder conHolder =
+				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
+		txObject.setConnectionHolder(conHolder, <span class="hljs-keyword">false</span>);
+		<span class="hljs-keyword">return</span> txObject;
+	&#125;
+
+org.springframework.jdbc.datasource.DataSourceTransactionManager#isExistingTransaction
+
+	<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">isExistingTransaction</span><span class="hljs-params">(Object transaction)</span> </span>&#123;
+		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
+		<span class="hljs-keyword">return</span> (txObject.hasConnectionHolder() &amp;&amp; txObject.getConnectionHolder().isTransactionActive());
+	&#125;</code></pre></div>
+
+<p><code>TransactionSynchronizationManager</code> 是事务同步管理器，TransactionSynchronizationManager通过ThreadLocal对象在当前线程记录了resources和synchronizations属性。resources是一个HashMap，用于记录当前参与事务的事务资源，方便进行事务同步，在DataSourceTransactionManager的例子中就是以dataSource作为key，保存了数据库连接，这样在同一个线程中，不同的方法调用就可以通过dataSource获取相同的数据库连接，从而保证所有操作在一个事务中进行。</p>
+<p>org.springframework.transaction.support.AbstractPlatformTransactionManager#handleExistingTransaction</p>
+<div class="hljs"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">private</span> TransactionStatus <span class="hljs-title">handleExistingTransaction</span><span class="hljs-params">(</span></span>
+<span class="hljs-function"><span class="hljs-params">		TransactionDefinition definition, Object transaction, <span class="hljs-keyword">boolean</span> debugEnabled)</span></span>
+<span class="hljs-function">		<span class="hljs-keyword">throws</span> TransactionException </span>&#123;
+   <span class="hljs-comment">// PROPAGATION_NEVER 直接抛出异常</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) &#123;
+		<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(
+				<span class="hljs-string">"Existing transaction found for transaction marked with propagation 'never'"</span>);
+	&#125;
+  	<span class="hljs-comment">// PROPAGATION_NOT_SUPPORTED suspend挂起当前事务，当前方法不使用事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) &#123;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Suspending current transaction"</span>);
+		&#125;
+		Object suspendedResources = suspend(transaction);
+		<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+		<span class="hljs-keyword">return</span> prepareTransactionStatus(
+				definition, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">false</span>, newSynchronization, debugEnabled, suspendedResources);
+	&#125;
+  <span class="hljs-comment">// PROPAGATION_REQUIRES_NEW suspend挂起当前事务，doBegin创建一个新事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) &#123;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Suspending current transaction, creating new transaction with name ["</span> +
+					definition.getName() + <span class="hljs-string">"]"</span>);
+		&#125;
+		SuspendedResourcesHolder suspendedResources = suspend(transaction);
+		<span class="hljs-keyword">try</span> &#123;
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+			DefaultTransactionStatus status = newTransactionStatus(
+					definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, suspendedResources);
+			doBegin(transaction, definition);
+			prepareSynchronization(status, definition);
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+		<span class="hljs-keyword">catch</span> (RuntimeException | Error beginEx) &#123;
+			resumeAfterBeginException(transaction, suspendedResources, beginEx);
+			<span class="hljs-keyword">throw</span> beginEx;
+		&#125;
+	&#125;
+  <span class="hljs-comment">// PROPAGATION_NESTED 嵌套事务</span>
+	<span class="hljs-keyword">if</span> (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) &#123;
+		<span class="hljs-keyword">if</span> (!isNestedTransactionAllowed()) &#123;
+			<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NestedTransactionNotSupportedException(
+					<span class="hljs-string">"Transaction manager does not allow nested transactions by default - "</span> +
+					<span class="hljs-string">"specify 'nestedTransactionAllowed' property with value 'true'"</span>);
+		&#125;
+		<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+			logger.debug(<span class="hljs-string">"Creating nested transaction with name ["</span> + definition.getName() + <span class="hljs-string">"]"</span>);
+		&#125;
+		<span class="hljs-keyword">if</span> (useSavepointForNestedTransaction()) &#123;
+			<span class="hljs-comment">// Create savepoint within existing Spring-managed transaction,</span>
+			<span class="hljs-comment">// through the SavepointManager API implemented by TransactionStatus.</span>
+			<span class="hljs-comment">// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.</span>
+			DefaultTransactionStatus status =
+					prepareTransactionStatus(definition, transaction, <span class="hljs-keyword">false</span>, <span class="hljs-keyword">false</span>, debugEnabled, <span class="hljs-keyword">null</span>);
+			status.createAndHoldSavepoint();
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+     <span class="hljs-comment">// PROPAGATION_REQUIRED、PROPAGATION_SUPPORTS、PROPAGATION_MANDATORY 使用当前事务</span>
+		<span class="hljs-keyword">else</span> &#123;
+			<span class="hljs-comment">// Nested transaction through nested begin and commit/rollback calls.</span>
+			<span class="hljs-comment">// Usually only for JTA: Spring synchronization might get activated here</span>
+			<span class="hljs-comment">// in case of a pre-existing JTA transaction.</span>
+			<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+			DefaultTransactionStatus status = newTransactionStatus(
+					definition, transaction, <span class="hljs-keyword">true</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+			doBegin(transaction, definition);
+			prepareSynchronization(status, definition);
+			<span class="hljs-keyword">return</span> status;
+		&#125;
+	&#125;
+
+	<span class="hljs-comment">// Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.</span>
+	<span class="hljs-keyword">if</span> (debugEnabled) &#123;
+		logger.debug(<span class="hljs-string">"Participating in existing transaction"</span>);
+	&#125;
+	<span class="hljs-keyword">if</span> (isValidateExistingTransaction()) &#123;
+		<span class="hljs-keyword">if</span> (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) &#123;
+			Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+			<span class="hljs-keyword">if</span> (currentIsolationLevel == <span class="hljs-keyword">null</span> || currentIsolationLevel != definition.getIsolationLevel()) &#123;
+				Constants isoConstants = DefaultTransactionDefinition.constants;
+				<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(<span class="hljs-string">"Participating transaction with definition ["</span> +
+						definition + <span class="hljs-string">"] specifies isolation level which is incompatible with existing transaction: "</span> +
+						(currentIsolationLevel != <span class="hljs-keyword">null</span> ?
+								isoConstants.toCode(currentIsolationLevel, DefaultTransactionDefinition.PREFIX_ISOLATION) :
+								<span class="hljs-string">"(unknown)"</span>));
+			&#125;
+		&#125;
+		<span class="hljs-keyword">if</span> (!definition.isReadOnly()) &#123;
+			<span class="hljs-keyword">if</span> (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) &#123;
+				<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalTransactionStateException(<span class="hljs-string">"Participating transaction with definition ["</span> +
+						definition + <span class="hljs-string">"] is not marked as read-only but existing transaction is"</span>);
+			&#125;
+		&#125;
+	&#125;
+	<span class="hljs-keyword">boolean</span> newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+	<span class="hljs-keyword">return</span> prepareTransactionStatus(definition, transaction, <span class="hljs-keyword">false</span>, newSynchronization, debugEnabled, <span class="hljs-keyword">null</span>);
+&#125;</code></pre></div>
+
+
+
+<p><a href="https://zhuanlan.zhihu.com/p/54067384" target="_blank" rel="noopener">【技术干货】Spring事务原理一探</a></p>
+<p><a href="https://blog.csdn.net/oDeviloo/article/details/101757711" target="_blank" rel="noopener">spring事务传播性源码解析</a></p>
+<p><a href="https://my.oschina.net/marvelcode/blog/3195379" target="_blank" rel="noopener">Spring事务源码解析</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Java/">Java</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Spring/">Spring</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Transaction/">Transaction</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" target="_blank" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext row">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/post/adfcf5ef.html">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Python通过跳板机连接远程MySQL</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/112d5fa0.html">
+                        <span class="hidden-mobile">聊一聊Mybatis-Spring都帮我们做了什么</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
+
+
+
+
+
+
+
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
+
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '#post-body',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
+      }
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "Spring编程式事务&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

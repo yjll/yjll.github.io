@@ -1,0 +1,586 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="test">
+  <meta name="author" content="Youj">
+  <meta name="keywords" content="">
+  <title>RDS MySQL 物理备份文件恢复到自建数据库 - Youj&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
+  
+
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Youj's blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+  <div class="mt-3 post-meta">
+    <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+    <time datetime="2020-04-27 15:40" pubdate>
+      2020年4月27日 下午
+    </time>
+  </div>
+
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      828 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      13
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto" id="post">
+            <!-- SEO header -->
+            <h1 style="display: none">RDS MySQL 物理备份文件恢复到自建数据库</h1>
+            
+            <div class="markdown-body" id="post-body">
+              <p>阿里云提供了定期备份数据库的功能，可以在阿里云的控制台将数据库恢复到备份点，那我们想将这部分数据导入到我们自建的数据库怎么操作呢？官方推荐使用开源软件Percona Xtrabackup对数据库进行恢复，Percona Xtrabackup目前没有Windows版本，但是我们可以使用Docker进行恢复。</p>
+<a id="more"></a>
+
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在阿里云的后台下载备份文件</p>
+<p><img src="https://img.yjll.art/img/bak.png" srcset="/img/loading.gif" alt="bak"></p>
+<p>生产环境的数据库使用的Mysql 8.0.16，我直接通过docker运行，并直接进入容器内部。</p>
+<div class="hljs"><pre><code class="hljs angelscript">docker run -v /root/bak.xb:/root/bak.xb  -p <span class="hljs-number">3308</span>:<span class="hljs-number">3306</span> -it mysql:<span class="hljs-number">8.0</span><span class="hljs-number">.16</span> bash</code></pre></div>
+
+
+
+<p>先更换<a href="https://mirrors.163.com/.help/debian.html" target="_blank" rel="noopener">163源</a>方便安装软件</p>
+<div class="hljs"><pre><code class="hljs vim"><span class="hljs-keyword">cat</span> &gt;&gt;/etc/apt/sources.<span class="hljs-keyword">list</span>&lt;&lt;EOF
+<span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch main non-free contrib
+<span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch-updates main non-free contrib
+<span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch-backports main non-free contrib
+<span class="hljs-keyword">deb</span>-src http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch main non-free contrib
+<span class="hljs-keyword">deb</span>-src http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch-updates main non-free contrib
+<span class="hljs-keyword">deb</span>-src http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian/ stretch-backports main non-free contrib
+<span class="hljs-keyword">deb</span> http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian-security/ stretch/updates main non-free contrib
+<span class="hljs-keyword">deb</span>-src http://mirrors.<span class="hljs-number">163</span>.<span class="hljs-keyword">com</span>/debian-security/ stretch/updates main non-free contrib
+EOF</code></pre></div>
+
+<p>安装我们的主角percona-xtrabackup用户恢复文件，直接下载deb包进行安装</p>
+<div class="hljs"><pre><code class="hljs vim">
+apt -<span class="hljs-keyword">y</span> install lsb-release wget aria2 <span class="hljs-keyword">vim</span>
+
+wget http<span class="hljs-variable">s:</span>//repo.percona.<span class="hljs-keyword">com</span>/apt/percona-release_latest.$(lsb_release -sc)_all.<span class="hljs-keyword">deb</span>
+
+dpkg -i percona-release_latest.$(lsb_release -sc)_all.<span class="hljs-keyword">deb</span>
+
+apt-<span class="hljs-built_in">get</span> <span class="hljs-keyword">update</span>
+
+apt-<span class="hljs-built_in">get</span> -<span class="hljs-keyword">y</span> install percona-xtrabackup-<span class="hljs-number">80</span></code></pre></div>
+
+
+<p>创建解压目录，官方文档中使用的这个路径，我懒得改了，就创建了一个</p>
+<div class="hljs"><pre><code class="hljs arduino"><span class="hljs-built_in">mkdir</span> -p /<span class="hljs-built_in">home</span>/mysql/data</code></pre></div>
+
+<p>开始解压</p>
+<div class="hljs"><pre><code class="hljs jboss-cli">先安装qpress解压软件
+aria2c http:<span class="hljs-string">//www.quicklz.com/qpress-11-linux-x64.tar</span>
+tar xvf qpress-11-linux-x64.tar
+chmod 775 qpress
+cp qpress <span class="hljs-string">/usr/bin</span>
+
+cat bak.xb | xbstream -x -v -C <span class="hljs-string">/home/mysql/data</span>
+
+xtrabackup <span class="hljs-params">--decompress</span> <span class="hljs-params">--remove-original</span> <span class="hljs-params">--target-dir=/home/mysql/data</span></code></pre></div>
+
+
+<p>解压后进行数据恢复</p>
+<div class="hljs"><pre><code class="hljs crystal"><span class="hljs-comment"># 删除原数据库中数据</span>
+rm -rf /var/<span class="hljs-class"><span class="hljs-keyword">lib</span>/<span class="hljs-title">mysql</span>/*</span>
+
+xtrabackup --prepare --target-dir=<span class="hljs-regexp">/home/mysql</span><span class="hljs-regexp">/data</span>
+<span class="hljs-regexp">xtrabackup --datadir=/var</span><span class="hljs-regexp">/lib/mysql</span> --copy-back --target-dir=<span class="hljs-regexp">/home/mysql</span><span class="hljs-regexp">/data</span></code></pre></div>
+
+<p>自建数据库不支持如下参数，需要注释掉。</p>
+<p>vi /home/mysql/data/backup-my.cnf</p>
+<div class="hljs"><pre><code class="hljs vala"><span class="hljs-meta">#innodb_log_checksum_algorithm</span>
+<span class="hljs-meta">#innodb_fast_checksum</span>
+<span class="hljs-meta">#innodb_log_block_size</span>
+<span class="hljs-meta">#innodb_doublewrite_file</span>
+<span class="hljs-meta">#rds_encrypt_data</span>
+<span class="hljs-meta">#innodb_encrypt_algorithm</span>
+<span class="hljs-meta">#redo_log_version</span>
+<span class="hljs-meta">#master_key_id</span>
+<span class="hljs-meta">#server_uuid</span></code></pre></div>
+
+<p>启动</p>
+<div class="hljs"><pre><code class="hljs routeros">mysqld_safe <span class="hljs-attribute">--defaults-file</span>=/home/mysql/data/backup-my.cnf <span class="hljs-attribute">--user</span>=root <span class="hljs-attribute">--datadir</span>=/home/mysql/data &amp;</code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs routeros">2020-04-28T09:43:49.658819Z mysqld_safe<span class="hljs-built_in"> Logging </span><span class="hljs-keyword">to</span> <span class="hljs-string">'/home/mysql/data/14864923d3cb.err'</span>.
+2020-04-28T09:43:49.703474Z mysqld_safe Starting mysqld daemon with databases <span class="hljs-keyword">from</span> /home/mysql/data</code></pre></div>
+
+<p>如果mysql服务没起来，可以查看/home/mysql/data/14864923d3cb.err这个日志文件</p>
+<p>实际使用遇到过的问题</p>
+<div class="hljs"><pre><code class="hljs angelscript"><span class="hljs-number">2020</span><span class="hljs-number">-08</span><span class="hljs-number">-18</span>T06:<span class="hljs-number">18</span>:<span class="hljs-number">32.304152</span>Z <span class="hljs-number">0</span> [ERROR] [MY<span class="hljs-number">-010095</span>] [Server] Failed to access directory <span class="hljs-keyword">for</span> --secure-file-priv. Please make sure that directory exists <span class="hljs-keyword">and</span> <span class="hljs-keyword">is</span> accessible by MySQL Server. Supplied value : /var/lib/mysql-files</code></pre></div>
+<p><code>--secure-file-priv</code> 默认使用 <code>/var/lib/mysql-files</code>这个目录，我们更改一下</p>
+<div class="hljs"><pre><code class="hljs gradle">vim <span class="hljs-regexp">/home/my</span>sql<span class="hljs-regexp">/data/</span>backup-my.cnf
+secure-<span class="hljs-keyword">file</span>-priv=<span class="hljs-regexp">/home/my</span>sql<span class="hljs-regexp">/data</span></code></pre></div>
+
+
+<div class="hljs"><pre><code class="hljs routeros">2020-08-18T06:20:49.765666Z 1 [<span class="hljs-builtin-name">ERROR</span>] [MY-011087] [Server] Different lower_case_table_names<span class="hljs-built_in"> settings </span><span class="hljs-keyword">for</span><span class="hljs-built_in"> server </span>(<span class="hljs-string">'0'</span>) <span class="hljs-keyword">and</span> data dictionary (<span class="hljs-string">'1'</span>).</code></pre></div>
+<p>大小写配置问题</p>
+<div class="hljs"><pre><code class="hljs ini"><span class="hljs-attr">lower_case_table_names</span>=<span class="hljs-number">1</span></code></pre></div>
+
+
+
+<p>再次启动后我们登录一下</p>
+<div class="hljs"><pre><code class="hljs routeros">root@a8a32828e279:/home/mysql/data# mysql -upro -p            
+Enter password: 
+Welcome <span class="hljs-keyword">to</span> the MySQL monitor.  Commands end with ; <span class="hljs-keyword">or</span> \g.
+Your MySQL<span class="hljs-built_in"> connection </span>id is 17
+Server version: 8.0.16 MySQL<span class="hljs-built_in"> Community Server </span>- GPL
+
+Copyright (c) 2000, 2019, Oracle <span class="hljs-keyword">and</span>/<span class="hljs-keyword">or</span> its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation <span class="hljs-keyword">and</span>/<span class="hljs-keyword">or</span> its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type <span class="hljs-string">'help;'</span> <span class="hljs-keyword">or</span> <span class="hljs-string">'\h'</span> <span class="hljs-keyword">for</span> help.<span class="hljs-built_in"> Type </span><span class="hljs-string">'\c'</span> <span class="hljs-keyword">to</span> clear the current input statement.
+
+mysql&gt; show databases
+    -&gt; ;
++--------------------+
+| Database           |
++--------------------+
+| pro                |
+| information_schema |
+| mysql              |
++--------------------+
+3 rows <span class="hljs-keyword">in</span> <span class="hljs-builtin-name">set</span> (0.01 sec)
+
+mysql&gt;</code></pre></div>
+<p>OK，大功告成</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://help.aliyun.com/knowledge_detail/41817.html" target="_blank" rel="noopener">https://help.aliyun.com/knowledge_detail/41817.html</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Linux/">Linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Docker/">Docker</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Mysql/">Mysql</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Aliyun/">Aliyun</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" target="_blank" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext row">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/post/21f939f5.html">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Docker使用宿主代理</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/post/77a89a46.html">
+                        <span class="hidden-mobile">Nginx使用Certbot配置HTTPS证书</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
+
+
+
+
+
+
+
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
+
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '#post-body',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
+      }
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "RDS MySQL 物理备份文件恢复到自建数据库&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
