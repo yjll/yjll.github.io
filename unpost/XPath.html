@@ -165,36 +165,25 @@
                 
 
 <div class="page-content">
-  <p><a href="https://blog.csdn.net/zhanghui200920061988/article/details/105132167" target="_blank" rel="noopener">nginx配置proxy_pass时url末尾带“/”与不带“/”的区别</a></p>
-<p>proxy_pass配置中url末尾带/时，nginx转发时，会将原uri去除location匹配表达式后的内容拼接在proxy_pass中url之后。<br>测试地址：<a href="http://127.0.0.1/admin/login" target="_blank" rel="noopener">http://127.0.0.1/admin/login</a></p>
-<p>场景一：<br>location /admin/ {<br>    proxy_pass <a href="http://127.0.0.1:8080/server/" target="_blank" rel="noopener">http://127.0.0.1:8080/server/</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/server/login" target="_blank" rel="noopener">http://127.0.0.1:8080/server/login</a></p>
-<p>场景二：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080/server/" target="_blank" rel="noopener">http://127.0.0.1:8080/server/</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/server//login" target="_blank" rel="noopener">http://127.0.0.1:8080/server//login</a></p>
-<p>场景三：<br>location /admin/ {<br>    proxy_pass <a href="http://127.0.0.1:8080/" target="_blank" rel="noopener">http://127.0.0.1:8080/</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/login" target="_blank" rel="noopener">http://127.0.0.1:8080/login</a></p>
-<p>场景四：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080/" target="_blank" rel="noopener">http://127.0.0.1:8080/</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080//login" target="_blank" rel="noopener">http://127.0.0.1:8080//login</a></p>
-<p>proxy_pass配置中url末尾不带/时，如url中不包含path，则直接将原uri拼接在proxy_pass中url之后；如url中包含path，则将原uri去除location匹配表达式后的内容拼接在proxy_pass中的url之后。</p>
-<p> 测试地址：<a href="http://127.0.0.1/admin/login" target="_blank" rel="noopener">http://127.0.0.1/admin/login</a></p>
-<p> 场景一：<br> location /admin/{<br>    proxy_pass <a href="http://127.0.0.1:8080/server" target="_blank" rel="noopener">http://127.0.0.1:8080/server</a>;<br> }</p>
-<p>代理后实际访问地址：<a href="http://127.0.0.1:8080/serverlogin" target="_blank" rel="noopener">http://127.0.0.1:8080/serverlogin</a></p>
-<p>场景二：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080/server" target="_blank" rel="noopener">http://127.0.0.1:8080/server</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/server/login" target="_blank" rel="noopener">http://127.0.0.1:8080/server/login</a></p>
-<p>场景三：<br>location /admin/ {<br>    proxy_pass <a href="http://127.0.0.1:8080" target="_blank" rel="noopener">http://127.0.0.1:8080</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/admin/login" target="_blank" rel="noopener">http://127.0.0.1:8080/admin/login</a></p>
-<p>场景四：<br>location /admin {<br>    proxy_pass <a href="http://127.0.0.1:8080" target="_blank" rel="noopener">http://127.0.0.1:8080</a>;<br>}<br>代理后实际访问地址：<a href="http://127.0.0.1:8080/admin/login" target="_blank" rel="noopener">http://127.0.0.1:8080/admin/login</a></p>
-<p><a href="http://hxd.best/2019/05/15/Nginx-%E5%86%85%E5%AE%B9%E7%BC%93%E5%AD%98%E5%8F%8A%E5%B8%B8%E8%A7%81%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE/" target="_blank" rel="noopener">Nginx 内容缓存及常见参数配置</a></p>
-<p><a href="https://learnku.com/articles/36857" target="_blank" rel="noopener">Nginx 代理缓存</a></p>
-<p><a href="https://www.qttc.net/355-nginx-proxy-cache-not-working.html" target="_blank" rel="noopener">Nginx配置proxy_cache后缓存目录里没有生成缓存文件</a></p>
-<p>代理缓存主要用到 proxy 模块中的 proxy_cache</p>
-<div class="hljs"><pre><code class="hljs nginx"><span class="hljs-attribute">proxy_cache_path</span> /var/cache/nginx levels=<span class="hljs-number">1</span>:<span class="hljs-number">2</span> keys_zone=my_cache:<span class="hljs-number">10m</span> max_size=<span class="hljs-number">10g</span> inactive=<span class="hljs-number">30d</span> use_temp_path=<span class="hljs-literal">off</span>;
+  <p><a href="https://curl.trillworks.com/" target="_blank" rel="noopener">Convert curl syntax to Python</a></p>
+<h3 id="Python"><a href="#Python" class="headerlink" title="Python"></a>Python</h3><p>python使用<code>lxml</code>进行解析</p>
+<div class="hljs"><pre><code class="hljs python"><span class="hljs-keyword">from</span> lxml <span class="hljs-keyword">import</span> etree
+html=etree.parse(<span class="hljs-string">'d:/github.html'</span>,etree.HTMLParser(encoding=<span class="hljs-string">"utf-8"</span>))
+result = html.xpath(<span class="hljs-string">'''//*[@id="org-repositories"]/div[1]/div/ul/li[1]/div[1]/div[1]/h3/a/@href'''</span>)
+<span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> result:
+    print(row)</code></pre></div>
 
-    <span class="hljs-section">server</span> &#123;
-        <span class="hljs-attribute">server_name</span> localhost;
-        <span class="hljs-attribute">location</span> / &#123;
-            <span class="hljs-attribute">proxy_cache</span> my_cache;
-            <span class="hljs-attribute">proxy_cache_valid</span>  <span class="hljs-number">200</span>;
-            <span class="hljs-attribute">proxy_pass</span> https://remote.com;
-        &#125;</code></pre></div>
+<h3 id="Java-amp-Groovy"><a href="#Java-amp-Groovy" class="headerlink" title="Java&amp;Groovy"></a>Java&amp;Groovy</h3><p>Java使用<code>htmlcleaner</code>解析HTML</p>
+<div class="hljs"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>net.sourceforge.htmlcleaner<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>htmlcleaner<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.6.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span></code></pre></div>
 
-
-<p><a href="https://www.xncoding.com/2018/03/12/fullstack/nginx-websocket.html" target="_blank" rel="noopener">nginx反向代理WebSocket</a></p>
-
+<div class="hljs"><pre><code class="hljs groovy">HtmlCleaner hc = <span class="hljs-keyword">new</span> HtmlCleaner()
+<span class="hljs-keyword">def</span> node = hc.clean(<span class="hljs-keyword">new</span> File(<span class="hljs-string">"d:/github.html"</span>))
+println node.getElementsByName(<span class="hljs-string">"title"</span>,<span class="hljs-literal">true</span>)
+println node.evaluateXPath(<span class="hljs-string">"//*[@id=\"org-repositories\"]/div[1]/div/ul/li[*]/div[1]/div[1]/h3/a/@href"</span>)</code></pre></div>
 </div>
 
               </div>
