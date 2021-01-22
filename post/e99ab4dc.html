@@ -135,7 +135,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+         style="background: url('https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/default.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -209,15 +209,15 @@
 <p>1 握手，客户端与代理协商SOCKS5版本及账号密码</p>
 <p>2 请求建立连接，客户端将发送要请求的远程地址发送给代理</p>
 <p>3 发送数据包给代理服务，代理进行转发后，将目标服务的数据返回</p>
-<p><img src="https://img.yjll.art/img/sock5.png" srcset="/img/loading.gif" alt="sock5"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/sock5.png" srcset="/img/loading.gif" alt="sock5"></p>
 <p>根据OSI模型，SOCKS是会话层的协议，位于表示层与传输层之间。</p>
-<h3 id="OSI网络模型"><a href="#OSI网络模型" class="headerlink" title="OSI网络模型"></a>OSI网络模型</h3><p><img src="https://img.yjll.art/img/OSI_model.jpg" srcset="/img/loading.gif" alt="OSI_model"></p>
+<h3 id="OSI网络模型"><a href="#OSI网络模型" class="headerlink" title="OSI网络模型"></a>OSI网络模型</h3><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/OSI_model.jpg" srcset="/img/loading.gif" alt="OSI_model"></p>
 <h3 id="Shadowsocks工作原理"><a href="#Shadowsocks工作原理" class="headerlink" title="Shadowsocks工作原理"></a>Shadowsocks工作原理</h3><p>Shadowsocks是基于Python开发的科学上网软件。Shadowsocks实现了SOCKS协议，SOCKS协议本身是没有加密功能的，为了防止GFW根据报文对数据进行拦截，所以要对数据进行加密。<br>Shadowsocks分为 <code>SS Local</code> 和 <code>SS Server</code>。</p>
 <ul>
 <li><code>SS Local</code>负责通过SOCKS协议与客户端交互，将客户端(浏览器)请求的数据加密发送给<code>SS Server</code>和将<code>SS Server</code>响应的数据解密返回给客户端。</li>
 <li><code>SS Server</code>负责将<code>SS Local</code>请求的数据解密，发送给目标网站(例如google.com)，并将目标网站的响应进行加密返回。</li>
 </ul>
-<p><img src="https://img.yjll.art/img/Shadowsocks.jpg" srcset="/img/loading.gif" alt="Shadowsocks"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/Shadowsocks.jpg" srcset="/img/loading.gif" alt="Shadowsocks"></p>
 <h3 id="NIO实现"><a href="#NIO实现" class="headerlink" title="NIO实现"></a>NIO实现</h3><p>首先我们要先创建一个选择器和一个ServerSocketChannel，ServerSocketChannel订阅ACCEPT事件注册到选择器上，<code>selector.select()</code>会阻塞直到有请求到来时。</p>
 <div class="hljs"><pre><code class="hljs java">
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">execute</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
@@ -418,9 +418,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/82ab8e0c.html">
+                      <a href="/post/9a133fa7.html">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Windows下的包管理工具</span>
+                        <span class="hidden-mobile">当我们谈论NIO时我们在谈论什么</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -428,8 +428,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/9a133fa7.html">
-                        <span class="hidden-mobile">当我们谈论NIO时我们在谈论什么</span>
+                      <a href="/post/a9515f36.html">
+                        <span class="hidden-mobile">Spring Cloud Gateway 登录拦截</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

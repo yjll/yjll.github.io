@@ -135,7 +135,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+         style="background: url('https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/default.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -202,17 +202,17 @@
             <h1 style="display: none">当我们谈论NIO时我们在谈论什么</h1>
             
             <div class="markdown-body" id="post-body">
-              <p><img src="https://img.yjll.art/img/NIO_HEAD.png" srcset="/img/loading.gif" alt="NIO_HEAD"></p>
+              <p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/NIO_HEAD.png" srcset="/img/loading.gif" alt="NIO_HEAD"></p>
 <p>NIO（Non-blocking I/O，在Java领域，也称为New I/O），是一种同步非阻塞的I/O模型，也是I/O多路复用的基础，已经被越来越多地应用到大型应用服务器，成为解决高并发与大量连接、I/O处理问题的有效方式。</p>
 <a id="more"></a>
 
 <h3 id="用户空间与内核空间"><a href="#用户空间与内核空间" class="headerlink" title="用户空间与内核空间"></a>用户空间与内核空间</h3><p>现在操作系统都是采用虚拟存储器，那么对32位操作系统而言，它的寻址空间（虚拟存储空间）为4G（2的32次方）。操作系统的核心是内核，独立于普通的应用程序，可以访问受保护的内存空间，也有访问底层硬件设备的所有权限。为了保证用户进程不能直接操作内核（kernel），保证内核的安全，操作系统将虚拟空间划分为两部分，一部分为内核空间，一部分为用户空间。针对linux操作系统而言，将最高的1G字节（从虚拟地址0xC0000000到0xFFFFFFFF），供内核使用，称为内核空间，而将较低的3G字节（从虚拟地址0x00000000到0xBFFFFFFF），供各个进程使用，称为用户空间。</p>
 <h3 id="缓存-IO"><a href="#缓存-IO" class="headerlink" title="缓存 IO"></a>缓存 IO</h3><p>缓存 IO 又被称作标准 IO，大多数文件系统的默认 IO 操作都是缓存 IO。在 Linux 的缓存 IO 机制中，操作系统会将 IO 的数据缓存在文件系统的页缓存（ page cache ）中，也就是说，数据会先被拷贝到操作系统内核的缓冲区中，然后才会从操作系统内核的缓冲区拷贝到应用程序的地址空间。</p>
-<h3 id="I-O-模型"><a href="#I-O-模型" class="headerlink" title="I/O 模型"></a>I/O 模型</h3><h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p><img src="https://img.yjll.art/img/BIO_model.png" srcset="/img/loading.gif" alt="BIO_model"></p>
+<h3 id="I-O-模型"><a href="#I-O-模型" class="headerlink" title="I/O 模型"></a>I/O 模型</h3><h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/BIO_model.png" srcset="/img/loading.gif" alt="BIO_model"></p>
 <p>每个连接需要独立的进程/线程单独处理</p>
-<h4 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h4><p><img src="https://img.yjll.art/img/loop_model.png" srcset="/img/loading.gif" alt="loop_model"></p>
+<h4 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/loop_model.png" srcset="/img/loading.gif" alt="loop_model"></p>
 <p>轮询将会不断地询问内核，这将占用大量的 CPU 时间</p>
-<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p><img src="https://img.yjll.art/img/NIO_model.png" srcset="/img/loading.gif" alt="NIO_model"></p>
+<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/NIO_model.png" srcset="/img/loading.gif" alt="NIO_model"></p>
 <p>当连接数较少时效率相比多线程+阻塞 I/O 模型效率较低，可能延迟更大，因为单个连接处理需要 2 次系统调用，占用时间会有增加。</p>
 <h3 id="应用层实现"><a href="#应用层实现" class="headerlink" title="应用层实现"></a>应用层实现</h3><h4 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h4><div class="hljs"><pre><code class="hljs java"> ExecutorService executor = Excutors.newFixedThreadPollExecutor(<span class="hljs-number">100</span>);<span class="hljs-comment">//线程池</span>
 
@@ -307,9 +307,9 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/e99ab4dc.html">
+                      <a href="/post/82ab8e0c.html">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">基于Java NIO实现SOCKS代理协议</span>
+                        <span class="hidden-mobile">Windows下的包管理工具</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -317,8 +317,8 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/a9515f36.html">
-                        <span class="hidden-mobile">Spring Cloud Gateway 登录拦截</span>
+                      <a href="/post/e99ab4dc.html">
+                        <span class="hidden-mobile">基于Java NIO实现SOCKS代理协议</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

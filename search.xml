@@ -3,17 +3,17 @@
   <entry>
     <title>当我们谈论NIO时我们在谈论什么</title>
     <url>/post/9a133fa7.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/NIO_HEAD.png" srcset="/img/loading.gif" alt="NIO_HEAD"></p>
+    <content><![CDATA[<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/NIO_HEAD.png" srcset="/img/loading.gif" alt="NIO_HEAD"></p>
 <p>NIO（Non-blocking I/O，在Java领域，也称为New I/O），是一种同步非阻塞的I/O模型，也是I/O多路复用的基础，已经被越来越多地应用到大型应用服务器，成为解决高并发与大量连接、I/O处理问题的有效方式。</p>
 <a id="more"></a>
 
 <h3 id="用户空间与内核空间"><a href="#用户空间与内核空间" class="headerlink" title="用户空间与内核空间"></a>用户空间与内核空间</h3><p>现在操作系统都是采用虚拟存储器，那么对32位操作系统而言，它的寻址空间（虚拟存储空间）为4G（2的32次方）。操作系统的核心是内核，独立于普通的应用程序，可以访问受保护的内存空间，也有访问底层硬件设备的所有权限。为了保证用户进程不能直接操作内核（kernel），保证内核的安全，操作系统将虚拟空间划分为两部分，一部分为内核空间，一部分为用户空间。针对linux操作系统而言，将最高的1G字节（从虚拟地址0xC0000000到0xFFFFFFFF），供内核使用，称为内核空间，而将较低的3G字节（从虚拟地址0x00000000到0xBFFFFFFF），供各个进程使用，称为用户空间。</p>
 <h3 id="缓存-IO"><a href="#缓存-IO" class="headerlink" title="缓存 IO"></a>缓存 IO</h3><p>缓存 IO 又被称作标准 IO，大多数文件系统的默认 IO 操作都是缓存 IO。在 Linux 的缓存 IO 机制中，操作系统会将 IO 的数据缓存在文件系统的页缓存（ page cache ）中，也就是说，数据会先被拷贝到操作系统内核的缓冲区中，然后才会从操作系统内核的缓冲区拷贝到应用程序的地址空间。</p>
-<h3 id="I-O-模型"><a href="#I-O-模型" class="headerlink" title="I/O 模型"></a>I/O 模型</h3><h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p><img src="https://img.yjll.art/img/BIO_model.png" srcset="/img/loading.gif" alt="BIO_model"></p>
+<h3 id="I-O-模型"><a href="#I-O-模型" class="headerlink" title="I/O 模型"></a>I/O 模型</h3><h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/BIO_model.png" srcset="/img/loading.gif" alt="BIO_model"></p>
 <p>每个连接需要独立的进程/线程单独处理</p>
-<h4 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h4><p><img src="https://img.yjll.art/img/loop_model.png" srcset="/img/loading.gif" alt="loop_model"></p>
+<h4 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/loop_model.png" srcset="/img/loading.gif" alt="loop_model"></p>
 <p>轮询将会不断地询问内核，这将占用大量的 CPU 时间</p>
-<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p><img src="https://img.yjll.art/img/NIO_model.png" srcset="/img/loading.gif" alt="NIO_model"></p>
+<h4 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h4><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/NIO_model.png" srcset="/img/loading.gif" alt="NIO_model"></p>
 <p>当连接数较少时效率相比多线程+阻塞 I/O 模型效率较低，可能延迟更大，因为单个连接处理需要 2 次系统调用，占用时间会有增加。</p>
 <h3 id="应用层实现"><a href="#应用层实现" class="headerlink" title="应用层实现"></a>应用层实现</h3><h4 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h4><div class="hljs"><pre><code class="hljs java"> ExecutorService executor = Excutors.newFixedThreadPollExecutor(<span class="hljs-number">100</span>);<span class="hljs-comment">//线程池</span>
 
@@ -218,7 +218,7 @@ SelectionKey key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT
 
 <p><code>DataSourceTransactionManager</code>是<code>PlatformTransactionManager</code>的一个实现。<code>PlatformTransactionManager</code>是Spring事务处理抽象层中的管理器。</p>
 <p>统一一致的事务抽象是Spring框架的一大优势，无论是全局事务还是本地事务，JTA、JDBC、Hibernate还是JPA，Spring都使用统一的编程模型，使得应用程序可以很容易地在全局事务与本地事务，或者不同的事务框架之间进行切换。下图是Spring事务抽象的核心类图：</p>
-<p><img src="https://img.yjll.art/img/PlatformTransactionManager.png" srcset="/img/loading.gif" alt="PlatformTransactionManager"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/PlatformTransactionManager.png" srcset="/img/loading.gif" alt="PlatformTransactionManager"></p>
 <p>PlatformTransactionManager：事务管理器<br>getTransaction方法：事务获取操作，根据事务属性定义，获取当前事务或者创建新事物；<br>commit方法：事务提交操作，注意这里所说的提交并非直接提交事务，而是根据当前事务状态执行提交或者回滚操作；<br>rollback方法：事务回滚操作，同样，也并非一定直接回滚事务，也有可能只是标记事务为只读，等待其他调用方执行回滚。</p>
 <p>TransactionDefinition：事务属性定义<br>getPropagationBehavior方法：返回事务的传播属性，默认是PROPAGATION_REQUIRED；<br>getIsolationLevel方法：返回事务隔离级别，事务隔离级别只有在创建新事务时才有效，也就是说只对应传播属性PROPAGATION_REQUIRED和PROPAGATION_REQUIRES_NEW；<br>getTimeout方法：返回事务超时时间，以秒为单位，同样只有在创建新事务时才有效；<br>isReadOnly方法：是否优化为只读事务，支持这项属性的事务管理器会将事务标记为只读，只读事务不允许有写操作，不支持只读属性的事务管理器需要忽略这项设置，这一点跟其他事务属性定义不同，针对其他不支持的属性设置，事务管理器应该抛出异常。<br>getName方法：返回事务名称，声明式事务中默认值为“类的完全限定名.方法名”。</p>
 <p>TransactionStatus：当前事务状态<br>isNewTransaction方法：当前方法是否创建了新事务（区别于使用现有事务以及没有事务）；<br>hasSavepoint方法：在嵌套事务场景中，判断当前事务是否包含保存点；<br>setRollbackOnly和isRollbackOnly方法：只读属性设置（主要用于标记事务，等待回滚）和查询；<br>flush方法：刷新底层会话中的修改到数据库，一般用于刷新如Hibernate/JPA的会话，是否生效由具体事务资源实现决定；<br>isCompleted方法：判断当前事务是否已完成（已提交或者已回滚）。</p>
@@ -1070,11 +1070,11 @@ bin		conf		job		<span class="hljs-class"><span class="hljs-keyword">lib</span>		
   <entry>
     <title>MacOS上使用OpenEmu玩怀旧游戏</title>
     <url>/post/12c7a153.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/OpenEmu.png" srcset="/img/loading.gif" alt="OpenEmu"></p>
+    <content><![CDATA[<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/OpenEmu.png" srcset="/img/loading.gif" alt="OpenEmu"></p>
 <p>OpenEmu是MacOS上的开源项目模拟器项目，它整合了几乎全部主流的游戏机平台，你可以在mac系统上畅玩FC/NES、SFC/SNES、N64、PlayStation、GameBoy等游戏。</p>
 <h3 id="下载模拟器"><a href="#下载模拟器" class="headerlink" title="下载模拟器"></a>下载模拟器</h3><p>官网：<a href="http://openemu.org" target="_blank" rel="noopener">http://openemu.org</a></p>
 <p>注意一定要下载里面的Experimental版本，正式版不支持Arcade街机游戏。</p>
-<h3 id="下载核心"><a href="#下载核心" class="headerlink" title="下载核心"></a>下载核心</h3><p><img src="https://img.yjll.art/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
+<h3 id="下载核心"><a href="#下载核心" class="headerlink" title="下载核心"></a>下载核心</h3><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/openemu_setting_core.jpg" srcset="/img/loading.gif" alt="openemu_setting_core"></p>
 <p>打开后在核心中下载对应的游戏核心，由于源在国外，访问不是很稳定，可以借助梯子解决。可以去单独下载核心core，放到指定位置<code>~/Library/Application Support/OpenEmu/Cores</code></p>
 <p>后边的系统文件，指的是我们常说的BIOS，BIOS 就是从游戏机里 dump 出来的基本 IO 模块。绝大部分模拟器都需要这个模块来启动游戏。为了规避版权问题， BIOS 是要自己找的。因为 BIOS 的版权属于游戏机厂商（而模拟器本身只要不提供 BIOS 一般是不侵权的）。</p>
 <p>BIOS文件放置在mac系统的位置 <code>~/Library/Application Support/OpenEmu/bios</code></p>
@@ -1231,7 +1231,7 @@ log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.get
 <span class="hljs-attr">systemctl</span> <span class="hljs-string">restart docker</span></code></pre></div>
 
 <h3 id="IDEA连接Docker"><a href="#IDEA连接Docker" class="headerlink" title="IDEA连接Docker"></a>IDEA连接Docker</h3><p>Docker配置完成后，我们配置IDEA</p>
-<p><img src="https://img.yjll.art/img/20200927194234.png" srcset="/img/loading.gif" alt="20200927194234"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/20200927194234.png" srcset="/img/loading.gif" alt="20200927194234"></p>
 <p>配置正确会有Connection successful提示</p>
 <h3 id="Dockerfile文件"><a href="#Dockerfile文件" class="headerlink" title="Dockerfile文件"></a>Dockerfile文件</h3><p>熟悉Docker的对Dockerfile应该不会陌生，我这里写一个简单的</p>
 <div class="hljs"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> openjdk:<span class="hljs-number">8</span>u102-jdk
@@ -1245,7 +1245,7 @@ log.info(<span class="hljs-string">"file_path:&#123;&#125;"</span>, tempFile.get
 <p>docker中的时区与我们不同，手动设置东八区。</p>
 <p>注意openjdk的版本，我最开始使用的是<code>alpine</code>版本，占用体积较小。但实际运行时，生成验证码接口报错，同样的代码我在CentOS中能运行，Docker中报错。最后换了JDK的版本解决了，猜测是<code>alpine</code>可能阉精简一部分功能。</p>
 <h3 id="IDEA部署Docker"><a href="#IDEA部署Docker" class="headerlink" title="IDEA部署Docker"></a>IDEA部署Docker</h3><p>在Run/Debug Configurations中添加Docker配置，支持<code>Docker Image</code>,<code>Docker-compose</code>,<code>Dockerfile</code>，我这里使用<code>Dockerfile</code>进行部署</p>
-<p><img src="https://img.yjll.art/img/20200928090658.png" srcset="/img/loading.gif" alt="20200928090658"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/20200928090658.png" srcset="/img/loading.gif" alt="20200928090658"></p>
 <p>这是一个Spring Cloud项目，启动容器后发现向调度中心注册的地址不是本机IP，而是Docker中的桥接网卡的地址，运行参数我添加了<code>--network=host</code>，容器直接使用宿主机的网络，不进行桥接。</p>
 <p>以上直接配置好后，启动项目</p>
 <div class="hljs"><pre><code class="hljs ada">Deploying <span class="hljs-symbol">'admin</span>-service Dockerfile: Dockerfile'...
@@ -1290,7 +1290,7 @@ Starting container <span class="hljs-symbol">'admin</span>-service'
   <entry>
     <title>使用Logstash同步Mysql数据到Elasticsearch</title>
     <url>/post/863f4886.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
+    <content><![CDATA[<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/Logstash.png" srcset="/img/loading.gif" alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
 <p>项目用到ES做统计，需要同步Mysql数据到ES中，增量数据使用阿里开源工具cannel,cannel是通过读取mysql的binlog实现同步，可对实时数据进行同步，无法同步历史数据，既有的数据我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
 <a id="more"></a>
 
@@ -1693,15 +1693,15 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
 <p>1 握手，客户端与代理协商SOCKS5版本及账号密码</p>
 <p>2 请求建立连接，客户端将发送要请求的远程地址发送给代理</p>
 <p>3 发送数据包给代理服务，代理进行转发后，将目标服务的数据返回</p>
-<p><img src="https://img.yjll.art/img/sock5.png" srcset="/img/loading.gif" alt="sock5"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/sock5.png" srcset="/img/loading.gif" alt="sock5"></p>
 <p>根据OSI模型，SOCKS是会话层的协议，位于表示层与传输层之间。</p>
-<h3 id="OSI网络模型"><a href="#OSI网络模型" class="headerlink" title="OSI网络模型"></a>OSI网络模型</h3><p><img src="https://img.yjll.art/img/OSI_model.jpg" srcset="/img/loading.gif" alt="OSI_model"></p>
+<h3 id="OSI网络模型"><a href="#OSI网络模型" class="headerlink" title="OSI网络模型"></a>OSI网络模型</h3><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/OSI_model.jpg" srcset="/img/loading.gif" alt="OSI_model"></p>
 <h3 id="Shadowsocks工作原理"><a href="#Shadowsocks工作原理" class="headerlink" title="Shadowsocks工作原理"></a>Shadowsocks工作原理</h3><p>Shadowsocks是基于Python开发的科学上网软件。Shadowsocks实现了SOCKS协议，SOCKS协议本身是没有加密功能的，为了防止GFW根据报文对数据进行拦截，所以要对数据进行加密。<br>Shadowsocks分为 <code>SS Local</code> 和 <code>SS Server</code>。</p>
 <ul>
 <li><code>SS Local</code>负责通过SOCKS协议与客户端交互，将客户端(浏览器)请求的数据加密发送给<code>SS Server</code>和将<code>SS Server</code>响应的数据解密返回给客户端。</li>
 <li><code>SS Server</code>负责将<code>SS Local</code>请求的数据解密，发送给目标网站(例如google.com)，并将目标网站的响应进行加密返回。</li>
 </ul>
-<p><img src="https://img.yjll.art/img/Shadowsocks.jpg" srcset="/img/loading.gif" alt="Shadowsocks"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/Shadowsocks.jpg" srcset="/img/loading.gif" alt="Shadowsocks"></p>
 <h3 id="NIO实现"><a href="#NIO实现" class="headerlink" title="NIO实现"></a>NIO实现</h3><p>首先我们要先创建一个选择器和一个ServerSocketChannel，ServerSocketChannel订阅ACCEPT事件注册到选择器上，<code>selector.select()</code>会阻塞直到有请求到来时。</p>
 <div class="hljs"><pre><code class="hljs java">
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">execute</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;
@@ -2063,7 +2063,7 @@ scoop bucket add dorado https://github.com/h404bi/dorado</code></pre></div>
   <entry>
     <title>Docker使用宿主代理</title>
     <url>/post/21f939f5.html</url>
-    <content><![CDATA[<p><img src="https://img.yjll.art/img/20200428102310.png" srcset="/img/loading.gif" alt="20200428102310"></p>
+    <content><![CDATA[<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/20200428102310.png" srcset="/img/loading.gif" alt="20200428102310"></p>
 <p>在docker中安装软件，下载地址在外国，下载速度奇慢，这个时候可以通过宿主的代理访问。</p>
 <a id="more"></a>
 
@@ -2115,7 +2115,7 @@ sudo<span class="hljs-built_in"> service </span>docker restart</code></pre></div
 <a id="more"></a>
 
 <h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在阿里云的后台下载备份文件</p>
-<p><img src="https://img.yjll.art/img/bak.png" srcset="/img/loading.gif" alt="bak"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/bak.png" srcset="/img/loading.gif" alt="bak"></p>
 <p>生产环境的数据库使用的Mysql 8.0.16，我直接通过docker运行，并直接进入容器内部。</p>
 <div class="hljs"><pre><code class="hljs angelscript">docker run -v /root/bak.xb:/root/bak.xb  -p <span class="hljs-number">3308</span>:<span class="hljs-number">3306</span> -it mysql:<span class="hljs-number">8.0</span><span class="hljs-number">.16</span> bash</code></pre></div>
 
@@ -2235,8 +2235,8 @@ mysql&gt;</code></pre></div>
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Docker</tag>
         <tag>Mysql</tag>
+        <tag>Docker</tag>
         <tag>Aliyun</tag>
       </tags>
   </entry>
@@ -2262,7 +2262,7 @@ mysql&gt;</code></pre></div>
 
 
 <p>LocalManualCache 相当于LocalCache的包装类，大部分方法直接使用LocalCache的实现，部分方法自己实现了一下。我们直接看LocalCache的逻辑，LocalCache的实现参考了<code>ConcurrentHashMap</code>，采用分段锁技术，当一个线程访问一个 <code>Segment</code> 时，不会影响其他的 <code>Segment</code>。</p>
-<p><img src="https://img.yjll.art/img/Segment.png" srcset="/img/loading.gif" alt="Segment"></p>
+<p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/Segment.png" srcset="/img/loading.gif" alt="Segment"></p>
 <div class="hljs"><pre><code class="hljs java"><span class="hljs-function">Segment&lt;K, V&gt; <span class="hljs-title">segmentFor</span><span class="hljs-params">(<span class="hljs-keyword">int</span> hash)</span> </span>&#123;
   <span class="hljs-keyword">return</span> segments[(hash &gt;&gt;&gt; segmentShift) &amp; segmentMask];
 &#125;</code></pre></div>
@@ -2859,8 +2859,8 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
         <category>Java</category>
       </categories>
       <tags>
-        <tag>Spring Cloud</tag>
         <tag>limiter</tag>
+        <tag>Spring Cloud</tag>
         <tag>Gateway</tag>
       </tags>
   </entry>
@@ -2908,7 +2908,7 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
 当前系统时间:<span class="hljs-number">2020</span><span class="hljs-number">-03</span><span class="hljs-number">-25</span>T13:<span class="hljs-number">30</span>:<span class="hljs-number">39.695</span>,等待秒数:<span class="hljs-number">1.958704</span></code></pre></div>
 
 <p>​    这是控制台打印的结果，每秒放入两个令牌的桶，同时有5个线程访问。基本每0.5秒放行一个请求。</p>
-<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://img.yjll.art/img/20200327141557.png" srcset="/img/loading.gif" alt=""></p>
+<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/20200327141557.png" srcset="/img/loading.gif" alt=""></p>
 <p>​    RateLimiter限流器实现了两种算法<code>SmoothWarmingUp(漏斗算法)</code>和<code>SmoothBursty(令牌桶算法)</code>，默认使用<code>SmoothBursty</code>。</p>
 <p>​    静态方法<code>RateLimiter.create()</code>默认使用子类<code>SmoothBursty</code>创建限流器</p>
 <div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// permitsPerSecond 创建时传入的单位时间内发放令牌数量</span>
@@ -3006,8 +3006,8 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
         <category>Java</category>
       </categories>
       <tags>
-        <tag>Guava</tag>
         <tag>limiter</tag>
+        <tag>Guava</tag>
       </tags>
   </entry>
   <entry>

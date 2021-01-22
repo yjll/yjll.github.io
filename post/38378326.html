@@ -135,7 +135,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://img.yjll.art/img/default.jpg') no-repeat center center;
+         style="background: url('https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/default.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -243,7 +243,7 @@
 当前系统时间:<span class="hljs-number">2020</span><span class="hljs-number">-03</span><span class="hljs-number">-25</span>T13:<span class="hljs-number">30</span>:<span class="hljs-number">39.695</span>,等待秒数:<span class="hljs-number">1.958704</span></code></pre></div>
 
 <p>​    这是控制台打印的结果，每秒放入两个令牌的桶，同时有5个线程访问。基本每0.5秒放行一个请求。</p>
-<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://img.yjll.art/img/20200327141557.png" srcset="/img/loading.gif" alt=""></p>
+<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://yjll-image.oss-cn-hongkong.aliyuncs.com/img/20200327141557.png" srcset="/img/loading.gif" alt=""></p>
 <p>​    RateLimiter限流器实现了两种算法<code>SmoothWarmingUp(漏斗算法)</code>和<code>SmoothBursty(令牌桶算法)</code>，默认使用<code>SmoothBursty</code>。</p>
 <p>​    静态方法<code>RateLimiter.create()</code>默认使用子类<code>SmoothBursty</code>创建限流器</p>
 <div class="hljs"><pre><code class="hljs java"><span class="hljs-comment">// permitsPerSecond 创建时传入的单位时间内发放令牌数量</span>
@@ -353,9 +353,9 @@
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/Guava/">Guava</a>
-                    
                       <a class="hover-with-bg" href="/tags/limiter/">limiter</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Guava/">Guava</a>
                     
                   </div>
                 
