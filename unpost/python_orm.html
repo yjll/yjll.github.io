@@ -166,8 +166,15 @@
 
 <div class="page-content">
   <p>pip install sqlacodegen</p>
-<p>sqlacodegen –outfile models.py –tables bizorg_store,bizorg_store_approve,bizorg_store_relation,bizorg_store_temp mysql+pymysql://root:<a href="mailto:123456@192.168.1.200">123456@192.168.1.200</a>:3307/codecase_pro</p>
-
+<p>sqlacodegen –outfile models.py –tables bizorg_store,bizorg_store_approve,bizorg_store_relation,bizorg_store_temp,bizorg_store_relation_temp mysql+pymysql://root:<a href="mailto:123456@192.168.1.200">123456@192.168.1.200</a>:3307/codecase_pro</p>
+<p>flask-sqlacodegen –flask –outfile models.py –tables bizorg_store,bizorg_store_approve,bizorg_store_relation,bizorg_store_temp mysql+pymysql://root:<a href="mailto:123456@192.168.1.200">123456@192.168.1.200</a>:3307/codecase_pro</p>
+<p>There are several ways to UPDATE using sqlalchemy</p>
+<p>1) user.no_of_logins += 1<br>   session.commit()</p>
+<p>2) session.query().<br>       filter(User.username == form.username.data).<br>       update({“no_of_logins”: (User.no_of_logins +1)})<br>   session.commit()</p>
+<p>3) conn = engine.connect()<br>   stmt = User.update().<br>       values(no_of_logins=(User.no_of_logins + 1)).<br>       where(User.username == form.username.data)<br>   conn.execute(stmt)</p>
+<p>4) setattr(user, ‘no_of_logins’, user.no_of_logins+1)<br>   session.commit()</p>
+<h3 id="查询某字段"><a href="#查询某字段" class="headerlink" title="查询某字段"></a>查询某字段</h3><div class="hljs"><pre><code>temp_list = session.query(BizorgStoreTemp.id).filter(
+    BizorgStoreTemp.batch_no == batch_no).all()</code></pre></div>
 </div>
 
               </div>

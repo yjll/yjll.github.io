@@ -536,9 +536,9 @@
     
     <tags>
       
-      <tag>Mysql</tag>
-      
       <tag>Docker</tag>
+      
+      <tag>Mysql</tag>
       
       <tag>Aliyun</tag>
       
@@ -652,9 +652,9 @@
     
     <tags>
       
-      <tag>limiter</tag>
-      
       <tag>Spring Cloud</tag>
+      
+      <tag>limiter</tag>
       
       <tag>Gateway</tag>
       
@@ -681,9 +681,9 @@
     
     <tags>
       
-      <tag>limiter</tag>
-      
       <tag>Guava</tag>
+      
+      <tag>limiter</tag>
       
     </tags>
     

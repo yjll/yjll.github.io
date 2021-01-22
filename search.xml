@@ -2235,8 +2235,8 @@ mysql&gt;</code></pre></div>
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Mysql</tag>
         <tag>Docker</tag>
+        <tag>Mysql</tag>
         <tag>Aliyun</tag>
       </tags>
   </entry>
@@ -2859,8 +2859,8 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
         <category>Java</category>
       </categories>
       <tags>
-        <tag>limiter</tag>
         <tag>Spring Cloud</tag>
+        <tag>limiter</tag>
         <tag>Gateway</tag>
       </tags>
   </entry>
@@ -3006,8 +3006,8 @@ redis.call(<span class="hljs-string">"setex"</span>, timestamp_key, ttl, now)
         <category>Java</category>
       </categories>
       <tags>
-        <tag>limiter</tag>
         <tag>Guava</tag>
+        <tag>limiter</tag>
       </tags>
   </entry>
   <entry>
