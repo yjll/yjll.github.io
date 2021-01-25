@@ -867,6 +867,32 @@ List&lt;TestObject&gt; list = template.queryForList(stringQuery, TestObject<span
       </tags>
   </entry>
   <entry>
+    <title>使用Docker部署Python项目</title>
+    <url>/post/ee11952c.html</url>
+    <content><![CDATA[<div class="hljs"><pre><code class="hljs 1c">.
+├── app.py
+├── Dockerfile
+<span class="hljs-string">|── .gitignore</span>
+└── requirements.txt</code></pre></div>
+<p>这是一个简单的python项目，只有一个app.py，运行一个基于Flask编写的web服务，requirements.txt是运行该项目所需要的依赖。启动项目前我们先通过</p>
+<div class="hljs"><pre><code class="hljs Dockerfile">
+<span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.6</span>
+<span class="hljs-comment"># 设置工作目录</span>
+<span class="hljs-keyword">WORKDIR</span><span class="bash"> /app</span>
+
+<span class="hljs-keyword">ADD</span><span class="bash"> ./requirements.txt /app/requirements.txt</span>
+
+<span class="hljs-keyword">RUN</span><span class="bash"> pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/</span>
+
+<span class="hljs-keyword">CMD</span><span class="bash"> [<span class="hljs-string">"python"</span>, <span class="hljs-string">"app.py"</span>]</span></code></pre></div>
+
+]]></content>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Python通过跳板机连接远程MySQL</title>
     <url>/post/adfcf5ef.html</url>
     <content><![CDATA[<p>一般公司的数据库在一个远程服务器里，而这个服务器需要链接跳板机才可以访问，常用的数据库客户端工具都支持配置SSH隧道，可以通过SSH隧道连接远程服务。但python脚本如何访问数据库呢，我们可以借助<code>sshtunnel</code>这个库来实现。</p>
@@ -1655,6 +1681,10 @@ docker run \
 
 <p>编辑<code>C:\Windows\System32\drivers\etc\hosts</code>文件</p>
 <p>添加<code>199.232.68.133 raw.githubusercontent.com</code>即可。</p>
+<p>有梯子的话，也可以通过配置代理解决</p>
+<div class="hljs"><pre><code class="hljs elixir"><span class="hljs-variable">$env</span><span class="hljs-symbol">:https_proxy=<span class="hljs-string">"http://192.168.1.200:7890"</span></span></code></pre></div>
+
+
 <p>Scoop 可以利用<a href="https://github.com/aria2/aria2" target="_blank" rel="noopener"><code>aria2</code></a> 进行多线程下载。</p>
 <div class="hljs"><pre><code class="hljs powershell">scoop install aria2</code></pre></div>
 

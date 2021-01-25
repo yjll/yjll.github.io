@@ -17,20 +17,10 @@
   <meta name="description" content="test">
   <meta name="author" content="Youj">
   <meta name="keywords" content="">
-  <title>page.title - Youj&#39;s blog</title>
+  <title>归档 - Youj&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
-
-  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
-
-  
-    
-    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/atom-one-dark.min.css" />
-  
-
-  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
@@ -164,13 +154,22 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
-<div class="page-content">
-  <h3 id="EXCEL"><a href="#EXCEL" class="headerlink" title="EXCEL"></a>EXCEL</h3><div class="hljs"><pre><code class="python">file_path = <span class="string">r'output.xlsx'</span>
-df3.to_excel(file_path)</code></pre></div>
-<h3 id="删除多余列"><a href="#删除多余列" class="headerlink" title="删除多余列"></a>删除多余列</h3><div class="hljs"><pre><code>df_db.drop(columns = del_columns,inplace=True)</code></pre></div><h3 id="query"><a href="#query" class="headerlink" title="query"></a>query</h3><div class="hljs"><pre><code>df3 = df.query(&apos;类型.str.startswith(&quot;三&quot;) &amp; ~编码.isin(@df2.上级编码)&apos;)
-df = df.query(&apos;终端编码 == &quot;KY3KC310474&quot;&apos;)</code></pre></div><h3 id="更改列名"><a href="#更改列名" class="headerlink" title="更改列名"></a>更改列名</h3><div class="hljs"><pre><code>df.rename(columns = {&apos;省&apos;:&apos;province&apos;,&apos;市&apos;:&apos;city&apos;},inplace = True)</code></pre></div><h3 id="merge"><a href="#merge" class="headerlink" title="merge"></a>merge</h3><div class="hljs"><pre><code>df_db = df2.merge(df3,left_on=&apos;上级编码&apos;,right_on=&apos;编码&apos;,how=&apos;left&apos;)</code></pre></div><h3 id="增加列"><a href="#增加列" class="headerlink" title="增加列"></a>增加列</h3><div class="hljs"><pre><code># 批次
-df_db[&apos;batch_no&apos;] = str(uuid.uuid4())</code></pre></div>
+<div class="list-group">
+  <p class="h4">共计 30 篇文章</p>
+  <hr>
+  
+    
+      
+      <p class="h5">2021</p>
+    
+    <a href="/post/ee11952c.html" class="list-group-item list-group-item-action">
+      <span class="archive-post-title">使用Docker部署Python项目</span>
+      <time style="float: right;">01-25</time>
+    </a>
+  
 </div>
+
+
 
               </div>
             </div>
@@ -261,7 +260,7 @@ df_db[&apos;batch_no&apos;] = str(uuid.uuid4())</code></pre></div>
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "page.title&nbsp;",
+        "归档&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 70,
@@ -275,21 +274,6 @@ df_db[&apos;batch_no&apos;] = str(uuid.uuid4())</code></pre></div>
   </script>
 
 
-
-  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
-  <script>
-    anchors.options = {
-      placement: "right",
-      visible: "hover",
-      
-    };
-    var el = "h1,h2,h3,h4,h5,h6".split(",");
-    var res = [];
-    for (item of el) {
-      res.push(".markdown-body > " + item)
-    }
-    anchors.add(res.join(", "))
-  </script>
 
 
 
