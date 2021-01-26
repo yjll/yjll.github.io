@@ -265,74 +265,6 @@ Let’s Encrypt 是 一个叫 ISRG （ Internet Secur
     
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
-        <a href="/post/65703737.html">Spring编程式事务</a>
-      </h1>
-
-      <p class="index-excerpt">
-        <a href="/post/65703737.html">
-          
-          
-            
-          
-          
-
-
-类型
-说明
-举例
-
-
-
-PROPAGATION_REQUIRED
-支持当前事务 如果不存，就建一个（默认的）
-A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）
-
-
-PROPAGATION_SUPPORTS
-支持当前事务 如果不存在，就不使用事务
-A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务
-
-
-PROPAGAT
-        </a>
-      </p>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-11-06 00:00" pubdate>
-              2020-11-06
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-category"></i>
-            
-              <a href="/categories/Java/">Java</a>
-            
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Spring/">Spring</a>
-            
-              <a href="/tags/Transaction/">Transaction</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
         <a href="/post/112d5fa0.html">聊一聊Mybatis-Spring都帮我们做了什么</a>
       </h1>
 
@@ -518,18 +450,7 @@ RestHighLevelClient是ES官方推荐使用的客户端，新版本的spring-data
           
             
           
-          .
-├── app.py
-├── Dockerfile
-|── .gitignore
-└── requirements.txt
-这是一个简单的python项目，只有一个app.py，运行一个基于Flask编写的web服务，requirements.txt是运行该项目所需要的依赖。启动项目前我们先通过
-
-FROM python:3.6
-# 设置工作目录
-WORKDIR /app
-
-ADD ./req
+          日常开发Python，环境是一个让人头疼的问题，首先Python2和Python3很多语法不兼容，开发环境难免安装多个版本的Python，即使使用同一个版本Python不同项目使用不同版本的第三方包也会导致各种问题，所以开发Python都会使用虚拟环境，不同项目使用不同的环境，其实我们也可以使用Docker将不同的环境进行区分。
         </a>
       </p>
 
@@ -599,6 +520,74 @@ ADD ./req
               <a href="/tags/Python/">Python</a>
             
               <a href="/tags/sshtunnel/">sshtunnel</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        <a href="/post/65703737.html">Spring编程式事务</a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/post/65703737.html">
+          
+          
+            
+          
+          
+
+
+类型
+说明
+举例
+
+
+
+PROPAGATION_REQUIRED
+支持当前事务 如果不存，就建一个（默认的）
+A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）
+
+
+PROPAGATION_SUPPORTS
+支持当前事务 如果不存在，就不使用事务
+A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务
+
+
+PROPAGAT
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-11-06 00:00" pubdate>
+              2020-11-06
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/Java/">Java</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Spring/">Spring</a>
+            
+              <a href="/tags/Transaction/">Transaction</a>
             
           </div>
         

@@ -159,7 +159,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      93 字
+      631 字
     </span>
   
 
@@ -169,7 +169,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      1
+      8
        分钟
     </span>
   
@@ -202,22 +202,72 @@
             <h1 style="display: none">使用Docker部署Python项目</h1>
             
             <div class="markdown-body" id="post-body">
-              <div class="hljs"><pre><code class="hljs 1c">.
+              <p>日常开发Python，环境是一个让人头疼的问题，首先<code>Python2</code>和<code>Python3</code>很多语法不兼容，开发环境难免安装多个版本的Python，即使使用同一个版本Python不同项目使用不同版本的第三方包也会导致各种问题，所以开发Python都会使用虚拟环境，不同项目使用不同的环境，其实我们也可以使用Docker将不同的环境进行区分。</p>
+<a id="more"></a>
+
+
+<div class="hljs"><pre><code class="hljs 1c">.
 ├── app.py
 ├── Dockerfile
 <span class="hljs-string">|── .gitignore</span>
 └── requirements.txt</code></pre></div>
-<p>这是一个简单的python项目，只有一个app.py，运行一个基于Flask编写的web服务，requirements.txt是运行该项目所需要的依赖。启动项目前我们先通过</p>
+
+<p>这是一个简单的python项目目录，只有一个<code>app.py</code>，运行一个基于Flask编写的web服务，requirements.txt是运行该项目所需要的依赖。启动项目前我们先通过<code>pip install -r requirements.txt</code>安装必要依赖，<code>python3 app.py</code>启动项目。</p>
+<p>app.py</p>
+<div class="hljs"><pre><code class="hljs python"><span class="hljs-keyword">from</span> flask <span class="hljs-keyword">import</span> Flask
+
+app = Flask(__name__)
+
+<span class="hljs-meta">@app.route('/')</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">hello_world</span><span class="hljs-params">()</span>:</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'Hello, World!'</span>
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">"__main__"</span>:
+    app.run(debug=<span class="hljs-literal">True</span>,host=<span class="hljs-string">'0.0.0.0'</span>,port=<span class="hljs-number">80</span>)</code></pre></div>
+
+<p>现在我们创建一个容器，在容器内完成以上步骤。</p>
 <div class="hljs"><pre><code class="hljs Dockerfile">
 <span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.6</span>
 <span class="hljs-comment"># 设置工作目录</span>
 <span class="hljs-keyword">WORKDIR</span><span class="bash"> /app</span>
-
-<span class="hljs-keyword">ADD</span><span class="bash"> ./requirements.txt /app/requirements.txt</span>
-
+<span class="hljs-comment"># 将当前目录的所有文件复制到工作目录内</span>
+<span class="hljs-keyword">ADD</span><span class="bash"> . /app</span>
+<span class="hljs-comment"># 安装依赖</span>
 <span class="hljs-keyword">RUN</span><span class="bash"> pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/</span>
-
+<span class="hljs-comment"># 启动</span>
 <span class="hljs-keyword">CMD</span><span class="bash"> [<span class="hljs-string">"python"</span>, <span class="hljs-string">"app.py"</span>]</span></code></pre></div>
+
+<p>构建镜像</p>
+<div class="hljs"><pre><code class="hljs armasm"><span class="hljs-symbol">docker</span> <span class="hljs-keyword">build </span>-t py-test .</code></pre></div>
+
+<p>运行</p>
+<div class="hljs"><pre><code class="hljs routeros">docker <span class="hljs-builtin-name">run</span> -p 9089:80  <span class="hljs-attribute">--name</span>=py-test py-test</code></pre></div>
+
+<div class="hljs"><pre><code class="hljs pgsql">* Serving Flask app "app" (lazy loading)
+* Environment: production
+  <span class="hljs-built_in">WARNING</span>: This <span class="hljs-keyword">is</span> a development <span class="hljs-keyword">server</span>. <span class="hljs-keyword">Do</span> <span class="hljs-keyword">not</span> use it <span class="hljs-keyword">in</span> a production deployment.
+  Use a production WSGI <span class="hljs-keyword">server</span> <span class="hljs-keyword">instead</span>.
+* <span class="hljs-keyword">Debug</span> mode: <span class="hljs-keyword">on</span>
+* Running <span class="hljs-keyword">on</span> http://<span class="hljs-number">0.0</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span>:<span class="hljs-number">80</span>/ (Press CTRL+C <span class="hljs-keyword">to</span> quit)</code></pre></div>
+
+<p>好了，容器启动成功，但是这种部署方式有一个不灵活的点就是我们的代码是在容器构建的时候COPY到容器内部的，导致我们更新代码时需要重新构建容器。其实我们还可以通过<code>volume</code>将我们的代码挂载在容器内部，容器执行的其实是宿主机上的代码。</p>
+<div class="hljs"><pre><code class="hljs Dockerfile">
+<span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.6</span>
+<span class="hljs-comment"># 设置工作目录</span>
+<span class="hljs-keyword">WORKDIR</span><span class="bash"> /app</span>
+<span class="hljs-comment"># 将requirements.txt复制到工作目录，方便操作</span>
+<span class="hljs-keyword">ADD</span><span class="bash"> ./requirements.txt /app/requirements.txt</span>
+<span class="hljs-comment"># 安装依赖</span>
+<span class="hljs-keyword">RUN</span><span class="bash"> pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/</span>
+<span class="hljs-comment"># 启动</span>
+<span class="hljs-keyword">CMD</span><span class="bash"> [<span class="hljs-string">"python"</span>, <span class="hljs-string">"app.py"</span>]</span></code></pre></div>
+
+<p>启动容器时指定挂载路径，将我们当前目录挂载到/app<br>    docker run -p 9089:80 -v $PWD/:/app -d –name=py-test  py-test;</p>
+<p>我是以DEBUG方式启动的web服务，如代码有变更，服务会自动加载，我们现在更改一下app.py的代码保存一下，可以看到服务器自动重启了</p>
+<div class="hljs"><pre><code class="hljs angelscript">* Detected change <span class="hljs-keyword">in</span> <span class="hljs-string">'/app/app.py'</span>, reloading
+* Restarting with stat
+* Debugger <span class="hljs-keyword">is</span> active!
+* Debugger PIN: <span class="hljs-number">286</span><span class="hljs-number">-043</span><span class="hljs-number">-277</span></code></pre></div>
 
 
             </div>

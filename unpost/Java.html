@@ -199,6 +199,7 @@ FooAndBar proxy = (FooAndBar)pf.getProxy();</code></pre></div><h3 id="Aware相�
 <p>注入Map</p>
 <p><code>@Value(&quot;#{${app.collection.map.string.to.integer}}&quot;)
 private Map&lt;String, Integer&gt; mapStringToInteger;</code></p>
+<p>时间序列化<br>    @JsonSerialize(using = LocalDateTimeSerializer.class)<br>    @JsonDeserialize(using = LocalDateTimeDeserializer.class)</p>
 
 </div>
 
