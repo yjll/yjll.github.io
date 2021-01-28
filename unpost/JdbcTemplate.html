@@ -178,30 +178,7 @@ String sql = &quot;select user_id,initial_inviter,card_inviter from inviter wher
 List&lt;Inviter&gt; inviterList = jdbcTemplate.query(sql, mapSqlParameterSource, BeanPropertyRowMapper.newInstance(Inviter.class));</code></pre></div><div class="hljs"><pre><code class="hljs clean">
 ### 使用pojo作为参数</code></pre></div>
 <p>jdbcTemplate.query(sql, new BeanPropertySqlParameterSource(activityDataDto), BeanPropertyRowMapper.newInstance(WxReportExportUserEntity.class))</p>
-<div class="hljs"><pre><code class="hljs reasonml">
-### Hibernate GroupBy
-``` java
-public List&lt;SyCodeStatisticalExportDto&gt; query<span class="hljs-constructor">SyCodeStatisticalExportData(String <span class="hljs-params">start</span>, String <span class="hljs-params">end</span>, String <span class="hljs-params">sysOrgCode</span>)</span> &#123;
-        Criteria criteria = systemService.get<span class="hljs-constructor">Session()</span>.create<span class="hljs-constructor">Criteria(SyCodeStatisticalEntity.<span class="hljs-params">class</span>)</span>;
-        <span class="hljs-comment">// 时间区间</span>
-        criteria.add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Restrictions</span>.</span></span>between(<span class="hljs-string">"def1"</span>, start, <span class="hljs-keyword">end</span>))
-                .set<span class="hljs-constructor">Projection(Projections.<span class="hljs-params">projectionList</span>()</span>
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>group<span class="hljs-constructor">Property(<span class="hljs-string">"def1"</span>)</span>.<span class="hljs-keyword">as</span>(<span class="hljs-string">"month"</span>))
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>group<span class="hljs-constructor">Property(<span class="hljs-string">"sysOrgCode"</span>)</span>.<span class="hljs-keyword">as</span>(<span class="hljs-string">"sysOrgCode"</span>))
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>sum(<span class="hljs-string">"actualStockInCount"</span>).<span class="hljs-keyword">as</span>(<span class="hljs-string">"actualStockInCount"</span>))
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>sum(<span class="hljs-string">"boxFactoryStockInCount"</span>).<span class="hljs-keyword">as</span>(<span class="hljs-string">"boxFactoryStockInCount"</span>))
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>sum(<span class="hljs-string">"waterFactoryStockInCount"</span>).<span class="hljs-keyword">as</span>(<span class="hljs-string">"waterFactoryStockInCount"</span>))
-                        .add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Projections</span>.</span></span>sum(<span class="hljs-string">"ksfCodeCount"</span>).<span class="hljs-keyword">as</span>(<span class="hljs-string">"ksfCodeCount"</span>))
-                )
-        ;
-        <span class="hljs-keyword">if</span> (<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">StringUtils</span>.</span></span>is<span class="hljs-constructor">NotEmpty(<span class="hljs-params">sysOrgCode</span>)</span>) &#123;
-            criteria.add(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Restrictions</span>.</span></span>eq(<span class="hljs-string">"sysOrgCode"</span>, sysOrgCode));
-        &#125;
-
-        criteria.set<span class="hljs-constructor">ResultTransformer(Transformers.<span class="hljs-params">aliasToBean</span>(SyCodeStatisticalExportDto.<span class="hljs-params">class</span>)</span>);
-
-        return criteria.<span class="hljs-built_in">list</span><span class="hljs-literal">()</span>;
-    &#125;</code></pre></div>
+<div class="hljs"><pre><code></code></pre></div>
 </div>
 
               </div>

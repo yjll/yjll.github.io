@@ -262,7 +262,9 @@ app = Flask(__name__)
 <span class="hljs-comment"># 启动</span>
 <span class="hljs-keyword">CMD</span><span class="bash"> [<span class="hljs-string">"python"</span>, <span class="hljs-string">"app.py"</span>]</span></code></pre></div>
 
-<p>启动容器时指定挂载路径，将我们当前目录挂载到/app<br>    docker run -p 9089:80 -v $PWD/:/app -d –name=py-test  py-test;</p>
+<p>启动容器时指定挂载路径，将我们当前目录挂载到/app</p>
+<div class="hljs"><pre><code class="hljs routeros">docker <span class="hljs-builtin-name">run</span> -p 9089:80 -v <span class="hljs-variable">$PWD</span>/:/app -d <span class="hljs-attribute">--name</span>=py-test  py-test;</code></pre></div>
+
 <p>我是以DEBUG方式启动的web服务，如代码有变更，服务会自动加载，我们现在更改一下app.py的代码保存一下，可以看到服务器自动重启了</p>
 <div class="hljs"><pre><code class="hljs angelscript">* Detected change <span class="hljs-keyword">in</span> <span class="hljs-string">'/app/app.py'</span>, reloading
 * Restarting with stat

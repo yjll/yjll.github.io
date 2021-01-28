@@ -165,11 +165,14 @@
                 
 
 <div class="page-content">
-  <h3 id="EXCEL"><a href="#EXCEL" class="headerlink" title="EXCEL"></a>EXCEL</h3><div class="hljs"><pre><code class="python">file_path = <span class="string">r'output.xlsx'</span>
+  <h3 id="EXCEL"><a href="#EXCEL" class="headerlink" title="EXCEL"></a>EXCEL</h3><div class="hljs"><pre><code class="python">df = pd.read_excel(<span class="string">'order.xlsx'</span>)
+file_path = <span class="string">r'output.xlsx'</span>
 df3.to_excel(file_path)</code></pre></div>
 <h3 id="删除多余列"><a href="#删除多余列" class="headerlink" title="删除多余列"></a>删除多余列</h3><div class="hljs"><pre><code>df_db.drop(columns = del_columns,inplace=True)</code></pre></div><h3 id="query"><a href="#query" class="headerlink" title="query"></a>query</h3><div class="hljs"><pre><code>df3 = df.query(&apos;类型.str.startswith(&quot;三&quot;) &amp; ~编码.isin(@df2.上级编码)&apos;)
-df = df.query(&apos;终端编码 == &quot;KY3KC310474&quot;&apos;)</code></pre></div><h3 id="更改列名"><a href="#更改列名" class="headerlink" title="更改列名"></a>更改列名</h3><div class="hljs"><pre><code>df.rename(columns = {&apos;省&apos;:&apos;province&apos;,&apos;市&apos;:&apos;city&apos;},inplace = True)</code></pre></div><h3 id="merge"><a href="#merge" class="headerlink" title="merge"></a>merge</h3><div class="hljs"><pre><code>df_db = df2.merge(df3,left_on=&apos;上级编码&apos;,right_on=&apos;编码&apos;,how=&apos;left&apos;)</code></pre></div><h3 id="增加列"><a href="#增加列" class="headerlink" title="增加列"></a>增加列</h3><div class="hljs"><pre><code># 批次
-df_db[&apos;batch_no&apos;] = str(uuid.uuid4())</code></pre></div>
+df = df.query(&apos;终端编码 == &quot;AAAAA&quot;&apos;)
+nan_df = merge_df.query(&apos;orgFullname.isnull()&apos;)</code></pre></div><h3 id="更改列名"><a href="#更改列名" class="headerlink" title="更改列名"></a>更改列名</h3><div class="hljs"><pre><code>df.rename(columns = {&apos;省&apos;:&apos;province&apos;,&apos;市&apos;:&apos;city&apos;},inplace = True)</code></pre></div><h3 id="merge"><a href="#merge" class="headerlink" title="merge"></a>merge</h3><div class="hljs"><pre><code>df_db = df2.merge(df3,left_on=&apos;上级编码&apos;,right_on=&apos;编码&apos;,how=&apos;left&apos;)</code></pre></div><h3 id="增加列"><a href="#增加列" class="headerlink" title="增加列"></a>增加列</h3><div class="hljs"><pre><code># 批次
+df_db[&apos;batch_no&apos;] = str(uuid.uuid4())</code></pre></div><h3 id="转成字典"><a href="#转成字典" class="headerlink" title="转成字典"></a>转成字典</h3><p>to_dict = merge_df.to_dict(orient=”records”)</p>
+
 </div>
 
               </div>
