@@ -19,19 +19,19 @@
     <meta name="description" content="Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。 项目用到ES做统计，需要同步Mysql数据到ES中，我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用Logstash同步Mysql数据到Elasticsearch">
-<meta property="og:url" content="http://blog.yjll.art/post/863f4886.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/863f4886.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。 项目用到ES做统计，需要同步Mysql数据到ES中，我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/Logstash.png">
+<meta property="og:image" content="https://img.yjll.blog/img/Logstash.png">
 <meta property="article:published_time" content="2021-07-06T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-09-07T03:12:51.263Z">
+<meta property="article:modified_time" content="2024-11-12T07:02:38.189Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="Elasticsearch">
 <meta property="article:tag" content="Mysql">
 <meta property="article:tag" content="Logstash">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/Logstash.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/Logstash.png">
   
   
   
@@ -75,7 +75,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -279,7 +279,7 @@
             
               <div class="markdown-body">
                 
-                <p><img src="https://img.yjll.art/img/Logstash.png" srcset="/img/loading.gif" lazyload alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
+                <p><img src="https://img.yjll.blog/img/Logstash.png" srcset="/img/loading.gif" lazyload alt="Logstash"><br>Logstash是一个开源数据收集引擎，具有近实时管道功能。Logstash可以动态地将来自不同数据源的数据统一起来，并将数据标准化到你所选择的目的地。</p>
 <p>项目用到ES做统计，需要同步Mysql数据到ES中，我们使用Logstash进行同步，Logstash安装需要依赖的包比较多，我为了方便直接使用Docker进行操作。</p>
 <span id="more"></span>
 
@@ -402,7 +402,7 @@ xpack.monitoring.elasticsearch.url: http:&#x2F;&#x2F;192.168.1.200:9200<span ari
   <div class="license-box my-3">
     <div class="license-title">
       <div>使用Logstash同步Mysql数据到Elasticsearch</div>
-      <div>http://blog.yjll.art/post/863f4886.html</div>
+      <div>http://blog.yjll.blog/post/863f4886.html</div>
     </div>
     <div class="license-meta">
       

@@ -19,12 +19,12 @@
     <meta name="description" content="搭建测速服务 docker pull adolfintel&#x2F;speedtest docker run -p 8880:80 -d --restart&#x3D;always  adolfintel&#x2F;speedtest:latest location &#x2F;speedtest&#x2F; &amp;#123;     proxy_pass http:&#x2F;&#x2F;127.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="page.title">
-<meta property="og:url" content="http://blog.yjll.art/unpost/vps.html">
+<meta property="og:url" content="http://blog.yjll.blog/unpost/vps.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="搭建测速服务 docker pull adolfintel&#x2F;speedtest docker run -p 8880:80 -d --restart&#x3D;always  adolfintel&#x2F;speedtest:latest location &#x2F;speedtest&#x2F; &amp;#123;     proxy_pass http:&#x2F;&#x2F;127.">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-09-06T08:41:29.259Z">
-<meta property="article:modified_time" content="2022-09-06T08:41:29.259Z">
+<meta property="article:published_time" content="2024-11-12T07:05:12.136Z">
+<meta property="article:modified_time" content="2024-11-12T07:05:12.136Z">
 <meta property="article:author" content="Youj">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -62,7 +62,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -252,27 +252,27 @@ location  &#x2F;netdata&#x2F;&#123;
 
 <p>Caddy配置 </p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">conf.d cat &#x2F;etc&#x2F;caddy&#x2F;conf.d&#x2F;v2ray.conf 
-yjll.art
+yjll.blog
 &#123;
-  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.art&#x2F;
+  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.blog&#x2F;
   proxy &#x2F;jsonrpc http:&#x2F;&#x2F;127.0.0.1:6800
   proxy &#x2F;emby http:&#x2F;&#x2F;127.0.0.1:8096&#x2F;
 &#125;
-blog.yjll.art
+blog.yjll.blog
 &#123;
-  proxy &#x2F; https:&#x2F;&#x2F;www.yjll.art&#x2F;
+  proxy &#x2F; https:&#x2F;&#x2F;www.yjll.blog&#x2F;
 &#125;
-v1.yjll.art
+v1.yjll.blog
 &#123;
-  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.art&#x2F;
+  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.blog&#x2F;
   proxy &#x2F;cross localhost:10000 &#123;
     websocket
     header_upstream -Origin
   &#125;
 &#125;
-http:&#x2F;&#x2F;v2.yjll.art
+http:&#x2F;&#x2F;v2.yjll.blog
 &#123;
-  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.art&#x2F;
+  proxy &#x2F; https:&#x2F;&#x2F;blog.yjll.blog&#x2F;
   proxy &#x2F;cross localhost:10000 &#123;
     websocket
     header_upstream -Origin
@@ -280,7 +280,7 @@ http:&#x2F;&#x2F;v2.yjll.art
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure>
 <p>caddy -conf /etc/caddy/caddy.conf -validate</p>
-<p>中转服务器配置<br>v4.yjll.art v2.yjll.art<br>{<br>  proxy / <a href="https://blog.yjll.art/">https://blog.yjll.art/</a><br>  proxy /cross <a target="_blank" rel="noopener" href="http://yjll.art:10000">http://yjll.art:10000</a> {<br>    websocket<br>    header_upstream -Origin<br>  }<br>}<br>系统性能<br>wget -qO- bench.sh | bash</p>
+<p>中转服务器配置<br>v4.yjll.blog v2.yjll.blog<br>{<br>  proxy / <a href="https://blog.yjll.blog/">https://blog.yjll.blog/</a><br>  proxy /cross <a target="_blank" rel="noopener" href="http://yjll.blog:10000">http://yjll.blog:10000</a> {<br>    websocket<br>    header_upstream -Origin<br>  }<br>}<br>系统性能<br>wget -qO- bench.sh | bash</p>
 <h3 id="更改CentOS源"><a href="#更改CentOS源" class="headerlink" title="更改CentOS源"></a>更改CentOS源</h3><p>更换aliyun源<br>wget -O /etc/yum.repos.d/CentOS-Base.repo <a target="_blank" rel="noopener" href="http://mirrors.aliyun.com/repo/Centos-7.repo">http://mirrors.aliyun.com/repo/Centos-7.repo</a></p>
 <p>更换官方源</p>
 <p>把/etc/yum.repos.d/下面所有的源给删除掉了<br>在镜像站中查找 <code>centos-release</code><br><a target="_blank" rel="noopener" href="http://mirror.centos.org/centos/7/os/x86_64/Packages/">http://mirror.centos.org/centos/7/os/x86_64/Packages/</a></p>

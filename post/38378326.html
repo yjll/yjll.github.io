@@ -19,18 +19,18 @@
     <meta name="description" content="​    日常开发中经常会出现一瞬间接口被超频次访问的这种情况，例如电商秒杀活动，定点抢红包等。短时间高并发可能会拖慢系统的响应速度，引起网络超时，一个服务不可用进而影响其他服务也不可用，甚至导致雪崩。 ​    限流是最直接有效的控制手段，将系统处理不过来的请求拦截在核心逻辑之外。限流器实现方法有漏桶算法(Leaky Bucket),令牌桶算法(Token Bucket)&#96;等。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="漫谈限流器">
-<meta property="og:url" content="http://blog.yjll.art/post/38378326.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/38378326.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="​    日常开发中经常会出现一瞬间接口被超频次访问的这种情况，例如电商秒杀活动，定点抢红包等。短时间高并发可能会拖慢系统的响应速度，引起网络超时，一个服务不可用进而影响其他服务也不可用，甚至导致雪崩。 ​    限流是最直接有效的控制手段，将系统处理不过来的请求拦截在核心逻辑之外。限流器实现方法有漏桶算法(Leaky Bucket),令牌桶算法(Token Bucket)&#96;等。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/20200327141557.png">
+<meta property="og:image" content="https://img.yjll.blog/img/20200327141557.png">
 <meta property="article:published_time" content="2020-03-24T07:40:24.000Z">
-<meta property="article:modified_time" content="2022-04-18T06:16:18.619Z">
+<meta property="article:modified_time" content="2024-11-12T07:02:38.197Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="limiter">
 <meta property="article:tag" content="Guava">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/20200327141557.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/20200327141557.png">
   
   
   
@@ -74,7 +74,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -319,7 +319,7 @@
 当前系统时间:2020-03-25T13:30:39.695,等待秒数:1.958704<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure>
 
 <p>​    这是控制台打印的结果，每秒放入两个令牌的桶，同时有5个线程访问。基本每0.5秒放行一个请求。</p>
-<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://img.yjll.art/img/20200327141557.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h3 id="Guava-RateLimiter-实现原理"><a href="#Guava-RateLimiter-实现原理" class="headerlink" title="Guava RateLimiter 实现原理"></a>Guava RateLimiter 实现原理</h3><p><img src="https://img.yjll.blog/img/20200327141557.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>​    RateLimiter限流器实现了两种算法<code>SmoothWarmingUp(漏斗算法)</code>和<code>SmoothBursty(令牌桶算法)</code>，默认使用<code>SmoothBursty</code>。</p>
 <p>​    静态方法<code>RateLimiter.create()</code>默认使用子类<code>SmoothBursty</code>创建限流器</p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token comment">// permitsPerSecond 创建时传入的单位时间内发放令牌数量</span>
@@ -460,7 +460,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>漫谈限流器</div>
-      <div>http://blog.yjll.art/post/38378326.html</div>
+      <div>http://blog.yjll.blog/post/38378326.html</div>
     </div>
     <div class="license-meta">
       

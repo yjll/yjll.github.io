@@ -19,12 +19,12 @@
     <meta name="description" content="使用docker compose进行安装 pip3 install docker-compose若报以下错误： Command &quot;python setup.py egg_info&quot; failed with error code 1 in &#x2F;tmp&#x2F;pip-build-dz2dj86_&#x2F;cryptography&#x2F;  可升级pip后重试 pi">
 <meta property="og:type" content="website">
 <meta property="og:title" content="page.title">
-<meta property="og:url" content="http://blog.yjll.art/unpost/Clash.html">
+<meta property="og:url" content="http://blog.yjll.blog/unpost/Clash.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="使用docker compose进行安装 pip3 install docker-compose若报以下错误： Command &quot;python setup.py egg_info&quot; failed with error code 1 in &#x2F;tmp&#x2F;pip-build-dz2dj86_&#x2F;cryptography&#x2F;  可升级pip后重试 pi">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-05-25T09:13:53.271Z">
-<meta property="article:modified_time" content="2022-05-25T09:13:53.271Z">
+<meta property="article:published_time" content="2024-05-20T04:58:49.106Z">
+<meta property="article:modified_time" content="2024-05-20T04:58:49.106Z">
 <meta property="article:author" content="Youj">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -62,7 +62,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -228,21 +228,24 @@
 <figure><div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">'3'</span>
 <span class="token key atrule">services</span><span class="token punctuation">:</span>
   <span class="token key atrule">clash</span><span class="token punctuation">:</span>
-    <span class="token key atrule">image</span><span class="token punctuation">:</span> dreamacro/clash<span class="token punctuation">-</span>premium<span class="token punctuation">:</span>2022.03.21
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> dreamacro/clash<span class="token punctuation">-</span>premium
     <span class="token key atrule">container_name</span><span class="token punctuation">:</span> clash
+    <span class="token key atrule">privileged</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
     <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> ./config.yaml<span class="token punctuation">:</span>/root/.config/clash/config.yaml
+      <span class="token punctuation">-</span> /root/.config/clash<span class="token punctuation">:</span>/root/.config/clash
     <span class="token key atrule">restart</span><span class="token punctuation">:</span> unless<span class="token punctuation">-</span>stopped
-    <span class="token key atrule">network_mode</span><span class="token punctuation">:</span> "host"x<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure>
+    <span class="token key atrule">network_mode</span><span class="token punctuation">:</span> <span class="token string">"host"</span>
+    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure>
 
 <p>docker run –name=clash -v $PWD/config.yaml:/root/.config/clash/config.yaml –network=host –restart=always -d dreamacro/clash-premium:2021.05.08</p>
 <h3 id="v2ray-vmess对时间有要求"><a href="#v2ray-vmess对时间有要求" class="headerlink" title="v2ray vmess对时间有要求"></a>v2ray vmess对时间有要求</h3><p>将系统时间设定成下午5点55分55秒的命令</p>
 <p>命令 ： “date -s 17:55:55”</p>
 <p>将当前时间和日期写入BIOS，避免重启后失效<br>命令 ： “hwclock -w”</p>
 <h3 id="使用TUN模式代理所有流量"><a href="#使用TUN模式代理所有流量" class="headerlink" title="使用TUN模式代理所有流量"></a>使用TUN模式代理所有流量</h3><h3 id="网关模式"><a href="#网关模式" class="headerlink" title="网关模式"></a>网关模式</h3><p>树莓派开启 IP 转发（需要开启 IP 转发才能作为网关）。命令为 echo net.ipv4.ip_forward=1 &gt;&gt; /etc/sysctl.conf &amp;&amp; sysctl -p。执行后将出现 net.ipv4.ip_forward=1 的提示</p>
+<p><a target="_blank" rel="noopener" href="https://web.archive.org/web/20230612033827/https://dreamacro.github.io/clash/configuration/configuration-reference.html">文档</a></p>
 <p><a target="_blank" rel="noopener" href="http://yacd.haishan.me/">WEB UI</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/Fndroid/clash_for_windows_pkg">Clash GUI</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/Dreamacro/clash">Clash</a></p>
+<p><a target="_blank" rel="noopener" href="https://web.archive.org/web/20231102080544/https://github.com/Dreamacro/clash/releases">Clash</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/Dreamacro/clash/wiki/configuration">Clash Config</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/Loyalsoldier/clash-rules">Clash Premium 的规则集</a></p>
 <p><a target="_blank" rel="noopener" href="https://hub.docker.com/r/dreamacro/clash-premium/tags?page=1&ordering=last_updated">dreamacro/clash-premium Docker镜像</a></p>

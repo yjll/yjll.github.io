@@ -19,19 +19,19 @@
     <meta name="description" content="阿里云提供了定期备份数据库的功能，可以在阿里云的控制台将数据库恢复到备份点，那我们想将这部分数据导入到我们自建的数据库怎么操作呢？官方推荐使用开源软件Percona Xtrabackup对数据库进行恢复，Percona Xtrabackup目前没有Windows版本，但是我们可以使用Docker进行恢复。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RDS MySQL 物理备份文件恢复到自建数据库">
-<meta property="og:url" content="http://blog.yjll.art/post/236702d.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/236702d.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="阿里云提供了定期备份数据库的功能，可以在阿里云的控制台将数据库恢复到备份点，那我们想将这部分数据导入到我们自建的数据库怎么操作呢？官方推荐使用开源软件Percona Xtrabackup对数据库进行恢复，Percona Xtrabackup目前没有Windows版本，但是我们可以使用Docker进行恢复。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/bak.png">
+<meta property="og:image" content="https://img.yjll.blog/img/bak.png">
 <meta property="article:published_time" content="2020-04-27T07:40:24.000Z">
-<meta property="article:modified_time" content="2022-04-18T06:16:18.622Z">
+<meta property="article:modified_time" content="2024-11-12T07:02:38.194Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="Mysql">
 <meta property="article:tag" content="Aliyun">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/bak.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/bak.png">
   
   
   
@@ -75,7 +75,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -283,7 +283,7 @@
 <span id="more"></span>
 
 <h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在阿里云的后台下载备份文件</p>
-<p><img src="https://img.yjll.art/img/bak.png" srcset="/img/loading.gif" lazyload alt="bak"></p>
+<p><img src="https://img.yjll.blog/img/bak.png" srcset="/img/loading.gif" lazyload alt="bak"></p>
 <p>生产环境的数据库使用的Mysql 8.0.16，我直接通过docker运行，并直接进入容器内部。</p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">docker run -v &#x2F;root&#x2F;bak.xb:&#x2F;root&#x2F;bak.xb  -p 3308:3306 -it mysql:8.0.16 bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure>
 
@@ -454,7 +454,7 @@ mysql&gt; <span aria-hidden="true" class="line-numbers-rows"><span></span><span>
   <div class="license-box my-3">
     <div class="license-title">
       <div>RDS MySQL 物理备份文件恢复到自建数据库</div>
-      <div>http://blog.yjll.art/post/236702d.html</div>
+      <div>http://blog.yjll.blog/post/236702d.html</div>
     </div>
     <div class="license-meta">
       

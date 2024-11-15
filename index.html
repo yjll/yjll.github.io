@@ -18,7 +18,7 @@
   
     <meta property="og:type" content="website">
 <meta property="og:title" content="Youj&#39;s blog">
-<meta property="og:url" content="http://blog.yjll.art/index.html">
+<meta property="og:url" content="http://blog.yjll.blog/index.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Youj">
@@ -58,7 +58,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -475,6 +475,71 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/post/489071f8.html" target="_self">
+          Centos7升级OpenSSH
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/post/489071f8.html" target="_self">
+        <div>
+          出于对安全的考虑，需要升级OpenSSH的版本，但是Centos7的源中的OpenSSH版本比较低，需要手动安装。 查看可升级的版本 yum --showduplicates list openssh  安装开启telnet服务先开启telnet防止网络问题导致远程连接失败，无法补救。 yum install telnet-server  -y yum install telnet -y  sys
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-10-22 14:16" pubdate>
+              2024-10-22
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%BA%94%E7%94%A8/" class="category-chain-item">应用</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux/">#Linux</a>
+            
+              <a href="/tags/Centos/">#Centos</a>
+            
+              <a href="/tags/OpenSSH/">#OpenSSH</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/post/9539654e.html" target="_self">
           FFmpeg使用笔记
         </a>
@@ -483,7 +548,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/post/9539654e.html" target="_self">
         <div>
-          CentOS 7 下安装FFmpeg dnf -y install https:&#x2F;&#x2F;download1.rpmfusion.org&#x2F;free&#x2F;fedora&#x2F;rpmfusion-free-release-$\(rpm -E %fedora).noarch.rpm   检查视频完整性ffmpeg -v error -i file.avi -f null
+          CentOS 7 下安装FFmpeg dnf -y install https:&#x2F;&#x2F;download1.rpmfusion.org&#x2F;free&#x2F;fedora&#x2F;rpmfusion-free-release-$\(rpm -E %fedora).noarch.rpm intel核显也可以直接使用支持qsv的dockerffmpeg-qsv 检查视频完整性
         </div>
       </a>
 
@@ -774,60 +839,6 @@
               <a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>
             
           </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/post/65ba80c8.html" target="_self">
-          Python更新服务器SSH密钥
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/post/65ba80c8.html" target="_self">
-        <div>
-          出于安全考虑，需要更换服务器上的ssh密钥，但是重复一台一台服务器更改又太浪费时间，这种重复又浪费时间的工作就交给计算机吧。在网上查了查，paramiko正适合，看了看文档，不错，说干就干。
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-11-05 00:00" pubdate>
-              2021-11-05
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
         
       </div>
     </article>

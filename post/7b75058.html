@@ -19,7 +19,7 @@
     <meta name="description" content="最近项目用到了动态公式计算，也就是页面配置一个公式，服务端进行计算。我们后端使用Java，Java处理这部分公式可以使用表达式引擎Aviator，Jexl。也可以以使用JVM上的脚本语言像Jython，Groovy。表达式引擎不是一门单独的语言，局限性比较高，由于我对Python比较熟悉，最开始准备使用Jython，查了查资料发现和Java配合不是很好，最终决定使用Groovy，Groovy兼容J">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java搭配Groovy实现动态公式计算">
-<meta property="og:url" content="http://blog.yjll.art/post/7b75058.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/7b75058.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="最近项目用到了动态公式计算，也就是页面配置一个公式，服务端进行计算。我们后端使用Java，Java处理这部分公式可以使用表达式引擎Aviator，Jexl。也可以以使用JVM上的脚本语言像Jython，Groovy。表达式引擎不是一门单独的语言，局限性比较高，由于我对Python比较熟悉，最开始准备使用Jython，查了查资料发现和Java配合不是很好，最终决定使用Groovy，Groovy兼容J">
 <meta property="og:locale" content="zh_CN">
@@ -72,7 +72,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -541,7 +541,7 @@ engine<span class="token punctuation">.</span><span class="token function">eval<
   <div class="license-box my-3">
     <div class="license-title">
       <div>Java搭配Groovy实现动态公式计算</div>
-      <div>http://blog.yjll.art/post/7b75058.html</div>
+      <div>http://blog.yjll.blog/post/7b75058.html</div>
     </div>
     <div class="license-meta">
       

@@ -19,18 +19,18 @@
     <meta name="description" content="类型 说明 举例    PROPAGATION_REQUIRED 支持当前事务 如果不存，就建一个（默认的） A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）   PROPAGATION_SUPPORTS 支持当前事务 如果不存在，就不使用事务 A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务   PROPAGAT">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spring编程式事务原理">
-<meta property="og:url" content="http://blog.yjll.art/post/65703737.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/65703737.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="类型 说明 举例    PROPAGATION_REQUIRED 支持当前事务 如果不存，就建一个（默认的） A,B，如果A有事务，则B使用A事务。如果A没有事务，则B开启一个新的事务。（A,B在同一个事务中）   PROPAGATION_SUPPORTS 支持当前事务 如果不存在，就不使用事务 A,B，如果A有事务，则B就使用A的事务。如果A没有事务，则B就不使用事务   PROPAGAT">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/PlatformTransactionManager.png">
+<meta property="og:image" content="https://img.yjll.blog/img/PlatformTransactionManager.png">
 <meta property="article:published_time" content="2020-11-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-05-20T02:53:07.322Z">
+<meta property="article:modified_time" content="2024-11-12T07:02:38.200Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="Spring">
 <meta property="article:tag" content="Transaction">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/PlatformTransactionManager.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/PlatformTransactionManager.png">
   
   
   
@@ -74,7 +74,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -343,7 +343,7 @@
 
 <p><code>DataSourceTransactionManager</code>是<code>PlatformTransactionManager</code>的一个实现。<code>PlatformTransactionManager</code>是Spring事务处理抽象层中的管理器。</p>
 <p>统一一致的事务抽象是Spring框架的一大优势，无论是全局事务还是本地事务，JTA、JDBC、Hibernate还是JPA，Spring都使用统一的编程模型，使得应用程序可以很容易地在全局事务与本地事务，或者不同的事务框架之间进行切换。下图是Spring事务抽象的核心类图：</p>
-<p><img src="https://img.yjll.art/img/PlatformTransactionManager.png" srcset="/img/loading.gif" lazyload alt="PlatformTransactionManager"></p>
+<p><img src="https://img.yjll.blog/img/PlatformTransactionManager.png" srcset="/img/loading.gif" lazyload alt="PlatformTransactionManager"></p>
 <p>PlatformTransactionManager：事务管理器<br>getTransaction方法：事务获取操作，根据事务属性定义，获取当前事务或者创建新事物；<br>commit方法：事务提交操作，注意这里所说的提交并非直接提交事务，而是根据当前事务状态执行提交或者回滚操作；<br>rollback方法：事务回滚操作，同样，也并非一定直接回滚事务，也有可能只是标记事务为只读，等待其他调用方执行回滚。</p>
 <p>TransactionDefinition：事务属性定义<br>getPropagationBehavior方法：返回事务的传播属性，默认是PROPAGATION_REQUIRED；<br>getIsolationLevel方法：返回事务隔离级别，事务隔离级别只有在创建新事务时才有效，也就是说只对应传播属性PROPAGATION_REQUIRED和PROPAGATION_REQUIRES_NEW；<br>getTimeout方法：返回事务超时时间，以秒为单位，同样只有在创建新事务时才有效；<br>isReadOnly方法：是否优化为只读事务，支持这项属性的事务管理器会将事务标记为只读，只读事务不允许有写操作，不支持只读属性的事务管理器需要忽略这项设置，这一点跟其他事务属性定义不同，针对其他不支持的属性设置，事务管理器应该抛出异常。<br>getName方法：返回事务名称，声明式事务中默认值为“类的完全限定名.方法名”。</p>
 <p>TransactionStatus：当前事务状态<br>isNewTransaction方法：当前方法是否创建了新事务（区别于使用现有事务以及没有事务）；<br>hasSavepoint方法：在嵌套事务场景中，判断当前事务是否包含保存点；<br>setRollbackOnly和isRollbackOnly方法：只读属性设置（主要用于标记事务，等待回滚）和查询；<br>flush方法：刷新底层会话中的修改到数据库，一般用于刷新如Hibernate/JPA的会话，是否生效由具体事务资源实现决定；<br>isCompleted方法：判断当前事务是否已完成（已提交或者已回滚）。</p>
@@ -584,7 +584,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Spring编程式事务原理</div>
-      <div>http://blog.yjll.art/post/65703737.html</div>
+      <div>http://blog.yjll.blog/post/65703737.html</div>
     </div>
     <div class="license-meta">
       

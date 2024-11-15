@@ -19,19 +19,19 @@
     <meta name="description" content="Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="IDEA部署应用到远程Docker">
-<meta property="og:url" content="http://blog.yjll.art/post/bee47fed.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/bee47fed.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，使用Docker可保证每个人的环境保持一致，减少团队开发中因项目环境不一致导致的问题，本文介绍如何使用IDEA直接部署Docker。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/20200927194234.png">
-<meta property="og:image" content="https://img.yjll.art/img/20200928090658.png">
+<meta property="og:image" content="https://img.yjll.blog/img/20200927194234.png">
+<meta property="og:image" content="https://img.yjll.blog/img/20200928090658.png">
 <meta property="article:published_time" content="2020-09-27T11:23:24.000Z">
-<meta property="article:modified_time" content="2022-04-18T06:16:18.621Z">
+<meta property="article:modified_time" content="2024-11-12T07:02:38.193Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="Docker">
 <meta property="article:tag" content="IDEA">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/20200927194234.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/20200927194234.png">
   
   
   
@@ -75,7 +75,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -299,7 +299,7 @@ systemctl restart docker
 
 
 <h3 id="IDEA连接Docker"><a href="#IDEA连接Docker" class="headerlink" title="IDEA连接Docker"></a>IDEA连接Docker</h3><p>Docker配置完成后，我们配置IDEA</p>
-<p><img src="https://img.yjll.art/img/20200927194234.png" srcset="/img/loading.gif" lazyload alt="20200927194234"></p>
+<p><img src="https://img.yjll.blog/img/20200927194234.png" srcset="/img/loading.gif" lazyload alt="20200927194234"></p>
 <p>配置正确会有Connection successful提示</p>
 <p><a target="_blank" rel="noopener" href="https://www.jetbrains.com/zh-cn/idea/whatsnew/2021-2/#docker">IDEA 2021.2</a>版本之后支持ssh连接</p>
 <h3 id="Dockerfile文件"><a href="#Dockerfile文件" class="headerlink" title="Dockerfile文件"></a>Dockerfile文件</h3><p>熟悉Docker的对Dockerfile应该不会陌生，我这里写一个简单的</p>
@@ -315,7 +315,7 @@ ENTRYPOINT [&quot;java&quot;,&quot;-Djava.security.egd&#x3D;file:&#x2F;dev&#x2F;
 <p>docker中的时区与我们不同，手动设置东八区。</p>
 <p>注意openjdk的版本，我最开始使用的是<code>alpine</code>版本，占用体积较小。但实际运行时，生成验证码接口报错，同样的代码我在CentOS中能运行，Docker中报错。最后换了JDK的版本解决了，猜测是<code>alpine</code>可能精简一部分功能。</p>
 <h3 id="IDEA部署Docker"><a href="#IDEA部署Docker" class="headerlink" title="IDEA部署Docker"></a>IDEA部署Docker</h3><p>在Run/Debug Configurations中添加Docker配置，支持<code>Docker Image</code>,<code>Docker-compose</code>,<code>Dockerfile</code>，我这里使用<code>Dockerfile</code>进行部署</p>
-<p><img src="https://img.yjll.art/img/20200928090658.png" srcset="/img/loading.gif" lazyload alt="20200928090658"></p>
+<p><img src="https://img.yjll.blog/img/20200928090658.png" srcset="/img/loading.gif" lazyload alt="20200928090658"></p>
 <p>这是一个Spring Cloud项目，启动容器后发现向调度中心注册的地址不是本机IP，而是Docker中的桥接网卡的地址，运行参数我添加了<code>--network=host</code>，容器直接使用宿主机的网络，不进行桥接。</p>
 <p>以上直接配置好后，启动项目</p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Deploying &#39;admin-service Dockerfile: Dockerfile&#39;...
@@ -401,7 +401,7 @@ Starting container &#39;admin-service&#39;
   <div class="license-box my-3">
     <div class="license-title">
       <div>IDEA部署应用到远程Docker</div>
-      <div>http://blog.yjll.art/post/bee47fed.html</div>
+      <div>http://blog.yjll.blog/post/bee47fed.html</div>
     </div>
     <div class="license-meta">
       

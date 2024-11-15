@@ -19,22 +19,22 @@
     <meta name="description" content="一直使用Hexo搭建博客，这里记录一下从安装环境到部署的过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用Hexo搭建静态博客">
-<meta property="og:url" content="http://blog.yjll.art/post/48dba841.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/48dba841.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="一直使用Hexo搭建博客，这里记录一下从安装环境到部署的过程。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.yjll.art/img/PicGo_vscode.png">
-<meta property="og:image" content="https://img.yjll.art/img/github_page_domain.png">
-<meta property="og:image" content="https://img.yjll.art/img/20200430115330.png">
+<meta property="og:image" content="https://img.yjll.blog/img/PicGo_vscode.png">
+<meta property="og:image" content="https://img.yjll.blog/img/github_page_domain.png">
+<meta property="og:image" content="https://img.yjll.blog/img/20200430115330.png">
 <meta property="article:published_time" content="2020-09-24T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-09-15T02:19:15.869Z">
+<meta property="article:modified_time" content="2024-11-12T07:05:12.139Z">
 <meta property="article:author" content="Youj">
 <meta property="article:tag" content="Hexo">
 <meta property="article:tag" content="Blog">
 <meta property="article:tag" content="workflows">
 <meta property="article:tag" content="Github Action">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://img.yjll.art/img/PicGo_vscode.png">
+<meta name="twitter:image" content="https://img.yjll.blog/img/PicGo_vscode.png">
   
   
   
@@ -78,7 +78,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -322,10 +322,10 @@ hexo init blog<span aria-hidden="true" class="line-numbers-rows"><span></span><s
 <p>Add backlink: true in _config.yml:</p>
 <h3 id="图片上传到图床"><a href="#图片上传到图床" class="headerlink" title="图片上传到图床"></a>图片上传到图床</h3><p>使用Markdown写作，插入图片是个问题，可选择本地引用或者上传图片到图床。</p>
 <p>PicGo是一个用于快速上传图片并获取图片 URL 链接的工具，我平时写内容喜欢使用vscode，可在商店中安装对应的插件</p>
-<p><img src="https://img.yjll.art/img/PicGo_vscode.png" srcset="/img/loading.gif" lazyload alt="PicGo_vscode"></p>
+<p><img src="https://img.yjll.blog/img/PicGo_vscode.png" srcset="/img/loading.gif" lazyload alt="PicGo_vscode"></p>
 <h3 id="使用GitHub-Pages部署"><a href="#使用GitHub-Pages部署" class="headerlink" title="使用GitHub Pages部署"></a>使用GitHub Pages部署</h3><p>参考<a target="_blank" rel="noopener" href="https://docs.github.com/cn/pages/getting-started-with-github-pages/creating-a-github-pages-site">创建 GitHub Pages 站点</a></p>
-<h3 id="自定义域名"><a href="#自定义域名" class="headerlink" title="自定义域名"></a>自定义域名</h3><p>使用GitHub Pages部署默认使用的域名为<code>yjll.github.io</code>，我这里使用自定义域名<code>www.yjll.art</code><br><img src="https://img.yjll.art/img/github_page_domain.png" srcset="/img/loading.gif" lazyload alt="github_page_domain"></p>
-<p>创建名为CNAME的文件，写入<code>www.yjll.art</code>，将该文件放入source目录下。</p>
+<h3 id="自定义域名"><a href="#自定义域名" class="headerlink" title="自定义域名"></a>自定义域名</h3><p>使用GitHub Pages部署默认使用的域名为<code>yjll.github.io</code>，我这里使用自定义域名<code>www.yjll.blog</code><br><img src="https://img.yjll.blog/img/github_page_domain.png" srcset="/img/loading.gif" lazyload alt="github_page_domain"></p>
+<p>创建名为CNAME的文件，写入<code>www.yjll.blog</code>，将该文件放入source目录下。</p>
 <h3 id="使用Github的Action进行部署"><a href="#使用Github的Action进行部署" class="headerlink" title="使用Github的Action进行部署"></a>使用Github的Action进行部署</h3><p>push后git会自动帮助我们部署项目</p>
 <p>在<code>.github/workflows</code>目录下创建部署脚本</p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml">	<span class="token key atrule">name</span><span class="token punctuation">:</span> BlogCI
@@ -362,7 +362,7 @@ hexo init blog<span aria-hidden="true" class="line-numbers-rows"><span></span><s
     <summary>使用 Github webhooks 自动部署</summary>
 
 <p>Github提供webhooks功能，可以在代码推送后回调我们配置的web接口，方便使用自己服务器部署。</p>
-<p><img src="https://img.yjll.art/img/20200430115330.png" srcset="/img/loading.gif" lazyload alt="20200430115330"></p>
+<p><img src="https://img.yjll.blog/img/20200430115330.png" srcset="/img/loading.gif" lazyload alt="20200430115330"></p>
 <figure><div class="code-wrapper"><pre class="line-numbers language-python" data-language="python"><code class="language-python">
 <span class="token keyword">from</span> flask <span class="token keyword">import</span> Flask
 <span class="token keyword">from</span> flask <span class="token keyword">import</span> request
@@ -447,7 +447,7 @@ hexo g
   <div class="license-box my-3">
     <div class="license-title">
       <div>使用Hexo搭建静态博客</div>
-      <div>http://blog.yjll.art/post/48dba841.html</div>
+      <div>http://blog.yjll.blog/post/48dba841.html</div>
     </div>
     <div class="license-meta">
       

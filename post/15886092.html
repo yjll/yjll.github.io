@@ -19,7 +19,7 @@
     <meta name="description" content="日常统计中总会遇到需要统计和周期有关的数据，如用户连续登录天数，事件发生的连续性等。样本数据是用户的ID和抽奖日期，准备计算出每个用户的连续抽奖最大间隔时间，我先说一下我的思路。先将根据用户ID将用户分组并按照日期排序，对相邻的日期进行比较，差异为1天的即为连续数据，对连续数据进行计数即可计算出最大的时间间隔。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Pandas计算最大连续间隔时间">
-<meta property="og:url" content="http://blog.yjll.art/post/15886092.html">
+<meta property="og:url" content="http://blog.yjll.blog/post/15886092.html">
 <meta property="og:site_name" content="Youj&#39;s blog">
 <meta property="og:description" content="日常统计中总会遇到需要统计和周期有关的数据，如用户连续登录天数，事件发生的连续性等。样本数据是用户的ID和抽奖日期，准备计算出每个用户的连续抽奖最大间隔时间，我先说一下我的思路。先将根据用户ID将用户分组并按照日期排序，对相邻的日期进行比较，差异为1天的即为连续数据，对连续数据进行计数即可计算出最大的时间间隔。">
 <meta property="og:locale" content="zh_CN">
@@ -72,7 +72,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"blog.yjll.art","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"blog.yjll.blog","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -515,7 +515,7 @@ df<span class="token punctuation">.</span>groupby<span class="token punctuation"
   <div class="license-box my-3">
     <div class="license-title">
       <div>Pandas计算最大连续间隔时间</div>
-      <div>http://blog.yjll.art/post/15886092.html</div>
+      <div>http://blog.yjll.blog/post/15886092.html</div>
     </div>
     <div class="license-meta">
       
