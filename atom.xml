@@ -1,25 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Youj&#39;s blog</title>
+  <title>简斋</title>
   
   <subtitle>萬物之始，大道至簡，衍化至繁</subtitle>
-  <link href="http://blog.yjll.blog/atom.xml" rel="self"/>
+  <link href="https://blog.yjll.blog/atom.xml" rel="self"/>
   
-  <link href="http://blog.yjll.blog/"/>
-  <updated>2024-10-22T07:25:30.518Z</updated>
-  <id>http://blog.yjll.blog/</id>
+  <link href="https://blog.yjll.blog/"/>
+  <updated>2025-01-10T01:46:41.738Z</updated>
+  <id>https://blog.yjll.blog/</id>
   
   <author>
-    <name>Youj</name>
+    <name>简斋</name>
     
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Linux使用TUN模式实现透明代理</title>
+    <link href="https://blog.yjll.blog/post/8852bf9.html"/>
+    <id>https://blog.yjll.blog/post/8852bf9.html</id>
+    <published>2025-01-07T16:00:00.000Z</published>
+    <updated>2025-01-10T01:46:41.738Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="树莓派做旁路由"><a href="#树莓派做旁路由" class="headerlink" title="树莓派做旁路由"></a>树莓派做旁路由</h3><p>我的树莓派作为旁路由，代理所有经过的流量，包括自己发出的请求。</p><p>编辑 /etc/sysctl.conf 文件，将 net.ipv4.ip_forward=0 修改为 net.ipv4.ip_forward=1，然后执行 sysctl -p 以使配置生效</p><p>docker中开启<code>privileged: true</code>，并且clash中开启<code>tun</code>模式</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">version: &#39;3&#39;services:  clash:    image: dreamacro&#x2F;clash-premium:latest    container_name: clash    volumes:      - .&#x2F;clash:&#x2F;root&#x2F;.config&#x2F;clash    restart: unless-stopped    network_mode: &quot;host&quot; # or &quot;host&quot; on Linux    privileged: true    environment:      - TZ&#x3D;Asia&#x2F;Shanghai<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><h3 id="不代理本机数据"><a href="#不代理本机数据" class="headerlink" title="不代理本机数据"></a>不代理本机数据</h3><p>另一个Linux主机不对内部应用进行代理。</p><p>开启网卡混杂模式<br>    ip link set enp3s0 promisc on</p><p>创建macvlan网络</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">  docker network create -d macvlan \                       --subnet&#x3D;192.168.1.0&#x2F;24 \--gateway&#x3D;192.168.1.1 \-o parent&#x3D;enp3s0 \macvlan142<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">version: &#39;3&#39;services:  clash:    image: dreamacro&#x2F;clash-premium:latest    container_name: clash_tun    volumes:      - .&#x2F;clash:&#x2F;root&#x2F;.config&#x2F;clash    restart: unless-stopped    networks:      macvlan142:        ipv4_address: 192.168.1.220        privileged: true    environment:      - TZ&#x3D;Asia&#x2F;Shanghainetworks:  macvlan142:    external: true  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>其他设备将网关改为192.168.1.220即可使用。</p><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/lululau/clashindocker">clashindocker</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h3 id=&quot;树莓派做旁路由&quot;&gt;&lt;a href=&quot;#树莓派做旁路由&quot; class=&quot;headerlink&quot; title=&quot;树莓派做旁路由&quot;&gt;&lt;/a&gt;树莓派做旁路由&lt;/h3&gt;&lt;p&gt;我的树莓派作为旁路由，代理所有经过的流量，包括自己发出的请求。&lt;/p&gt;
+&lt;p&gt;编辑 /etc/sys</summary>
+      
+    
+    
+    
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    
+    
+    <category term="Docker" scheme="https://blog.yjll.blog/tags/Docker/"/>
+    
+    <category term="透明代理" scheme="https://blog.yjll.blog/tags/%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
+    
+    <category term="Clash" scheme="https://blog.yjll.blog/tags/Clash/"/>
+    
+    <category term="macvlan" scheme="https://blog.yjll.blog/tags/macvlan/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>通过代理服务更改HTTP request的地址</title>
+    <link href="https://blog.yjll.blog/post/86d57f8b.html"/>
+    <id>https://blog.yjll.blog/post/86d57f8b.html</id>
+    <published>2024-12-20T16:00:00.000Z</published>
+    <updated>2024-12-21T10:15:23.252Z</updated>
+    
+    <content type="html"><![CDATA[<p>利用更改<a href="https://github.com/abhinavsingh/proxy.py">proxy.py</a>中的<a href="https://github.com/abhinavsingh/proxy.py/tree/develop?tab=readme-ov-file#redirecttocustomserverplugin">Redirect To Custom Server Plugin</a>插件来更改原Android端请求的IP地址。</p><p>更改<code>plugin/redirect_to_custom_server.py</code>文件</p><figure><div class="code-wrapper"><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">RedirectToCustomServerPlugin</span><span class="token punctuation">(</span>HttpProxyBasePlugin<span class="token punctuation">)</span><span class="token punctuation">:</span>    <span class="token keyword">def</span> <span class="token function">before_upstream_connection</span><span class="token punctuation">(</span>            self<span class="token punctuation">,</span> request<span class="token punctuation">:</span> HttpParser<span class="token punctuation">,</span>    <span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> Optional<span class="token punctuation">[</span>HttpParser<span class="token punctuation">]</span><span class="token punctuation">:</span>        <span class="token comment"># 原服务器地址</span>        old_server <span class="token operator">=</span> <span class="token string">'http://xxx:8088'</span>        <span class="token comment"># 新服务器地址</span>        new_server <span class="token operator">=</span> <span class="token string">'http://yyy:8088'</span>        url <span class="token operator">=</span> <span class="token builtin">str</span><span class="token punctuation">(</span>request<span class="token punctuation">.</span>_url<span class="token punctuation">)</span>        <span class="token keyword">if</span> <span class="token keyword">not</span> request<span class="token punctuation">.</span>is_https_tunnel <span class="token keyword">and</span> old_server <span class="token keyword">in</span> url <span class="token punctuation">:</span>            url <span class="token operator">=</span> url<span class="token punctuation">.</span>replace<span class="token punctuation">(</span>old_server<span class="token punctuation">,</span>new_server<span class="token punctuation">)</span>                        request<span class="token punctuation">.</span>set_url<span class="token punctuation">(</span>url<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token string">'utf_8'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>            <span class="token comment"># Update Host header too, otherwise upstream can reject our request</span>            <span class="token keyword">if</span> request<span class="token punctuation">.</span>has_header<span class="token punctuation">(</span><span class="token string">b'Host'</span><span class="token punctuation">)</span> <span class="token punctuation">:</span>                request<span class="token punctuation">.</span>del_header<span class="token punctuation">(</span><span class="token string">b'Host'</span><span class="token punctuation">)</span>            request<span class="token punctuation">.</span>add_header<span class="token punctuation">(</span>                <span class="token string">b'Host'</span><span class="token punctuation">,</span> urlparse<span class="token punctuation">.</span>urlsplit<span class="token punctuation">(</span>                    new_server<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>                <span class="token punctuation">)</span><span class="token punctuation">.</span>netloc<span class="token punctuation">,</span>            <span class="token punctuation">)</span>        <span class="token keyword">return</span> request<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>启动proxy.py服务</p><figure><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">proxy  --enable-web-server --plugins proxy.plugin.RedirectToCustomServerPlugin --hostname <span class="token number">0.0</span>.0.0  --port <span class="token number">1080</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>最后在Android端设置代理为当前服务即可实现IP地址的变更。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;利用更改&lt;a href=&quot;https://github.com/abhinavsingh/proxy.py&quot;&gt;proxy.py&lt;/a&gt;中的&lt;a href=&quot;https://github.com/abhinavsingh/proxy.py/tree/develop?tab=r</summary>
+      
+    
+    
+    
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
+    
+    
+    <category term="代理" scheme="https://blog.yjll.blog/tags/%E4%BB%A3%E7%90%86/"/>
+    
+    <category term="python" scheme="https://blog.yjll.blog/tags/python/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Centos7升级OpenSSH</title>
-    <link href="http://blog.yjll.blog/post/489071f8.html"/>
-    <id>http://blog.yjll.blog/post/489071f8.html</id>
+    <link href="https://blog.yjll.blog/post/489071f8.html"/>
+    <id>https://blog.yjll.blog/post/489071f8.html</id>
     <published>2024-10-22T06:16:58.000Z</published>
     <updated>2024-10-22T07:25:30.518Z</updated>
     
@@ -34,25 +91,25 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Centos" scheme="http://blog.yjll.blog/tags/Centos/"/>
+    <category term="Centos" scheme="https://blog.yjll.blog/tags/Centos/"/>
     
-    <category term="OpenSSH" scheme="http://blog.yjll.blog/tags/OpenSSH/"/>
+    <category term="OpenSSH" scheme="https://blog.yjll.blog/tags/OpenSSH/"/>
     
-    <category term="Linux" scheme="http://blog.yjll.blog/tags/Linux/"/>
+    <category term="Linux" scheme="https://blog.yjll.blog/tags/Linux/"/>
     
   </entry>
   
   <entry>
     <title>FFmpeg使用笔记</title>
-    <link href="http://blog.yjll.blog/post/9539654e.html"/>
-    <id>http://blog.yjll.blog/post/9539654e.html</id>
+    <link href="https://blog.yjll.blog/post/9539654e.html"/>
+    <id>https://blog.yjll.blog/post/9539654e.html</id>
     <published>2023-12-07T16:00:00.000Z</published>
-    <updated>2024-12-11T05:51:36.030Z</updated>
+    <updated>2025-01-07T03:16:49.819Z</updated>
     
-    <content type="html"><![CDATA[<p>CentOS 7 下安装FFmpeg</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">dnf -y install https:&#x2F;&#x2F;download1.rpmfusion.org&#x2F;free&#x2F;fedora&#x2F;rpmfusion-free-release-$\(rpm -E %fedora).noarch.rpm<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>intel核显也可以直接使用支持qsv的docker<a href="https://hub.docker.com/r/wzhy1234/ffmpeg-qsv">ffmpeg-qsv</a></p><h3 id="检查视频完整性"><a href="#检查视频完整性" class="headerlink" title="检查视频完整性"></a>检查视频完整性</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -v error -i file.avi -f null -  </code></pre></div></figure><p>输出到日志  </p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -v error -i file.avi -f null -  2&gt;error.log</code></pre></div></figure><h3 id="查看信息"><a href="#查看信息" class="headerlink" title="查看信息"></a>查看信息</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i file.mp4</code></pre></div></figure><h3 id="指定码率和分辨率"><a href="#指定码率和分辨率" class="headerlink" title="指定码率和分辨率"></a>指定码率和分辨率</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i A.mp4 -vcodec libx264 -b:v 1500k -vf scale=1280:720 B.mp4</code></pre></div></figure><h3 id="缩放为固定分辨率的命令行："><a href="#缩放为固定分辨率的命令行：" class="headerlink" title="缩放为固定分辨率的命令行："></a>缩放为固定分辨率的命令行：</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 1.mp4 -vf scale=640:480 output.mp4</code></pre></div></figure><h3 id="缩放为自适应宽高比的命令行："><a href="#缩放为自适应宽高比的命令行：" class="headerlink" title="缩放为自适应宽高比的命令行："></a>缩放为自适应宽高比的命令行：</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 1.mp4 -vf scale=640:-2 output.mp4</code></pre></div></figure><h3 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h3><p>创建一个文本文件，列出要合并的视频文件。以下是一个示例：</p><p>首先，创建一个文本文件，比如 input.txt，内容如下：</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">file &#39;input1.mp4&#39;file &#39;input2.mp4&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div></figure><p>可使用脚本生成</p><p>Windows:</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">(for %i in (*.wmv) do @echo file &#39;%i&#39;) &gt; input.txt</code></pre></div></figure><p>Linux:</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">printf &quot;file &#39;%s&#39;\n&quot; *.wmv &gt; input.txt</code></pre></div></figure><p>然后，使用以下命令将这两个视频文件合并成一个：</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -f concat -i input.txt -c copy output.mp4</code></pre></div></figure><p>在这个例子中，input.txt 包含了要合并的视频文件列表。-f concat 告诉 FFmpeg 使用 concat 协议，-i input.txt 指定了输入文件，-c copy 告诉 FFmpeg 只进行复制而不重新编码，这样可以加快处理速度并且保持视频质量，最后的 output.mp4 是合并后的输出文件名。</p><h3 id="提取ISO中的文件，我这里取的都是第一条流"><a href="#提取ISO中的文件，我这里取的都是第一条流" class="headerlink" title="提取ISO中的文件，我这里取的都是第一条流"></a>提取ISO中的文件，我这里取的都是第一条流</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i input.iso -map 0:v:0 -map 0:a:0 -c copy output.mp4</code></pre></div></figure><h3 id="截图功能"><a href="#截图功能" class="headerlink" title="截图功能"></a>截图功能</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -ss 00:12:39.0 -i input.wmv  -frames:v 1 /share/media/output.jpg</code></pre></div></figure><h3 id="截取视频"><a href="#截取视频" class="headerlink" title="截取视频"></a>截取视频</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg  -ss 00:45:35 -to 00:57:47 -i input.mp4 -c copy test.mp4</code></pre></div></figure><h3 id="下载m3u8文件"><a href="#下载m3u8文件" class="headerlink" title="下载m3u8文件"></a>下载m3u8文件</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 视频地址 -c copy -bsf:a aac_adtstoasc output.mp4</code></pre></div></figure><p>ffmpeg毕竟不是下载工具，下载也可以使用<a href="https://github.com/llychao/m3u8-downloader">m3u8-downloader</a>，支持更多参数。</p><h3 id="合并字幕"><a href="#合并字幕" class="headerlink" title="合并字幕"></a>合并字幕</h3><p>推荐使用外挂字幕形式，合并成mkv格式</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i input.mp4 -i sub.srt -c copy  output.mkv</code></pre></div></figure><p>也可以使用<code>mkvmerge</code>进行处理</p><p>参考<a href="https://ubuntuhandbook.org/index.php/2018/08/mkvtoolnix-26-0-0-released/">MKVToolNix 26.0.0 Released, How to Install it in Ubuntu</a>进行安装</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo sh -c &#39;echo &quot;deb https:&#x2F;&#x2F;mkvtoolnix.download&#x2F;ubuntu&#x2F; $(lsb_release -sc) main&quot; &gt;&gt; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;bunkus.org.list&#39;wget -q -O - https:&#x2F;&#x2F;mkvtoolnix.download&#x2F;gpg-pub-moritzbunkus.txt | sudo apt-key add -sudo apt-get updatesudo apt-get install mkvtoolnix<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>合并字幕，并且设置默认字幕为中文</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">mkvmerge -o merge/Game.of.Thrones.S02E08.mkv  Game.of.Thrones.S02E08.mkv --language 0:chi Game.of.Thrones.S02E08.ass </code></pre></div></figure><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://juejin.cn/post/7034349606704152589">FFMPEG合并视频文件（无损）</a></p><p><a href="https://www.jianshu.com/p/9c07b730d1dc">每天一点FFmpeg</a></p>]]></content>
+    <content type="html"><![CDATA[<p>CentOS 7 下安装FFmpeg</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">dnf -y install https:&#x2F;&#x2F;download1.rpmfusion.org&#x2F;free&#x2F;fedora&#x2F;rpmfusion-free-release-$\(rpm -E %fedora).noarch.rpm<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>intel核显也可以直接使用支持qsv的docker<a href="https://hub.docker.com/r/wzhy1234/ffmpeg-qsv">ffmpeg-qsv</a></p><h3 id="检查视频完整性"><a href="#检查视频完整性" class="headerlink" title="检查视频完整性"></a>检查视频完整性</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -v error -i file.avi -f null -  </code></pre></div></figure><p>输出到日志  </p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -v error -i file.avi -f null -  2&gt;error.log</code></pre></div></figure><h3 id="查看信息"><a href="#查看信息" class="headerlink" title="查看信息"></a>查看信息</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i file.mp4</code></pre></div></figure><h3 id="指定码率和分辨率"><a href="#指定码率和分辨率" class="headerlink" title="指定码率和分辨率"></a>指定码率和分辨率</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i A.mp4 -vcodec libx264 -b:v 1500k -vf scale=1280:720 B.mp4</code></pre></div></figure><h3 id="缩放为固定分辨率的命令行："><a href="#缩放为固定分辨率的命令行：" class="headerlink" title="缩放为固定分辨率的命令行："></a>缩放为固定分辨率的命令行：</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 1.mp4 -vf scale=640:480 output.mp4</code></pre></div></figure><h3 id="缩放为自适应宽高比的命令行："><a href="#缩放为自适应宽高比的命令行：" class="headerlink" title="缩放为自适应宽高比的命令行："></a>缩放为自适应宽高比的命令行：</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 1.mp4 -vf scale=640:-2 output.mp4</code></pre></div></figure><h3 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h3><p>创建一个文本文件，列出要合并的视频文件。以下是一个示例：</p><p>首先，创建一个文本文件，比如 input.txt，内容如下：</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">file &#39;input1.mp4&#39;file &#39;input2.mp4&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div></figure><p>可使用脚本生成</p><p>Windows:</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">(for %i in (*.wmv) do @echo file &#39;%i&#39;) &gt; input.txt</code></pre></div></figure><p>Linux:</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">printf &quot;file &#39;%s&#39;\n&quot; *.wmv &gt; input.txt</code></pre></div></figure><p>然后，使用以下命令将这两个视频文件合并成一个：</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -f concat -i input.txt -c copy output.mp4</code></pre></div></figure><p>在这个例子中，input.txt 包含了要合并的视频文件列表。-f concat 告诉 FFmpeg 使用 concat 协议，-i input.txt 指定了输入文件，-c copy 告诉 FFmpeg 只进行复制而不重新编码，这样可以加快处理速度并且保持视频质量，最后的 output.mp4 是合并后的输出文件名。</p><h3 id="提取ISO中的文件，我这里取的都是第一条流"><a href="#提取ISO中的文件，我这里取的都是第一条流" class="headerlink" title="提取ISO中的文件，我这里取的都是第一条流"></a>提取ISO中的文件，我这里取的都是第一条流</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i input.iso -map 0:v:0 -map 0:a:0 -c copy output.mp4</code></pre></div></figure><h3 id="截图功能"><a href="#截图功能" class="headerlink" title="截图功能"></a>截图功能</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -ss 00:12:39.0 -i input.wmv  -frames:v 1 /share/media/output.jpg</code></pre></div></figure><h3 id="截取视频"><a href="#截取视频" class="headerlink" title="截取视频"></a>截取视频</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg  -ss 00:45:35 -to 00:57:47 -i input.mp4 -c copy test.mp4</code></pre></div></figure><h3 id="下载m3u8文件"><a href="#下载m3u8文件" class="headerlink" title="下载m3u8文件"></a>下载m3u8文件</h3><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i 视频地址 -c copy -bsf:a aac_adtstoasc output.mp4</code></pre></div></figure><p>ffmpeg毕竟不是下载工具，下载也可以使用<a href="https://github.com/llychao/m3u8-downloader">m3u8-downloader</a>，支持更多参数。</p><h3 id="合并字幕"><a href="#合并字幕" class="headerlink" title="合并字幕"></a>合并字幕</h3><p>推荐使用外挂字幕形式，合并成mkv格式</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i input.mp4 -i sub.srt -c copy  output.mkv</code></pre></div></figure><p>也可以使用<code>mkvmerge</code>进行处理</p><p>参考<a href="https://ubuntuhandbook.org/index.php/2018/08/mkvtoolnix-26-0-0-released/">MKVToolNix 26.0.0 Released, How to Install it in Ubuntu</a>进行安装</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo sh -c &#39;echo &quot;deb https:&#x2F;&#x2F;mkvtoolnix.download&#x2F;ubuntu&#x2F; $(lsb_release -sc) main&quot; &gt;&gt; &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;bunkus.org.list&#39;wget -q -O - https:&#x2F;&#x2F;mkvtoolnix.download&#x2F;gpg-pub-moritzbunkus.txt | sudo apt-key add -sudo apt-get updatesudo apt-get install mkvtoolnix<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>合并字幕，并且设置默认字幕为中文</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">mkvmerge -o merge/Game.of.Thrones.S02E08.mkv  Game.of.Thrones.S02E08.mkv --language 0:chi Game.of.Thrones.S02E08.ass </code></pre></div></figure><h3 id="反交错"><a href="#反交错" class="headerlink" title="反交错"></a>反交错</h3><p>隔行扫描的视频可以在转码阶段进行反交错处理</p><figure><div class="code-wrapper"><pre class="language-none"><code class="language-none">ffmpeg -i input.mp4 -vf yadif output.mp4</code></pre></div></figure><p>若视频包含大量快速运动场景可使用mdeint、bwdif、mcdeint滤镜</p><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://juejin.cn/post/7034349606704152589">FFMPEG合并视频文件（无损）</a></p><p><a href="https://www.jianshu.com/p/9c07b730d1dc">每天一点FFmpeg</a></p>]]></content>
     
     
       
@@ -63,15 +120,15 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
   </entry>
   
   <entry>
     <title>Java给ID加锁的实现</title>
-    <link href="http://blog.yjll.blog/post/2b6e6ad5.html"/>
-    <id>http://blog.yjll.blog/post/2b6e6ad5.html</id>
+    <link href="https://blog.yjll.blog/post/2b6e6ad5.html"/>
+    <id>https://blog.yjll.blog/post/2b6e6ad5.html</id>
     <published>2022-07-04T16:00:00.000Z</published>
     <updated>2023-04-13T06:32:21.540Z</updated>
     
@@ -86,21 +143,21 @@
     
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/categories/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/categories/Java/"/>
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/tags/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/tags/Java/"/>
     
-    <category term="锁" scheme="http://blog.yjll.blog/tags/%E9%94%81/"/>
+    <category term="锁" scheme="https://blog.yjll.blog/tags/%E9%94%81/"/>
     
-    <category term="分布式" scheme="http://blog.yjll.blog/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    <category term="分布式" scheme="https://blog.yjll.blog/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
   </entry>
   
   <entry>
     <title>Pandas连接Clickhouse</title>
-    <link href="http://blog.yjll.blog/post/2cd58774.html"/>
-    <id>http://blog.yjll.blog/post/2cd58774.html</id>
+    <link href="https://blog.yjll.blog/post/2cd58774.html"/>
+    <id>https://blog.yjll.blog/post/2cd58774.html</id>
     <published>2022-06-27T16:00:00.000Z</published>
     <updated>2022-09-06T05:12:41.721Z</updated>
     
@@ -116,21 +173,21 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/tags/Python/"/>
     
-    <category term="Pandas" scheme="http://blog.yjll.blog/tags/Pandas/"/>
+    <category term="Pandas" scheme="https://blog.yjll.blog/tags/Pandas/"/>
     
-    <category term="Clickhouse" scheme="http://blog.yjll.blog/tags/Clickhouse/"/>
+    <category term="Clickhouse" scheme="https://blog.yjll.blog/tags/Clickhouse/"/>
     
   </entry>
   
   <entry>
     <title>Java log 不打印异常栈信息</title>
-    <link href="http://blog.yjll.blog/post/6b05ac2c.html"/>
-    <id>http://blog.yjll.blog/post/6b05ac2c.html</id>
+    <link href="https://blog.yjll.blog/post/6b05ac2c.html"/>
+    <id>https://blog.yjll.blog/post/6b05ac2c.html</id>
     <published>2022-01-26T02:35:34.000Z</published>
     <updated>2022-01-26T03:20:15.271Z</updated>
     
@@ -141,21 +198,21 @@
     
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/categories/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/categories/Java/"/>
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/tags/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/tags/Java/"/>
     
-    <category term="JVM" scheme="http://blog.yjll.blog/tags/JVM/"/>
+    <category term="JVM" scheme="https://blog.yjll.blog/tags/JVM/"/>
     
-    <category term="Log" scheme="http://blog.yjll.blog/tags/Log/"/>
+    <category term="Log" scheme="https://blog.yjll.blog/tags/Log/"/>
     
   </entry>
   
   <entry>
     <title>自建直播流媒体服务</title>
-    <link href="http://blog.yjll.blog/post/3bc6b560.html"/>
-    <id>http://blog.yjll.blog/post/3bc6b560.html</id>
+    <link href="https://blog.yjll.blog/post/3bc6b560.html"/>
+    <id>https://blog.yjll.blog/post/3bc6b560.html</id>
     <published>2021-11-11T16:00:00.000Z</published>
     <updated>2024-11-12T07:02:38.189Z</updated>
     
@@ -166,17 +223,17 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="工具" scheme="http://blog.yjll.blog/tags/%E5%B7%A5%E5%85%B7/"/>
+    <category term="工具" scheme="https://blog.yjll.blog/tags/%E5%B7%A5%E5%85%B7/"/>
     
   </entry>
   
   <entry>
     <title>Python更新服务器SSH密钥</title>
-    <link href="http://blog.yjll.blog/post/65ba80c8.html"/>
-    <id>http://blog.yjll.blog/post/65ba80c8.html</id>
+    <link href="https://blog.yjll.blog/post/65ba80c8.html"/>
+    <id>https://blog.yjll.blog/post/65ba80c8.html</id>
     <published>2021-11-04T16:00:00.000Z</published>
     <updated>2024-11-12T07:02:38.197Z</updated>
     
@@ -187,15 +244,15 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
   </entry>
   
   <entry>
     <title>Pandas计算最大连续间隔时间</title>
-    <link href="http://blog.yjll.blog/post/15886092.html"/>
-    <id>http://blog.yjll.blog/post/15886092.html</id>
+    <link href="https://blog.yjll.blog/post/15886092.html"/>
+    <id>https://blog.yjll.blog/post/15886092.html</id>
     <published>2021-09-26T16:00:00.000Z</published>
     <updated>2021-09-28T01:29:39.955Z</updated>
     
@@ -206,19 +263,19 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/tags/Python/"/>
     
-    <category term="Pandas" scheme="http://blog.yjll.blog/tags/Pandas/"/>
+    <category term="Pandas" scheme="https://blog.yjll.blog/tags/Pandas/"/>
     
   </entry>
   
   <entry>
     <title>使用Logstash同步Mysql数据到Elasticsearch</title>
-    <link href="http://blog.yjll.blog/post/863f4886.html"/>
-    <id>http://blog.yjll.blog/post/863f4886.html</id>
+    <link href="https://blog.yjll.blog/post/863f4886.html"/>
+    <id>https://blog.yjll.blog/post/863f4886.html</id>
     <published>2021-07-06T16:00:00.000Z</published>
     <updated>2024-11-12T07:02:38.189Z</updated>
     
@@ -230,21 +287,21 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Elasticsearch" scheme="http://blog.yjll.blog/tags/Elasticsearch/"/>
+    <category term="Elasticsearch" scheme="https://blog.yjll.blog/tags/Elasticsearch/"/>
     
-    <category term="Mysql" scheme="http://blog.yjll.blog/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://blog.yjll.blog/tags/Mysql/"/>
     
-    <category term="Logstash" scheme="http://blog.yjll.blog/tags/Logstash/"/>
+    <category term="Logstash" scheme="https://blog.yjll.blog/tags/Logstash/"/>
     
   </entry>
   
   <entry>
     <title>Canal实现Mysql至ClickHouse实时同步</title>
-    <link href="http://blog.yjll.blog/post/abdd8675.html"/>
-    <id>http://blog.yjll.blog/post/abdd8675.html</id>
+    <link href="https://blog.yjll.blog/post/abdd8675.html"/>
+    <id>https://blog.yjll.blog/post/abdd8675.html</id>
     <published>2021-06-28T16:00:00.000Z</published>
     <updated>2022-09-06T08:34:41.314Z</updated>
     
@@ -255,21 +312,21 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Canal" scheme="http://blog.yjll.blog/tags/Canal/"/>
+    <category term="Canal" scheme="https://blog.yjll.blog/tags/Canal/"/>
     
-    <category term="Mysql" scheme="http://blog.yjll.blog/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://blog.yjll.blog/tags/Mysql/"/>
     
-    <category term="ClickHouse" scheme="http://blog.yjll.blog/tags/ClickHouse/"/>
+    <category term="ClickHouse" scheme="https://blog.yjll.blog/tags/ClickHouse/"/>
     
   </entry>
   
   <entry>
     <title>Canal实现Mysql至Elasticsearch实时同步</title>
-    <link href="http://blog.yjll.blog/post/15c08367.html"/>
-    <id>http://blog.yjll.blog/post/15c08367.html</id>
+    <link href="https://blog.yjll.blog/post/15c08367.html"/>
+    <id>https://blog.yjll.blog/post/15c08367.html</id>
     <published>2021-06-28T16:00:00.000Z</published>
     <updated>2023-04-13T06:34:18.463Z</updated>
     
@@ -280,47 +337,47 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Elasticsearch" scheme="http://blog.yjll.blog/tags/Elasticsearch/"/>
+    <category term="Elasticsearch" scheme="https://blog.yjll.blog/tags/Elasticsearch/"/>
     
-    <category term="Canal" scheme="http://blog.yjll.blog/tags/Canal/"/>
+    <category term="Canal" scheme="https://blog.yjll.blog/tags/Canal/"/>
     
-    <category term="Mysql" scheme="http://blog.yjll.blog/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://blog.yjll.blog/tags/Mysql/"/>
     
   </entry>
   
   <entry>
     <title>Canal推送Mysql增量数据至RabbitMQ</title>
-    <link href="http://blog.yjll.blog/post/ab6a3b54.html"/>
-    <id>http://blog.yjll.blog/post/ab6a3b54.html</id>
+    <link href="https://blog.yjll.blog/post/ab6a3b54.html"/>
+    <id>https://blog.yjll.blog/post/ab6a3b54.html</id>
     <published>2021-06-28T16:00:00.000Z</published>
-    <updated>2022-09-06T05:11:42.717Z</updated>
+    <updated>2024-12-19T08:58:24.396Z</updated>
     
-    <content type="html"><![CDATA[<p>canal [kə’næl]，译意为水道/管道/沟渠，主要用途是基于 MySQL 数据库增量日志解析，提供增量数据订阅和消费</p><p><img src="https://camo.githubusercontent.com/63881e271f889d4a424c55cea2f9c2065f63494fecac58432eac415f6e47e959/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32303139313130343130313733353934372e706e67" alt="Canal"></p><span id="more"></span><p>工作原理</p><ul><li>canal 模拟 MySQL slave 的交互协议，伪装自己为 MySQL slave ，向 MySQL master 发送 dump 协议</li><li>MySQL master 收到 dump 请求，开始推送 binary log 给 slave (即 canal )</li><li>canal 解析 binary log 对象(原始为 byte 流)</li></ul><p>从<a href="https://github.com/alibaba/canal/releases/tag/canal-1.1.5">v1.1.5</a>版本开始，Canal新增对RabbitMQ的支持。</p><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><!-- log-bin=mysql-bin 　　# 开启 binlogbinlog-format=ROW 　　# 选择 ROW 模式server_id=1 　　　　   # 配置 MySQL replaction 需要定义，不要和 canal 的 slaveId 重复 --><p><code>canal</code>需要Mysql端开启二进制日志同步，我使用的阿里云的Mysql，默认已开启<code>binlog dump</code>。</p><p>RabbitMQ我使用Docker部署，注意镜像要使用带<code>management</code>版本的，方便在界面操作。</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">docker run --name rabbitmq -d -p 15672:15672 -p 5672:5672 -e RABBITMQ_DEFAULT_USER&#x3D;root -e RABBITMQ_DEFAULT_PASS&#x3D;root   rabbitmq:3.8.2-management<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>RabbitMQ的<code>Exchange</code>,<code>Queue</code>,<code>Binding</code>也要优先配置好，我的需求是canal解析完Mysql的binlog后，将信息分别推送到3个队列中，我这里为了隔离环境建3个队列，分别是同步Elasticsearch的<code>canal.es</code>，同步ClickHouse的<code>canal.clickhouse</code>和同步Mysql的<code>canal.mysql</code>。因为是无差别投放，我只创建了一个交换机<code>canal</code>。将3个队列<code>canal.es</code>、<code>canal.clickhouse</code>、<code>canal.mysql</code>绑定到交换机<code>canal</code>上。</p><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>编辑<code>deployer/conf/example/instance.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 我这里使用了gtid日志进行同步canal.instance.gtidon&#x3D;truecanal.instance.master.address&#x3D;localhost:3306canal.instance.dbUsername&#x3D;rootcanal.instance.dbPassword&#x3D;root# 这里配置发送消息的主题，由于3队列接收全部数据，所以此处主题我没有用到，使用的默认值canal.mq.topic&#x3D;example<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>编辑<code>deployer/conf/canal.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 此处更改为rabbitmq模式canal.serverMode &#x3D; rabbitmqrabbitmq.host &#x3D; 127.0.0.1rabbitmq.virtual.host &#x3D; &#x2F;rabbitmq.exchange &#x3D; canalrabbitmq.username &#x3D; rootrabbitmq.password &#x3D; root# 消息持久化rabbitmq.deliveryMode &#x3D; 2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>运行 <code>bin/startup.sh</code> ，服务便开始运行了</p><h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><p>由于三个队列需要同步的数据库不同，无差别投放会造成不必要的性能浪费，可开启<code>dynamicTopic</code>功能，根据topic将数据投放至不能的队列。</p><p>编辑<code>deployer/conf/example/instance.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">canal.mq.dynamicTopic&#x3D;pro\\..*<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>投递的topic为<code>库名_表名</code></p><p>Exchanges和Queues的绑定关系在RebbitMQ的后台配置即可，模式选择Topic模式。</p><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/alibaba/canal/wiki/QuickStart">alibaba/canal</a></p><p><a href="https://github.com/alibaba/canal/wiki/Canal-Kafka-RocketMQ-QuickStart">Canal Kafka RocketMQ QuickStart</a></p>]]></content>
+    <content type="html"><![CDATA[<p>canal [kə’næl]，译意为水道/管道/沟渠，主要用途是基于 MySQL 数据库增量日志解析，提供增量数据订阅和消费</p><p><img src="https://img.yjll.blog/img/Canal.png" alt="Canal"></p><span id="more"></span><p>工作原理</p><ul><li>canal 模拟 MySQL slave 的交互协议，伪装自己为 MySQL slave ，向 MySQL master 发送 dump 协议</li><li>MySQL master 收到 dump 请求，开始推送 binary log 给 slave (即 canal )</li><li>canal 解析 binary log 对象(原始为 byte 流)</li></ul><p>从<a href="https://github.com/alibaba/canal/releases/tag/canal-1.1.5">v1.1.5</a>版本开始，Canal新增对RabbitMQ的支持。</p><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><!-- log-bin=mysql-bin 　　# 开启 binlogbinlog-format=ROW 　　# 选择 ROW 模式server_id=1 　　　　   # 配置 MySQL replaction 需要定义，不要和 canal 的 slaveId 重复 --><p><code>canal</code>需要Mysql端开启二进制日志同步，我使用的阿里云的Mysql，默认已开启<code>binlog dump</code>。</p><p>RabbitMQ我使用Docker部署，注意镜像要使用带<code>management</code>版本的，方便在界面操作。</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">docker run --name rabbitmq -d -p 15672:15672 -p 5672:5672 -e RABBITMQ_DEFAULT_USER&#x3D;root -e RABBITMQ_DEFAULT_PASS&#x3D;root   rabbitmq:3.8.2-management<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>RabbitMQ的<code>Exchange</code>,<code>Queue</code>,<code>Binding</code>也要优先配置好，我的需求是canal解析完Mysql的binlog后，将信息分别推送到3个队列中，我这里为了隔离环境建3个队列，分别是同步Elasticsearch的<code>canal.es</code>，同步ClickHouse的<code>canal.clickhouse</code>和同步Mysql的<code>canal.mysql</code>。因为是无差别投放，我只创建了一个交换机<code>canal</code>。将3个队列<code>canal.es</code>、<code>canal.clickhouse</code>、<code>canal.mysql</code>绑定到交换机<code>canal</code>上。</p><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>编辑<code>deployer/conf/example/instance.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 我这里使用了gtid日志进行同步canal.instance.gtidon&#x3D;truecanal.instance.master.address&#x3D;localhost:3306canal.instance.dbUsername&#x3D;rootcanal.instance.dbPassword&#x3D;root# 这里配置发送消息的主题，由于3队列接收全部数据，所以此处主题我没有用到，使用的默认值canal.mq.topic&#x3D;example<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>编辑<code>deployer/conf/canal.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 此处更改为rabbitmq模式canal.serverMode &#x3D; rabbitmqrabbitmq.host &#x3D; 127.0.0.1rabbitmq.virtual.host &#x3D; &#x2F;rabbitmq.exchange &#x3D; canalrabbitmq.username &#x3D; rootrabbitmq.password &#x3D; root# 消息持久化rabbitmq.deliveryMode &#x3D; 2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>运行 <code>bin/startup.sh</code> ，服务便开始运行了</p><h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><p>由于三个队列需要同步的数据库不同，无差别投放会造成不必要的性能浪费，可开启<code>dynamicTopic</code>功能，根据topic将数据投放至不能的队列。</p><p>编辑<code>deployer/conf/example/instance.properties</code></p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">canal.mq.dynamicTopic&#x3D;pro\\..*<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>投递的topic为<code>库名_表名</code></p><p>Exchanges和Queues的绑定关系在RebbitMQ的后台配置即可，模式选择Topic模式。</p><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://github.com/alibaba/canal/wiki/QuickStart">alibaba/canal</a></p><p><a href="https://github.com/alibaba/canal/wiki/Canal-Kafka-RocketMQ-QuickStart">Canal Kafka RocketMQ QuickStart</a></p>]]></content>
     
     
     <summary type="html">&lt;p&gt;canal [kə’næl]，译意为水道/管道/沟渠，主要用途是基于 MySQL 数据库增量日志解析，提供增量数据订阅和消费&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;https://camo.githubusercontent.com/63881e271f889d4a424c55cea2f9c2065f63494fecac58432eac415f6e47e959/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f32303139313130343130313733353934372e706e67&quot; alt=&quot;Canal&quot;&gt;&lt;/p&gt;</summary>
+&lt;p&gt;&lt;img src=&quot;https://img.yjll.blog/img/Canal.png&quot; alt=&quot;Canal&quot;&gt;&lt;/p&gt;</summary>
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Canal" scheme="http://blog.yjll.blog/tags/Canal/"/>
+    <category term="Canal" scheme="https://blog.yjll.blog/tags/Canal/"/>
     
-    <category term="Mysql" scheme="http://blog.yjll.blog/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://blog.yjll.blog/tags/Mysql/"/>
     
-    <category term="RabbitMQ" scheme="http://blog.yjll.blog/tags/RabbitMQ/"/>
+    <category term="RabbitMQ" scheme="https://blog.yjll.blog/tags/RabbitMQ/"/>
     
   </entry>
   
   <entry>
     <title>Xpath语法</title>
-    <link href="http://blog.yjll.blog/post/d16b66c8.html"/>
-    <id>http://blog.yjll.blog/post/d16b66c8.html</id>
+    <link href="https://blog.yjll.blog/post/d16b66c8.html"/>
+    <id>https://blog.yjll.blog/post/d16b66c8.html</id>
     <published>2021-04-26T16:00:00.000Z</published>
     <updated>2024-11-12T07:02:38.197Z</updated>
     
@@ -335,23 +392,23 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/tags/Python/"/>
     
-    <category term="Xpath" scheme="http://blog.yjll.blog/tags/Xpath/"/>
+    <category term="Xpath" scheme="https://blog.yjll.blog/tags/Xpath/"/>
     
-    <category term="Java" scheme="http://blog.yjll.blog/tags/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/tags/Java/"/>
     
-    <category term="爬虫" scheme="http://blog.yjll.blog/tags/%E7%88%AC%E8%99%AB/"/>
+    <category term="爬虫" scheme="https://blog.yjll.blog/tags/%E7%88%AC%E8%99%AB/"/>
     
   </entry>
   
   <entry>
     <title>ZooKeeper在实际开发中的应用-事件监听</title>
-    <link href="http://blog.yjll.blog/post/bf85b35c.html"/>
-    <id>http://blog.yjll.blog/post/bf85b35c.html</id>
+    <link href="https://blog.yjll.blog/post/bf85b35c.html"/>
+    <id>https://blog.yjll.blog/post/bf85b35c.html</id>
     <published>2021-04-24T16:00:00.000Z</published>
     <updated>2022-11-02T05:50:47.631Z</updated>
     
@@ -365,21 +422,21 @@
     
     
     
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
+    <category term="应用" scheme="https://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/tags/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/tags/Java/"/>
     
-    <category term="中间件" scheme="http://blog.yjll.blog/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    <category term="中间件" scheme="https://blog.yjll.blog/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
     
-    <category term="ZooKeeper" scheme="http://blog.yjll.blog/tags/ZooKeeper/"/>
+    <category term="ZooKeeper" scheme="https://blog.yjll.blog/tags/ZooKeeper/"/>
     
   </entry>
   
   <entry>
     <title>使用Docker部署Python项目</title>
-    <link href="http://blog.yjll.blog/post/ee11952c.html"/>
-    <id>http://blog.yjll.blog/post/ee11952c.html</id>
+    <link href="https://blog.yjll.blog/post/ee11952c.html"/>
+    <id>https://blog.yjll.blog/post/ee11952c.html</id>
     <published>2021-01-25T08:54:23.000Z</published>
     <updated>2021-09-28T01:30:06.086Z</updated>
     
@@ -390,19 +447,19 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/tags/Python/"/>
     
-    <category term="Docker" scheme="http://blog.yjll.blog/tags/Docker/"/>
+    <category term="Docker" scheme="https://blog.yjll.blog/tags/Docker/"/>
     
   </entry>
   
   <entry>
     <title>Python通过跳板机连接远程MySQL</title>
-    <link href="http://blog.yjll.blog/post/adfcf5ef.html"/>
-    <id>http://blog.yjll.blog/post/adfcf5ef.html</id>
+    <link href="https://blog.yjll.blog/post/adfcf5ef.html"/>
+    <id>https://blog.yjll.blog/post/adfcf5ef.html</id>
     <published>2020-11-05T16:00:00.000Z</published>
     <updated>2021-07-07T02:50:49.804Z</updated>
     
@@ -413,19 +470,19 @@
     
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/categories/Python/"/>
     
     
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
+    <category term="Python" scheme="https://blog.yjll.blog/tags/Python/"/>
     
-    <category term="sshtunnel" scheme="http://blog.yjll.blog/tags/sshtunnel/"/>
+    <category term="sshtunnel" scheme="https://blog.yjll.blog/tags/sshtunnel/"/>
     
   </entry>
   
   <entry>
     <title>Spring编程式事务原理</title>
-    <link href="http://blog.yjll.blog/post/65703737.html"/>
-    <id>http://blog.yjll.blog/post/65703737.html</id>
+    <link href="https://blog.yjll.blog/post/65703737.html"/>
+    <id>https://blog.yjll.blog/post/65703737.html</id>
     <published>2020-11-05T16:00:00.000Z</published>
     <updated>2024-11-12T07:02:38.200Z</updated>
     
@@ -449,19 +506,19 @@
     
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/categories/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/categories/Java/"/>
     
     
-    <category term="Spring" scheme="http://blog.yjll.blog/tags/Spring/"/>
+    <category term="Spring" scheme="https://blog.yjll.blog/tags/Spring/"/>
     
-    <category term="Transaction" scheme="http://blog.yjll.blog/tags/Transaction/"/>
+    <category term="Transaction" scheme="https://blog.yjll.blog/tags/Transaction/"/>
     
   </entry>
   
   <entry>
     <title>聊一聊Mybatis-Spring都帮我们做了什么</title>
-    <link href="http://blog.yjll.blog/post/112d5fa0.html"/>
-    <id>http://blog.yjll.blog/post/112d5fa0.html</id>
+    <link href="https://blog.yjll.blog/post/112d5fa0.html"/>
+    <id>https://blog.yjll.blog/post/112d5fa0.html</id>
     <published>2020-11-02T16:00:00.000Z</published>
     <updated>2023-06-05T09:31:26.755Z</updated>
     
@@ -472,63 +529,14 @@
     
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/categories/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/categories/Java/"/>
     
     
-    <category term="Java" scheme="http://blog.yjll.blog/tags/Java/"/>
+    <category term="Java" scheme="https://blog.yjll.blog/tags/Java/"/>
     
-    <category term="Spring" scheme="http://blog.yjll.blog/tags/Spring/"/>
+    <category term="Spring" scheme="https://blog.yjll.blog/tags/Spring/"/>
     
-    <category term="Mybatis" scheme="http://blog.yjll.blog/tags/Mybatis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Python logging模块日志流处理流程</title>
-    <link href="http://blog.yjll.blog/post/2c25ac60.html"/>
-    <id>http://blog.yjll.blog/post/2c25ac60.html</id>
-    <published>2020-11-01T16:00:00.000Z</published>
-    <updated>2023-04-13T06:33:25.965Z</updated>
-    
-    <content type="html"><![CDATA[<p><code>logger</code>是Python标准库的一部分，根据<a href="https://www.python.org/dev/peps/pep-0282">PEP 282</a>中描述，设计时也参考了Java的日志，所以处理流程上和jul、Log4j有跟多相似之处。</p><span id="more"></span><h3 id="logging模块的四大组件"><a href="#logging模块的四大组件" class="headerlink" title="logging模块的四大组件"></a>logging模块的四大组件</h3><table><thead><tr><th>组件名称</th><th>对应类名</th><th>功能描述</th></tr></thead><tbody><tr><td>日志器</td><td>Logger</td><td>提供了应用程序可一直使用的接口</td></tr><tr><td>处理器</td><td>Handler</td><td>将logger创建的日志记录发送到合适的目的输出</td></tr><tr><td>过滤器</td><td>Filter</td><td>提供了更细粒度的控制工具来决定输出哪条日志记录，丢弃哪条日志记录</td></tr><tr><td>格式器</td><td>Formatter</td><td>决定日志记录的最终输出格式</td></tr></tbody></table><p>logging模块就是通过这些组件来完成日志处理的，上面所使用的logging模块级别的函数也是通过这些组件对应的类来实现的。</p><p>这些组件之间的关系描述：</p><p>日志器（logger）需要通过处理器（handler）将日志信息输出到目标位置，如：文件、sys.stdout、网络等。不同的处理器（handler）可以将日志输出到不同的位置。日志器（logger）可以设置多个处理器（handler）将同一条日志记录输出到不同的位置。每个处理器（handler）都可以设置自己的过滤器（filter）实现日志过滤，从而只保留感兴趣的日志。每个处理器（handler）都可以设置自己的格式器（formatter）实现同一条日志以不同的格式输出到不同的地方。</p><p>简单点说就是：日志器（logger）是入口，真正干活儿的是处理器（handler），处理器（handler）还可以通过过滤器（filter）和格式器（formatter）对要输出的日志内容做过滤和格式化等处理操作。</p><p>如果和Logback类比的话这几个组件分别对应的是 <code>Logger</code>,<code>Appender</code>,<code>Filter</code>及<code>Layout</code></p><h3 id="使用yaml进行日志配置"><a href="#使用yaml进行日志配置" class="headerlink" title="使用yaml进行日志配置"></a>使用yaml进行日志配置</h3><figure><div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token key atrule">formatters</span><span class="token punctuation">:</span>  <span class="token key atrule">simple</span><span class="token punctuation">:</span>    <span class="token key atrule">format</span><span class="token punctuation">:</span> <span class="token string">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span><span class="token key atrule">handlers</span><span class="token punctuation">:</span>  <span class="token key atrule">console</span><span class="token punctuation">:</span>    <span class="token key atrule">class</span><span class="token punctuation">:</span> logging.StreamHandler    <span class="token key atrule">level</span><span class="token punctuation">:</span> DEBUG    <span class="token key atrule">formatter</span><span class="token punctuation">:</span> simple  <span class="token key atrule">file</span><span class="token punctuation">:</span>    <span class="token key atrule">class</span><span class="token punctuation">:</span> logging.FileHandler    <span class="token key atrule">filename</span><span class="token punctuation">:</span> logging.log    <span class="token key atrule">encoding</span><span class="token punctuation">:</span> utf<span class="token punctuation">-</span><span class="token number">8</span>    <span class="token key atrule">level</span><span class="token punctuation">:</span> INFO    <span class="token key atrule">formatter</span><span class="token punctuation">:</span> simple  <span class="token key atrule">loggers</span><span class="token punctuation">:</span>  <span class="token key atrule">simpleLogger</span><span class="token punctuation">:</span>    <span class="token key atrule">level</span><span class="token punctuation">:</span> INFO    <span class="token key atrule">handlers</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>console<span class="token punctuation">,</span>file<span class="token punctuation">]</span>    <span class="token key atrule">propagate</span><span class="token punctuation">:</span> no<span class="token key atrule">root</span><span class="token punctuation">:</span>  <span class="token key atrule">level</span><span class="token punctuation">:</span> INFO  <span class="token key atrule">handlers</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>console<span class="token punctuation">]</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><figure><div class="code-wrapper"><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> logging<span class="token punctuation">.</span>config<span class="token keyword">import</span> yamlconfig <span class="token operator">=</span> <span class="token boolean">None</span><span class="token keyword">with</span> <span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">'log.yaml'</span><span class="token punctuation">,</span> <span class="token string">'r'</span><span class="token punctuation">)</span> <span class="token keyword">as</span> f<span class="token punctuation">:</span>    config <span class="token operator">=</span> yaml<span class="token punctuation">.</span>safe_load<span class="token punctuation">(</span>f<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>    logging<span class="token punctuation">.</span>config<span class="token punctuation">.</span>dictConfig<span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token keyword">def</span> <span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>    <span class="token keyword">return</span> logging<span class="token punctuation">.</span>getLogger<span class="token punctuation">(</span><span class="token string">'simpleLogger'</span><span class="token punctuation">)</span><span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">"__main__"</span><span class="token punctuation">:</span>    logger <span class="token operator">=</span> getLogger<span class="token punctuation">(</span><span class="token punctuation">)</span>        logger<span class="token punctuation">.</span>debug<span class="token punctuation">(</span><span class="token string">'debug'</span><span class="token punctuation">)</span>    logger<span class="token punctuation">.</span>info<span class="token punctuation">(</span><span class="token string">'info:%s'</span><span class="token punctuation">,</span><span class="token string">'message'</span><span class="token punctuation">)</span>    logger<span class="token punctuation">.</span>error<span class="token punctuation">(</span><span class="token string">'error'</span><span class="token punctuation">)</span>    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p><code>simpleLogger</code>配置的日志级别为INFO，debug的日志没有打印</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">2020-11-02 16:22:09,194 - simpleLogger - INFO - info:message2020-11-02 16:22:09,195 - simpleLogger - ERROR - error<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div></figure><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://www.cnblogs.com/yyds/p/6901864.html">Python之日志处理（logging模块）</a></p><p><a href="https://logbackcn.gitbook.io/logback/">logback 中文手册</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;&lt;code&gt;logger&lt;/code&gt;是Python标准库的一部分，根据&lt;a href=&quot;https://www.python.org/dev/peps/pep-0282&quot;&gt;PEP 282&lt;/a&gt;中描述，设计时也参考了Java的日志，所以处理流程上和jul、Log4j有跟多相似之处。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="Python" scheme="http://blog.yjll.blog/categories/Python/"/>
-    
-    
-    <category term="Python" scheme="http://blog.yjll.blog/tags/Python/"/>
-    
-    <category term="log" scheme="http://blog.yjll.blog/tags/log/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>DataX同步全量Mqsql数据到Elasticsearch</title>
-    <link href="http://blog.yjll.blog/post/6a3f5dff.html"/>
-    <id>http://blog.yjll.blog/post/6a3f5dff.html</id>
-    <published>2020-10-29T16:00:00.000Z</published>
-    <updated>2021-11-29T09:20:35.756Z</updated>
-    
-    <content type="html"><![CDATA[<p><a href="https://github.com/alibaba/DataX">DataX</a> 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、ODPS 等各种异构数据源之间高效的数据同步功能。</p><p>DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。</p><span id="more"></span><h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>官方提供的二进制包缺少必要的组件，我们需要下载源码自己编译</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">wget https:&#x2F;&#x2F;codeload.github.com&#x2F;alibaba&#x2F;DataX&#x2F;zip&#x2F;master<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><p>解压后编辑pom.xml，只保留部分必要module和mysql，es即可</p><figure><div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modules</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>common<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>core<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>transformer<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token comment">&lt;!-- reader --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>mysqlreader<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token comment">&lt;!-- writer --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>elasticsearchwriter<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token comment">&lt;!-- common support module --></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>plugin-rdbms-util<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>plugin-unstructured-storage-util<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>hbase20xsqlreader<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>hbase20xsqlwriter<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span>    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>module</span><span class="token punctuation">></span></span>kuduwriter<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>module</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modules</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>更改配置后打包</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">mvn -U clean package assembly:assembly -Dmaven.test.skip&#x3D;truels .&#x2F;target&#x2F;datax&#x2F;datax&#x2F;binconfjoblibloglog_perfpluginscripttmp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><!-- ### 设置动态模板开始同步数据前，在es中创建一个动态模板<figure><div class="code-wrapper"><pre class="line-numbers language-json" data-language="json"><code class="language-json">PUT _template/hkey_transferbill<span class="token punctuation">&#123;</span>    <span class="token property">"index_patterns"</span><span class="token operator">:</span><span class="token string">"hkey_transferbill"</span><span class="token punctuation">,</span>    <span class="token property">"settings"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>        <span class="token property">"number_of_shards"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span>        <span class="token property">"number_of_replicas"</span><span class="token operator">:</span><span class="token number">1</span>    <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>    <span class="token property">"mappings"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>        <span class="token property">"data"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>            <span class="token property">"dynamic_templates"</span><span class="token operator">:</span><span class="token punctuation">[</span>                <span class="token punctuation">&#123;</span>                    <span class="token property">"keyword_field"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                        <span class="token property">"unmatch"</span><span class="token operator">:</span><span class="token string">"*Name"</span><span class="token punctuation">,</span>                        <span class="token property">"match_mapping_type"</span><span class="token operator">:</span><span class="token string">"string"</span><span class="token punctuation">,</span>                        <span class="token property">"mapping"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                            <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"keyword"</span>                        <span class="token punctuation">&#125;</span>                    <span class="token punctuation">&#125;</span>                <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>                <span class="token punctuation">&#123;</span>                    <span class="token property">"text_fields"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                        <span class="token property">"match"</span><span class="token operator">:</span><span class="token string">"*Name"</span><span class="token punctuation">,</span>                        <span class="token property">"match_mapping_type"</span><span class="token operator">:</span><span class="token string">"string"</span><span class="token punctuation">,</span>                        <span class="token property">"mapping"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                            <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"text"</span><span class="token punctuation">,</span>                            <span class="token property">"fields"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                                <span class="token property">"raw"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                                    <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"keyword"</span>                                <span class="token punctuation">&#125;</span>                            <span class="token punctuation">&#125;</span>                        <span class="token punctuation">&#125;</span>                    <span class="token punctuation">&#125;</span>                <span class="token punctuation">&#125;</span>            <span class="token punctuation">]</span><span class="token punctuation">,</span>            <span class="token property">"properties"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                <span class="token property">"rowkey"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                    <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"keyword"</span>                <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>                <span class="token property">"age"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                    <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"keyword"</span>                <span class="token punctuation">&#125;</span>            <span class="token punctuation">&#125;</span>        <span class="token punctuation">&#125;</span>    <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p> –&gt;</p><h3 id="编写同步配置文件"><a href="#编写同步配置文件" class="headerlink" title="编写同步配置文件"></a>编写同步配置文件</h3><p><a href="https://github.com/alibaba/DataX/blob/master/mysqlreader/doc/mysqlreader.md">MysqlReader 插件文档</a></p><p><a href="https://github.com/alibaba/DataX/blob/master/elasticsearchwriter/doc/elasticsearchwriter.md">ElasticSearchWriter 插件文档</a></p><p>同步时间类型问题，部分mysql中时间字段为空，导入到ES中时间变成了系统时间，我在导入时将ES中column的type更改为<code>text</code>解决了这个问题。</p><p><code>setting.speed.channel</code>为并发数，<code>setting.speed.byte</code>是最大同步字节数</p><figure><div class="code-wrapper"><pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>    <span class="token property">"job"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>        <span class="token property">"setting"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>            <span class="token property">"speed"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                <span class="token property">"channel"</span><span class="token operator">:</span><span class="token number">4</span><span class="token punctuation">,</span>                <span class="token property">"byte"</span><span class="token operator">:</span> <span class="token number">104857600</span>            <span class="token punctuation">&#125;</span>        <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>        <span class="token property">"content"</span><span class="token operator">:</span><span class="token punctuation">[</span>            <span class="token punctuation">&#123;</span>                <span class="token property">"reader"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                    <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"mysqlreader"</span><span class="token punctuation">,</span>                    <span class="token property">"parameter"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                        <span class="token property">"username"</span><span class="token operator">:</span><span class="token string">"root"</span><span class="token punctuation">,</span>                        <span class="token property">"password"</span><span class="token operator">:</span><span class="token string">"test"</span><span class="token punctuation">,</span>                        <span class="token property">"column"</span><span class="token operator">:</span><span class="token punctuation">[</span>                            <span class="token string">"code"</span><span class="token punctuation">,</span>                            <span class="token string">"internal_code"</span><span class="token punctuation">,</span>                            <span class="token string">"internal_code_md5"</span>                        <span class="token punctuation">]</span><span class="token punctuation">,</span>                        <span class="token property">"connection"</span><span class="token operator">:</span><span class="token punctuation">[</span>                            <span class="token punctuation">&#123;</span>                                <span class="token property">"jdbcUrl"</span><span class="token operator">:</span><span class="token punctuation">[</span>                                    <span class="token string">"jdbc:mysql://192.168.1.200:3306/test"</span>                                <span class="token punctuation">]</span><span class="token punctuation">,</span>                                <span class="token property">"table"</span><span class="token operator">:</span><span class="token punctuation">[</span>                                    <span class="token string">"code_t"</span>                                <span class="token punctuation">]</span>                            <span class="token punctuation">&#125;</span>                        <span class="token punctuation">]</span>                    <span class="token punctuation">&#125;</span>                <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>                <span class="token property">"writer"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                    <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"elasticsearchwriter"</span><span class="token punctuation">,</span>                    <span class="token property">"parameter"</span><span class="token operator">:</span><span class="token punctuation">&#123;</span>                        <span class="token property">"endpoint"</span><span class="token operator">:</span><span class="token string">"http://192.168.1.200:9200"</span><span class="token punctuation">,</span>                        <span class="token property">"accessId"</span><span class="token operator">:</span><span class="token string">"1"</span><span class="token punctuation">,</span>                        <span class="token property">"accessKey"</span><span class="token operator">:</span><span class="token string">"1"</span><span class="token punctuation">,</span>                        <span class="token property">"index"</span><span class="token operator">:</span><span class="token string">"code_t"</span><span class="token punctuation">,</span>                        <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"_doc"</span><span class="token punctuation">,</span>                        <span class="token property">"cleanup"</span><span class="token operator">:</span><span class="token boolean">true</span><span class="token punctuation">,</span>                        <span class="token property">"dynamic"</span><span class="token operator">:</span><span class="token boolean">true</span><span class="token punctuation">,</span>                        <span class="token property">"batchSize"</span><span class="token operator">:</span><span class="token number">5000</span><span class="token punctuation">,</span>                        <span class="token property">"splitter"</span><span class="token operator">:</span><span class="token string">","</span><span class="token punctuation">,</span>                        <span class="token property">"column"</span><span class="token operator">:</span><span class="token punctuation">[</span>                            <span class="token punctuation">&#123;</span>                                <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"code"</span><span class="token punctuation">,</span>                                <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"long"</span>                            <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>                            <span class="token punctuation">&#123;</span>                                <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"internal_code"</span><span class="token punctuation">,</span>                                <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"text"</span>                            <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>                            <span class="token punctuation">&#123;</span>                                <span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"internal_code_md5"</span><span class="token punctuation">,</span>                                <span class="token property">"type"</span><span class="token operator">:</span><span class="token string">"text"</span>                            <span class="token punctuation">&#125;</span>                        <span class="token punctuation">]</span>                    <span class="token punctuation">&#125;</span>                <span class="token punctuation">&#125;</span>            <span class="token punctuation">&#125;</span>        <span class="token punctuation">]</span>    <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p><code>dynamic</code>设置为true可使用ES自带的动态模版。ES自带的模板会对String类型做特殊处理，映射成<code>text</code>类型，并添加<code>keyword</code>类型的属性</p><p>如</p><figure><div class="code-wrapper"><pre class="line-numbers language-json" data-language="json"><code class="language-json">    <span class="token property">"internal_code"</span> <span class="token operator">:</span> <span class="token punctuation">&#123;</span>    <span class="token property">"type"</span> <span class="token operator">:</span> <span class="token string">"text"</span><span class="token punctuation">,</span>    <span class="token property">"fields"</span> <span class="token operator">:</span> <span class="token punctuation">&#123;</span>        <span class="token property">"keyword"</span> <span class="token operator">:</span> <span class="token punctuation">&#123;</span>        <span class="token property">"type"</span> <span class="token operator">:</span> <span class="token string">"keyword"</span><span class="token punctuation">,</span>        <span class="token property">"ignore_above"</span> <span class="token operator">:</span> <span class="token number">256</span>        <span class="token punctuation">&#125;</span>    <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p><code>mysqlreader</code> 中的列可以使用<code>*</code>代替，<code>elasticsearchwriter</code>中的<code>column</code>必填还要指定对应的类型，字段多的话处理起来很麻烦，我这里写了一个脚本来处理。</p><figure><div class="code-wrapper"><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span>  records <span class="token keyword">import</span> Databasedata_dict <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token string">'int'</span><span class="token punctuation">:</span><span class="token string">'integer'</span><span class="token punctuation">,</span><span class="token string">'bigint'</span><span class="token punctuation">:</span><span class="token string">'long'</span><span class="token punctuation">,</span><span class="token string">'char'</span><span class="token punctuation">:</span><span class="token string">'keyword'</span><span class="token punctuation">,</span><span class="token string">'datetime'</span><span class="token punctuation">:</span><span class="token string">'keyword'</span><span class="token punctuation">,</span><span class="token string">'varchar'</span><span class="token punctuation">:</span><span class="token string">'keyword'</span><span class="token punctuation">&#125;</span>db<span class="token punctuation">:</span>Database <span class="token operator">=</span> common_connection<span class="token punctuation">.</span>getProDB<span class="token punctuation">(</span><span class="token punctuation">)</span>result <span class="token operator">=</span> db<span class="token punctuation">.</span>query<span class="token punctuation">(</span><span class="token triple-quoted-string string">'''        select column_name as 'name',data_type as 'type' from information_schema.columns where table_name='code_t'    '''</span><span class="token punctuation">)</span>row_dict <span class="token operator">=</span> result<span class="token punctuation">.</span><span class="token builtin">all</span><span class="token punctuation">(</span>as_dict<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span><span class="token keyword">for</span> row <span class="token keyword">in</span> row_dict<span class="token punctuation">:</span>    type_str <span class="token operator">=</span> row<span class="token punctuation">[</span><span class="token string">'type'</span><span class="token punctuation">]</span>    row<span class="token punctuation">[</span><span class="token string">'type'</span><span class="token punctuation">]</span> <span class="token operator">=</span> data_dict<span class="token punctuation">[</span>type_str<span class="token punctuation">]</span><span class="token keyword">print</span><span class="token punctuation">(</span>json<span class="token punctuation">.</span>dumps<span class="token punctuation">(</span>row_dict<span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></figure><p>数据库封装使用的是<code>records</code></p><h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>运行需要python环境，官方推荐2.6，我本地装的是2.7，实测可以正常使用</p><figure><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">python datax.py .&#x2F;es.json<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div></figure><h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://blog.csdn.net/Zsigner/article/details/108362724">【DataX 增量同步】Mysql 同步数据到 es（Elasticsearch）</a></p><p><a href="https://blog.csdn.net/ASN_forever/article/details/106340961">datax从mysql同步数据到elasticsearch（使用es的动态模板）</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/alibaba/DataX&quot;&gt;DataX&lt;/a&gt; 是阿里巴巴集团内被广泛使用的离线数据同步工具/平台，实现包括 MySQL、SQL Server、Oracle、PostgreSQL、HDFS、Hive、HBase、OTS、ODPS 等各种异构数据源之间高效的数据同步功能。&lt;/p&gt;
-&lt;p&gt;DataX本身作为数据同步框架，将不同数据源的同步抽象为从源头数据源读取数据的Reader插件，以及向目标端写入数据的Writer插件，理论上DataX框架可以支持任意数据源类型的数据同步工作。同时DataX插件体系作为一套生态系统, 每接入一套新数据源该新加入的数据源即可实现和现有的数据源互通。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="应用" scheme="http://blog.yjll.blog/categories/%E5%BA%94%E7%94%A8/"/>
-    
-    
-    <category term="Elasticsearch" scheme="http://blog.yjll.blog/tags/Elasticsearch/"/>
-    
-    <category term="Mysql" scheme="http://blog.yjll.blog/tags/Mysql/"/>
-    
-    <category term="DataX" scheme="http://blog.yjll.blog/tags/DataX/"/>
+    <category term="Mybatis" scheme="https://blog.yjll.blog/tags/Mybatis/"/>
     
   </entry>
   
